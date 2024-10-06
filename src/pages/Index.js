@@ -61,9 +61,9 @@ const Index = () => {
             </div>
             <div className="cards-display-area">
                 {selectedSetId ? (
-                    <CardList cards={cards} /> // No need for a click handler
+                    <CardList cards={cards} /> 
                 ) : (
-                    <Typography variant="h6" component="div" align="center">
+                    <Typography variant="h6" component="div" align="center" > 
                         Select a set to see the cards.
                     </Typography>
                 )}

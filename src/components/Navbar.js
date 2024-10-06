@@ -11,7 +11,7 @@ const pages = [
 
 function Navbar() {
   return (
-    <AppBar position="static" sx={{ backgroundColor: '#8a3f3f' }}>
+    <AppBar  sx={{ backgroundColor: '#8a3f3f' , position: 'fixed', zIndex: '1100'}}>
       <Toolbar sx={{ justifyContent: 'start' }}>
         {/* <Typography variant="h6" sx={{ flexGrow: 1 }}>
           User menu incoming
