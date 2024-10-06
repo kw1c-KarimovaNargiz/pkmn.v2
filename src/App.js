@@ -6,8 +6,8 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Pokemons from './pages/Pokemons';
 import Decks from './pages/Decks';
-import Sets from './pages/Sets';
-import Cards from './pages/Cards'; 
+import Index from './pages/Index';
+
 
 function App() {
     return (
@@ -20,9 +20,7 @@ function App() {
                             <Route path="/" element={<Home />} />
                             <Route path="/Pokemons" element={<Pokemons />} />
                             <Route path="/Decks" element={<Decks />} />
-                            <Route path="/Sets" element={<Sets />} />
-                            {/* <Route path="/sets/:setName" element={<Cards />} /> */}
-              
+                            <Route path="/Index" element={<Index />} />
                         </Routes>
                     </Container>
                 </Box>
