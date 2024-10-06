@@ -5,7 +5,7 @@ import CardDisplay from './CardDisplay';
 
 const CardList = ({ cards }) => {
     return (
-        <Grid container spacing={3}>
+        <Grid container spacing={10}>
             {cards.map((card) => (
                 <Grid item xs={12} sm={6} md={4} key={card.number}>
                     <CardDisplay card={card} />

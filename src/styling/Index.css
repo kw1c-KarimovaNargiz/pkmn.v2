@@ -4,22 +4,30 @@ body {
     padding: 0; 
     height: 100%; }
 
-.sets-container {
-    display: flex;
-    height: 100vh;
+    .cards-display-area {
+      margin-left: 20%;
+      padding: 30px; 
+    
+      overflow-y: auto; 
   }
 
-  .cards-display-area {
-    flex-grow: 1; 
-    padding: 20px; 
-  }
-
-
-.sidebar {
-    position: absolute; 
-    width: 25%;
-    top: 0; 
-    right: 0; 
+  .sidebar {
+    position: fixed;
+    width: 20%;
+    left: 0; 
     height: 100vh; 
     margin: 0; 
+  overflow-y:auto;
+
+    background-color: #606060; 
+    z-index: 1000;
+}
+
+.cards-display-area::-webkit-scrollbar {
+  display: none;
+}
+  
+  .sidebar::-webkit-scrollbar {
+
+    display: none; 
 }

@@ -22,7 +22,6 @@ const Index = () => {
             seriesMap[series].push({ id, name, releaseDate }); 
         });
 
-        //formatting from latest to earliest desc>
         const formattedSets = Object.entries(seriesMap).map(([series, setNames]) => {
             setNames.sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate)); 
             const latestReleaseDate = new Date(setNames[0].releaseDate);
@@ -34,10 +33,8 @@ const Index = () => {
         setSets(sortedSets);
     }, []);
 
-    //load cards when set is selected
     const handleSetSelect = async (setId) => {
         setSelectedSetId(setId); 
-        console.log("Attempting to load cards for set:", setId); 
         try {
             const cardsData = await import(`../scrapes/cards/${setId}.json`);
             setCards(cardsData.default); 
@@ -47,8 +44,6 @@ const Index = () => {
         }
     };
 
-    //set the selected series 
-    //clears previous  set selection the cards
     const handleSeriesSelect = (series) => {
         setSelectedSeries(series);
         setSelectedSetId(null); 
@@ -66,10 +61,10 @@ const Index = () => {
             </div>
             <div className="cards-display-area">
                 {selectedSetId ? (
-                    <CardList cards={cards} />
+                    <CardList cards={cards} /> // No need for a click handler
                 ) : (
                     <Typography variant="h6" component="div" align="center">
-                        Select a set to see the cards - what do i do with this empty space? :D
+                        Select a set to see the cards.
                     </Typography>
                 )}
             </div>
