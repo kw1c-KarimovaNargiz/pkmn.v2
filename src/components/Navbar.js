@@ -8,6 +8,7 @@ const pages = [
   { name: 'Pokemons', path: '/Pokemons' },
   { name: 'My decks', path: '/Decks' },
   { name: 'Sets',  path: '/Sets' },
+  // { name: 'TestPageSeries',  path: '/' },
 
 ];
 

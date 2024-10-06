@@ -20,8 +20,9 @@ function App() {
                             <Route path="/" element={<Home />} />
                             <Route path="/Pokemons" element={<Pokemons />} />
                             <Route path="/Decks" element={<Decks />} />
-                            <Route path="/sets" element={<Sets />} />
-                            <Route path="/sets/:setName" element={<Cards />} />
+                            <Route path="/Sets" element={<Sets />} />
+                            {/* <Route path="/sets/:setName" element={<Cards />} /> */}
+              
                         </Routes>
                     </Container>
                 </Box>
