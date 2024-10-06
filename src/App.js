@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Box, Container } from '@mui/material';
+import setBodyColor from './setBodyColor'
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Pokemons from './pages/Pokemons';
@@ -28,5 +29,5 @@ function App() {
         </Router>
     );
 }
-
+setBodyColor({color: "#262626"})
 export default App;
