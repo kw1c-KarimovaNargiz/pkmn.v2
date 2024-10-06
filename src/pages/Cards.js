@@ -5,10 +5,11 @@ import { Grid, Card, CardContent, Typography } from '@mui/material';
 import pokemonData from '../scrapes/gen_scarlet_violet.json'; // Adjust the path if needed
 
 const Cards = () => {
-  const { setName } = useParams();
+  const { setName } = useParams(); // Get the set name from URL
   const [cards, setCards] = useState([]);
 
   useEffect(() => {
+    // Filter the cards that belong to the selected set
     const filteredCards = pokemonData.filter(card => card.set === decodeURIComponent(setName));
     setCards(filteredCards);
   }, [setName]);
@@ -40,7 +41,6 @@ const Cards = () => {
               <Typography variant="body1">
                 Rarity: {card.rarity}
               </Typography>
-              
             </CardContent>
           </Card>
         </Grid>

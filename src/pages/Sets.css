@@ -1,0 +1,25 @@
+/* Sets.css */
+body {
+    margin: 0; 
+    padding: 0; 
+    height: 100%; }
+/* Sets.css */
+.sets-container {
+    display: flex; /* Use flexbox for layout */
+    height: 100vh;
+  }
+
+  .cards-display-area {
+    flex-grow: 1; /* Take up remaining space */
+    padding: 20px; /* Padding for cards display area */
+  }
+
+/* Positioning to remove gaps */
+.sidebar {
+    position: absolute; 
+    width: 25%;
+    top: 0; 
+    right: 0; 
+    height: 100vh; 
+    margin: 0; 
+}
