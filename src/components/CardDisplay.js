@@ -56,6 +56,9 @@ const CardDisplay = ({ card }) => {
                 <Typography variant="h6">
                     Type: {card.types}
                 </Typography>
+                <Typography>
+                    Attack: {card.attacksName}
+                </Typography>
                 <Typography variant="h6">
                     {card.hp} HP
                 </Typography>

@@ -3,46 +3,67 @@ import React, { useEffect, useState } from 'react';
 import { Typography } from '@mui/material';
 import CardList from '../components/CardList';
 import SetsSidebar from '../components/SetsSideBar'; 
-import pokemonSets from '../scrapes/pokemon_sets.json'; 
+import axios from 'axios';  // Import Axios
 import '../styling/Index.css'; 
 
 const Index = () => {
     const [sets, setSets] = useState([]); 
+    const [series, setSeries] = useState([]); 
     const [selectedSeries, setSelectedSeries] = useState(null); 
     const [selectedSetId, setSelectedSetId] = useState(null); 
     const [cards, setCards] = useState([]); 
 
-    useEffect(() => {
-        const seriesMap = {};
-        pokemonSets.forEach(set => {
-            const { series, id, name, releaseDate } = set;
-            if (!seriesMap[series]) {
-                seriesMap[series] = []; 
+   
+     //sorted series - sorted sets
+     useEffect(() => {
+        const fetchSeries = async () => {
+            try {
+                const response = await axios.get('http://127.0.0.1:8000/api/series'); 
+                const fetchedSeries = response.data;
+    
+                const sortedSeries = fetchedSeries.sort((a, b) => {
+                    const latestReleaseDateA = new Date(
+                        Math.max(...a.sets.map(set => new Date(set.release_date)))
+                    );
+    
+                    const latestReleaseDateB = new Date(
+                        Math.max(...b.sets.map(set => new Date(set.release_date)))
+                    );
+    
+                    return latestReleaseDateB - latestReleaseDateA;
+                });
+    
+                //for each series, sort the sets from new to old
+                const sortedSeriesSets = sortedSeries.map(series => {
+                    return {
+                        ...series,
+                        sets: series.sets.sort((a, b) => new Date(b.release_date) - new Date(a.release_date))
+                    };
+                });
+    
+                setSeries(sortedSeriesSets); 
+            } catch (error) {
+                console.error("Cannot fetch series or sets:", error);
             }
-            seriesMap[series].push({ id, name, releaseDate }); 
-        });
-
-        const formattedSets = Object.entries(seriesMap).map(([series, setNames]) => {
-            setNames.sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate)); 
-            const latestReleaseDate = new Date(setNames[0].releaseDate);
-            return { series, setNames, latestReleaseDate };
-        });
-
-        const sortedSets = formattedSets.sort((a, b) => b.latestReleaseDate - a.latestReleaseDate);
-
-        setSets(sortedSets);
+        };
+    
+        fetchSeries(); 
     }, []);
+    
+    
 
+    //cards by selected set
     const handleSetSelect = async (setId) => {
         setSelectedSetId(setId); 
         try {
-            const cardsData = await import(`../scrapes/cards/${setId}.json`);
-            setCards(cardsData.default); 
+            const response = await axios.get(`http://127.0.0.1:8000/api/sets/${setId}/cards`); 
+            setCards(response.data); 
         } catch (error) {
             console.error("Error loading cards:", error);
             setCards([]); 
         }
     };
+    
 
     const handleSeriesSelect = (series) => {
         setSelectedSeries(series);
@@ -55,6 +76,7 @@ const Index = () => {
             <div className="sidebar">
                 <SetsSidebar
                     sets={sets}
+                    series={series} 
                     onSetSelect={handleSetSelect}
                     onSeriesSelect={handleSeriesSelect} 
                 />

@@ -3,12 +3,12 @@ import React from 'react';
 import { Accordion, AccordionSummary, AccordionDetails, Typography } from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 
-const SetsSidebar = ({ sets, onSetSelect, onSeriesSelect }) => {
+const SetsSidebar = ({ series, onSetSelect, onSeriesSelect }) => {
     return (
         <div className="sets-sidebar">
-            {sets.map((set) => (
+            {series.map((s) => (
                 <Accordion 
-                    key={set.series} 
+                    key={s.id} 
                     sx={{ 
                         backgroundColor: '#3c3c3c', 
                         color: 'white',
@@ -19,17 +19,19 @@ const SetsSidebar = ({ sets, onSetSelect, onSeriesSelect }) => {
                         '&:before': {
                             display: 'none' 
                         }
-                    }} >
+                    }} 
+                >
                     <AccordionSummary
                         expandIcon={<ArrowDownwardIcon />}
-                        aria-controls={`${set.series}-content`}
-                        id={`${set.series}-header`}
-                        onClick={() => onSeriesSelect(set.series)}  >
-                        <Typography variant="h6" sx={{ color: 'white' }}>{set.series}</Typography>
+                        aria-controls={`${s.id}-content`}
+                        id={`${s.id}-header`}
+                        onClick={() => onSeriesSelect(s.series_name)}  
+                    >
+                        <Typography variant="h6" sx={{ color: 'white' }}>{s.series_name}</Typography>
                     </AccordionSummary>
                     <AccordionDetails sx={{ backgroundColor: '#3c3c3c', color: 'white' }}>
-                        <ul style={{listStyleType: 'none' }}>
-                            {set.setNames.map((setInfo) => (
+                        <ul style={{ listStyleType: 'none' }}>
+                            {s.sets.map((setInfo) => ( 
                                 <li key={setInfo.id}>
                                     <button
                                         onClick={() => onSetSelect(setInfo.id)}
@@ -41,7 +43,7 @@ const SetsSidebar = ({ sets, onSetSelect, onSeriesSelect }) => {
                                             color: 'white' 
                                         }} 
                                     >
-                                        {setInfo.name}
+                                        {setInfo.set_name} 
                                     </button>
                                 </li>
                             ))}
