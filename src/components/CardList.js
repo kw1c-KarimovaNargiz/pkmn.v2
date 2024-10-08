@@ -5,13 +5,14 @@ import CardDisplay from './CardDisplay';
 
 const CardList = ({ cards }) => {
     return (
-        <Grid container spacing={10}>
+        <Grid container spacing={2}>
             {cards.map((card) => (
-                <Grid item xs={12} sm={6} md={4} key={card.number}>
+                <Grid item key={card.id} xs={12} sm={6} md={4} > {/* Ensure unique key here */}
                     <CardDisplay card={card} />
                 </Grid>
             ))}
         </Grid>
     );
 };
+
 export default CardList;
