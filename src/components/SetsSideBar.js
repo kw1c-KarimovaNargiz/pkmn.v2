@@ -51,9 +51,7 @@ const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect }) => {
                                     </li>
                                 ))
                             }
-                                <Typography variant="body2" sx={{ color: 'white' }}>
-                                    No sets available for this series.
-                                </Typography>
+                              
                            
                         </ul>
                     </AccordionDetails>
