@@ -1,34 +1,50 @@
-
 body {
-    margin: 0; 
-    padding: 0; 
-    height: 100%; }
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
 
-    .cards-display-area {
-      margin-left: 20%;
-      padding: 30px; 
-      margin-top: 60px;
-      overflow-y: auto; 
-  }
+.index-container {
+  position: static;
+  margin: 0;
+  z-index: 1000;
+  
+  
+}
 
-  .sidebar {
-    position: fixed;
-    width: 20%;
-    left: 0; 
-    height: 100vh; 
-    margin: 0; 
-    top: 60px; 
-  overflow-y:auto;
+.sidebar {
+  position: fixed;
+  width: 20%;
+  left: 0;
+  height: 100vh;
+  margin: 0;
+  top: 60px;
+  overflow-y: auto;
+  background-color: #606060;
+  z-index: 1000;
+}
 
-    background-color: #606060; 
-    z-index: 1000;
+.cards-display-area {
+  margin-left: 20%; 
+  padding: 30px;
+  margin-top: 60px;
+  overflow-y: auto;
+}
+
+.search-filter-container {
+  display: flex;
+  align-items: center;
+  margin-top: 100px;
+  margin-left: 20%; /* Ensure this is aligned next to the sidebar */
+  padding-left: 20px; /* Optional padding */
+ 
+  z-index: 1001; /* Ensure it appears above the cards */
 }
 
 .cards-display-area::-webkit-scrollbar {
   display: none;
 }
-  
-  .sidebar::-webkit-scrollbar {
 
-    display: none; 
+.sidebar::-webkit-scrollbar {
+  display: none;
 }

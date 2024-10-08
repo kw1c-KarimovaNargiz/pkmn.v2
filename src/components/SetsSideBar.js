@@ -1,4 +1,3 @@
-// src/components/SetsSidebar.js
 import React from 'react';
 import { Accordion, AccordionSummary, AccordionDetails, Typography } from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';

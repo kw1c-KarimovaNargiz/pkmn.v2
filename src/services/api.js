@@ -33,3 +33,23 @@ export const fetchSeries = async () => {
                 throw error;
             }  
         };
+
+        export const loadMoreCards = async (page) => {
+            try {
+                const response = await axios.get(`http://127.0.0.1:8000/api/cards?page=${page}`);
+                return response.data;
+            } catch (error) {
+                console.error("Error loading more cards:", error);
+                throw error;
+            }
+        };
+
+    export const handleFilter = async (type) => {
+        try {
+            const response = await axios.get(`http://127.0.0.1:8000/api/cards/filter?type=${type}`);
+            return response.data;
+            } catch (error) {
+                console.error("Error searching card with type", error);
+                throw error;
+        }
+    }
