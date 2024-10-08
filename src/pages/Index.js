@@ -3,49 +3,61 @@ import React, { useEffect, useState } from 'react';
 import { Typography } from '@mui/material';
 import CardList from '../components/CardList';
 import SetsSidebar from '../components/SetsSideBar'; 
-import axios from 'axios';  
+import SearchBar from '../components/SearchBar'; 
+import { fetchSeries, fetchCardsForSet, searchCard } from '../services/api';
 import '../styling/Index.css'; 
 
 const Index = () => {
     const [sets, setSets] = useState([]); 
     const [series, setSeries] = useState([]); 
-    const [selectedSetId, setSelectedSetId] = useState([]); 
+    const [selectedSetId, setSelectedSetId] = useState(null); 
     const [cards, setCards] = useState([]); 
-
-   //series and their sets at once
+    const [searchResults, setSearchResults] = useState([]);
+  
     useEffect(() => {
-        const fetchSeries = async () => {
+        const loadSeries = async () => {
             try {
-                const response = await axios.get('http://127.0.0.1:8000/api/series'); 
-                setSeries(response.data);
+                const seriesData = await fetchSeries(); 
+                setSeries(seriesData);
             } catch (error) {
                 console.error("Cannot fetch series/sets", error);
             }
         };
-        fetchSeries(); 
+        loadSeries(); 
     }, []);
 
-    //cards from their
+    //fetch card when set selected
     const handleSetSelect = async (setId) => {
         setSelectedSetId(setId); 
         try {
-            const response = await axios.get(`http://127.0.0.1:8000/api/sets/${setId}/cards`); 
-            setCards(response.data); 
+            const cardData = await fetchCardsForSet(setId);
+            setCards(cardData); 
         } catch (error) {
             console.error("Error loading cards:", error);
             setCards([]); 
         }
     };
 
-    //selectign series,
+    //handle search
+    const handleSearch = async (searchTerm) => {
+        try {
+            const results = await searchCard(searchTerm); 
+            setSearchResults(results); 
+        } catch (error) {
+            console.error("Error searching Pokémon:", error);
+            setSearchResults([]); 
+        }
+    }
+
+   //series selection
     const handleSeriesSelect = (selectedSeries) => {
-        setSets(selectedSeries.sets || []);
-     
-      };
+        setSets(selectedSeries.sets || []); 
+    };
 
     return (
         <div className="index-container">
             <div className="sidebar">
+                <SearchBar onSearch={handleSearch} />
                 <SetsSidebar
                     sets={sets}
                     series={series} 
@@ -54,11 +66,13 @@ const Index = () => {
                 />
             </div>
             <div className="cards-display-area">
-                {selectedSetId ? (
+                {searchResults.length > 0 ? (
+                    <CardList cards={searchResults} /> 
+                ) : selectedSetId ? (
                     <CardList cards={cards} /> 
                 ) : (
                     <Typography variant="h6" component="div" align="center"> 
-                        Select a set to see the cards.
+                        Select a set or search for a Pokémon to see the cards.
                     </Typography>
                 )}
             </div>
