@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Typography } from '@mui/material';
 import CardList from '../components/CardList';
 import SetsSidebar from '../components/SetsSideBar'; 
-import SearchBar from '../components/SearchBar'; 
-import FilterBar from '../components/FilterBar'; 
+import CombinedSearchFilterBar from '../components/CombinedSearchFilterBar'; // Make sure the import path is correct
 import { fetchSeries, fetchCardsForSet, searchCard } from '../services/api';
 import '../styling/Index.css'; 
 
@@ -15,7 +14,10 @@ const Index = () => {
     const [filteredCards, setFilteredCards] = useState([]);
     const [searchResults, setSearchResults] = useState([]);
     const [selectedTypes, setSelectedTypes] = useState([]);
-    const [allTypes, setAllTypes] = useState([]);  
+    const [allTypes, setAllTypes] = useState([]);
+    
+   
+    const availableTypes = allTypes;
 
     useEffect(() => {
         const loadSeries = async () => {
@@ -28,8 +30,6 @@ const Index = () => {
         };
         loadSeries(); 
     }, []);
-
-    //set selection
 
     const handleSetSelect = async (setId) => {
         setSelectedSetId(setId); 
@@ -44,7 +44,6 @@ const Index = () => {
         }
     };
 
-    //search
     const handleSearch = async (searchTerm) => {
         try {
             const results = await searchCard(searchTerm); 
@@ -55,13 +54,11 @@ const Index = () => {
         }
     };
 
-    //handle filter by type, if type removed; reset
     const handleFilterByType = (types) => {
         if (types.length === 0) {
             return setFilteredCards(cards);
         }
 
-        //filtering cards
         const filtered = cards.filter((card) =>
             types.some((type) => card.types.includes(type))
         );
@@ -69,7 +66,6 @@ const Index = () => {
         setFilteredCards(filtered); 
     };
 
-    //series seleciton
     const handleSeriesSelect = (selectedSeries) => {
         setSets(selectedSeries.sets || []); 
     };
@@ -90,12 +86,12 @@ const Index = () => {
                 />
             </div>
             <div className="search-filter-container">
-                <SearchBar onSearch={handleSearch} />
-                <FilterBar 
-                    onFilter={handleFilterByType} 
-                    availableTypes={allTypes} 
-                    selectedTypes={selectedTypes} 
-                    setSelectedTypes={setSelectedTypes} 
+                <CombinedSearchFilterBar 
+                    availableTypes={availableTypes} 
+                    onSearch={handleSearch}
+                    onFilter={handleFilterByType}
+                    selectedTypes={selectedTypes}
+                    setSelectedTypes={setSelectedTypes}
                 />
             </div>
             <div className="cards-display-area">

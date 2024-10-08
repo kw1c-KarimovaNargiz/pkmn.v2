@@ -1,35 +1,54 @@
 import React from 'react';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
 
 const FilterBar = ({ onFilter, availableTypes, selectedTypes, setSelectedTypes }) => {
-    const handleChange = (e) => {
-        const value = e.target.value;
+    const [selectedType, setSelectedType] = React.useState('');
 
-    
+    const handleChange = (event) => {
+        const value = event.target.value;
+
+        //add type to filtermode
         if (value && !selectedTypes.includes(value)) {
             const newSelectedTypes = [...selectedTypes, value];
             setSelectedTypes(newSelectedTypes);
             onFilter(newSelectedTypes);
         }
+
+        setSelectedType(value);
     };
 
+    //remove type in filtermode
     const handleRemoveType = (typeToRemove) => {
         const updatedTypes = selectedTypes.filter((type) => type !== typeToRemove);
         setSelectedTypes(updatedTypes);
-        onFilter(updatedTypes); 
+        onFilter(updatedTypes);
     };
 
     return (
         <div>
-            <select onChange={handleChange} defaultValue="">
-                <option value="">Select a Type</option>
-                {availableTypes.map((type) => (
-                    <option key={type} value={type}>
-                        {type}
-                    </option>
-                ))}
-            </select>
+            <FormControl sx={{ m: 1, minWidth: 120,}} size="small">
+                <InputLabel id="filter-select-label">Type</InputLabel>
+                <Select
+                    labelId="filter-select-label"
+                    id="filter-select"
+                    value={selectedType}
+                    label="Select a Type"
+                    onChange={handleChange}
+                >
+                    <MenuItem value="">
+                        <em>None</em>
+                    </MenuItem>
+                    {availableTypes.map((type) => (
+                        <MenuItem key={type} value={type}>
+                            {type}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
             <div>
-                <strong>Selected Types:</strong>
                 {selectedTypes.map((type) => (
                     <span key={type} style={{ margin: '0 5px' }}>
                         {type} <button onClick={() => handleRemoveType(type)}>x</button>
