@@ -4,15 +4,11 @@ import { Card, CardContent, Typography, Dialog, DialogContent } from '@mui/mater
 const CardDisplay = React.memo(({ card }) => {
     const [open, setOpen] = useState(false);
 
-    // Open dialog on card click
     const handleCardClick = () => setOpen(true);
-    
-    // Close dialog
     const handleClose = () => setOpen(false);
 
     return (
         <>
-            {/* Card Display */}
             <Card 
                 sx={{ backgroundColor: 'transparent', boxShadow: 'none' }} 
                 onClick={handleCardClick}
@@ -30,7 +26,7 @@ const CardDisplay = React.memo(({ card }) => {
                 </CardContent>
             </Card>
 
-            {/* Dialog for Card Details */}
+        {/*card deets*/}
             <Dialog 
                 open={open} 
                 onClose={handleClose} 
@@ -61,7 +57,7 @@ const CardDisplay = React.memo(({ card }) => {
                             boxShadow: 'none'
                         }}
                     >
-                        {/* Image and Details Section */}
+                        {/*img and deets */}
                         <div style={{ flex: 1 }}>
                             <img 
                                 src={card.images.large}
@@ -75,11 +71,14 @@ const CardDisplay = React.memo(({ card }) => {
                                 {card.name}
                             </Typography>
                             <Typography variant="h6">
+                                Set: {card.set ? card.set.name : "Unknown Set"}
+                            </Typography>
+                            <Typography variant="h6">
                                 {card.hp} HP
                             </Typography>
                             <Typography variant="h6">
-                    Type: {card.types}
-                </Typography>
+                                  Type: {card.types}
+                             </Typography>
                             {card.attacks && card.attacks.length > 0 ? (
                                 card.attacks.map((attack, index) => (
                                     <div key={index}>
@@ -92,7 +91,7 @@ const CardDisplay = React.memo(({ card }) => {
                                     </div>
                                 ))
                             ) : (
-                                <Typography>No attacks available.</Typography>
+                                <Typography></Typography>
                             )}
                             {card.subtypes && card.subtypes.length > 0 && ( 
                                 <Typography variant="h6">

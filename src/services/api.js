@@ -66,3 +66,13 @@ export const fetchSeries = async () => {
               throw error; 
           }
       };
+
+      export const fetchSubTypes = async (setId) => {
+        try {
+            const response = await axios.get(`http://127.0.0.1:8000/api/subtypes/${setId}`);
+            return response.data; 
+        } catch (error) {
+            console.error("Error fetching sorted evolution cards:", error);
+            throw error; 
+        }
+    };

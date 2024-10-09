@@ -1,26 +1,32 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { AppBar, Toolbar, Button, Typography } from '@mui/material';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { AppBar, Toolbar, Button } from '@mui/material';
 
 const pages = [
   { name: 'Home', path: '/' },
   { name: 'Pokemons', path: '/Index' },
   { name: 'My decks', path: '/Decks' },
- 
 ];
 
 function Navbar() {
+  const location = useLocation(); 
+  const navigate = useNavigate(); 
+
+  const handleClick = (path) => {
+    if (location.pathname === path) {
+      window.location.reload();
+    } else {
+      navigate(path);
+    }
+  };
+
   return (
-    <AppBar  sx={{ backgroundColor: '#8a3f3f' , position: 'fixed', zIndex: '1100'}}>
+    <AppBar sx={{ backgroundColor: '#8a3f3f', position: 'fixed', zIndex: '1100' }}>
       <Toolbar sx={{ justifyContent: 'start' }}>
-        {/* <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          User menu incoming
-        </Typography> */}
         {pages.map((page) => (
           <Button
             key={page.name}
-            component={Link}
-            to={page.path}
+            onClick={() => handleClick(page.path)} 
             sx={{ color: 'white' }}
           >
             {page.name}

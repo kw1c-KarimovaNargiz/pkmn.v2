@@ -3,7 +3,7 @@ import { Typography } from '@mui/material';
 import CardList from '../components/CardList';
 import SetsSidebar from '../components/SetsSideBar'; 
 import CombinedSearchFilterBar from '../components/CombinedSearchFilterBar'; 
-import { fetchSeries, fetchCardsForSet, searchCard, fetchSortedEvolutionCards } from '../services/api';
+import { fetchSeries, fetchCardsForSet, searchCard, fetchSortedEvolutionCards, fetchSubTypes } from '../services/api';
 import '../styling/Index.css'; 
 
 const Index = () => {
@@ -16,34 +16,58 @@ const Index = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [allTypes, setAllTypes] = useState([]);
-    
+    const [subTypes, setSubTypes] = useState([]);
+
     const availableTypes = allTypes;
 
-    const handleSortByEvo = async () => {
-        if (selectedSetId) {
-            try {
-                const sortedCards = await fetchSortedEvolutionCards(selectedSetId);
-    
-                //setting deduplicate card by id
-                const uniqueSortedCards = sortedCards.filter((card, index, self) => 
-                    index === self.findIndex((c) => c.id === card.id)
-                );
+   const handleSortByEvo = async () => {
+    if (selectedSetId) {
+        try {
 
-                setCards(uniqueSortedCards); 
-                setFilteredCards(uniqueSortedCards); 
-            } catch (error) {
-                console.error("Error fetching sorted evolution cards:", error);
-                setCards([]); 
-                setFilteredCards([]); 
-            }
+            setOriginalCards(cards);
+
+            //fetch sorted cards by evo without filtering by type yet
+            const sortedCards = await fetchSortedEvolutionCards(selectedSetId);
+
+            //deduplicate sorted cards
+            const uniqueSortedCards = sortedCards.filter((card, index, self) => 
+                index === self.findIndex((c) => c.id === card.id)
+            );
+
+            //filter sorted cards based on selected types
+            const sortedFilteredCards = uniqueSortedCards.filter(card =>
+                selectedTypes.length === 0 || selectedTypes.some(type => card.types.includes(type))
+            );
+
+            setCards(sortedFilteredCards);
+            setFilteredCards(sortedFilteredCards);
+          } catch (error) {
+            console.error("Error fetching sorted evolution cards:", error);
+            setCards([]);
+            setFilteredCards([]);
+          }
         }
-    };
+};
+
+        const handleFilterBySubtype = (selectedSubtypes) => {
+            if (selectedSubtypes.length === 0) {
+                return setFilteredCards(cards);
+            }
+            const filtered = cards.filter((card) =>
+                selectedSubtypes.some((subtype) => card.subtypes.includes(subtype))  // Assuming `subtypes` is an array in your card object
+            );
+            setFilteredCards(filtered);
+        };
+
+
     
-    //to original unsorted state
+    //to original unsorted state // also when filter is on - evo checked unchecked 
     const handleRestoreOriginal = () => {
-        setCards(originalCards); 
-        setFilteredCards(originalCards); 
-    };
+        setCards(originalCards);
+        setFilteredCards(originalCards.filter(card =>
+          selectedTypes.length === 0 || selectedTypes.some(type => card.types.includes(type))
+        ));
+      };
 
     useEffect(() => {
         const loadSeries = async () => {
@@ -66,10 +90,15 @@ const Index = () => {
             setCards(cardData);
             setOriginalCards(cardData); 
             setFilteredCards(cardData);
+
+            const subTypeData = await fetchSubTypes(setId); 
+            setSubTypes(subTypeData);
+
         } catch (error) {
             console.error("Error loading cards:", error);
             setCards([]); 
             setFilteredCards([]); 
+            setSubTypes([]);
         }
     };
     
@@ -118,9 +147,11 @@ const Index = () => {
                 <CombinedSearchFilterBar 
                     availableTypes={availableTypes} 
                     onSearch={handleSearch}
+                    availableSubTypes={subTypes}
                     onFilter={handleFilterByType}
                     selectedTypes={selectedTypes}
                     setSelectedTypes={setSelectedTypes}
+                    onFilterBySubtype={handleFilterBySubtype}
                     onSortByEvo={handleSortByEvo}
                     onRestoreOriginal={handleRestoreOriginal} 
                 />

@@ -5,7 +5,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-import { Box, Chip, Button, Checkbox, FormControlLabel } from '@mui/material'; 
+import { Box, Chip, FormControlLabel, Checkbox } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
 const Search = styled('div')(({ theme }) => ({
@@ -49,10 +49,21 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const CombinedSearchFilterBar = ({ availableTypes, onFilter, onSearch, selectedTypes = [], setSelectedTypes, onSortByEvo, onRestoreOriginal}) => {
+const CombinedSearchFilterBar = ({
+  availableTypes,
+  availableSubTypes,
+  onFilter,
+  onSearch,
+  selectedTypes = [],
+  setSelectedTypes,
+  onSortByEvo,
+  onRestoreOriginal,
+  onFilterBySubtype,
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [isSortedByEvo, setIsSortedByEvo] = useState(false);
+  const [selectedSubtypes, setSelectedSubtypes] = useState([]);
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -80,19 +91,25 @@ const CombinedSearchFilterBar = ({ availableTypes, onFilter, onSearch, selectedT
     onFilter(updatedTypes);
   };
 
+  const handleSubtypeChange = (event) => {
+    const { target: { value } } = event;
+    setSelectedSubtypes(value);
+    onFilterBySubtype(value); 
+  };
 
   const handleSortByEvoChange = async (event) => {
     const checked = event.target.checked;
     setIsSortedByEvo(checked);
     if (checked) {
-      await onSortByEvo(); 
+      await onSortByEvo();
     } else {
-      onRestoreOriginal(); 
+      onRestoreOriginal();
     }
   };
 
   return (
     <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ marginTop: '8px' }}>
+      {/*searchform */}
       <form onSubmit={handleSearchSubmit} style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
         <Search>
           <SearchIconWrapper>
@@ -107,6 +124,7 @@ const CombinedSearchFilterBar = ({ availableTypes, onFilter, onSearch, selectedT
         </Search>
       </form>
 
+      {/* selected filters */}
       <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: '8px' }}>
         {selectedTypes.map((type) => (
           <Chip
@@ -117,11 +135,12 @@ const CombinedSearchFilterBar = ({ availableTypes, onFilter, onSearch, selectedT
           />
         ))}
 
+        {/*type filter*/}
         <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-          <InputLabel id="filter-select-label">Type</InputLabel>
+          <InputLabel id="type-select-label">Type</InputLabel>
           <Select
-            labelId="filter-select-label"
-            id="filter-select"
+            labelId="type-select-label"
+            id="type-select"
             value={selectedType}
             label="Select a Type"
             onChange={handleTypeChange}
@@ -137,15 +156,35 @@ const CombinedSearchFilterBar = ({ availableTypes, onFilter, onSearch, selectedT
           </Select>
         </FormControl>
 
+        {/* subtype filter */}
+        <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+          <InputLabel id="subtype-select-label">Subtype</InputLabel>
+          <Select
+            labelId="subtype-select-label"
+            id="subtype-select"
+            multiple
+            value={selectedSubtypes}
+            onChange={handleSubtypeChange}
+            renderValue={(selected) => selected.join(', ')}
+          >
+            {availableSubTypes.map((subtype) => (
+              <MenuItem key={subtype} value={subtype}>
+                {subtype}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        {/*evo*/}
         <FormControlLabel
           control={
-            <Checkbox 
-              checked={isSortedByEvo} 
-              onChange={handleSortByEvoChange} 
-              color="primary" 
+            <Checkbox
+              checked={isSortedByEvo}
+              onChange={handleSortByEvoChange}
+              color="primary"
             />
           }
-          label="Sort by Evo"
+          label="Evo-sort"
         />
       </Box>
     </Box>

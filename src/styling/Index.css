@@ -12,21 +12,96 @@ body {
 
 #filter-select{
   background-color: rgba(255, 255, 255, 0.15);
-  color: rgba(0, 0, 0, 0.87);
+  color: transparent;
 
 }
 
-#filter-select-label{
-transform: none;
-color: inherit;
-display: flex;
-justify-content: center; 
-    align-items: center;    /* Center vertically */
-    height: 100%;        
+#filter-select-label {
+  transform: none;
+  transform-origin: 0%;
+  display: flex;
+  left: 40px;
+  justify-content: center; 
+  align-items: center;    
+  border-color: transparent !important; 
+  height: 100%;        
+  outline: none; 
+  border: none;  
+  box-shadow: none; 
+}
+
+#filter-select-label:active, #filter-select-label:focus {
+  transform: none;
+  color: inherit; 
+  
+  display: flex;
+  justify-content: center; 
+  align-items: center;    
+  height: 100%;        
+  border-color: transparent !important; 
+}
+
+.MuiFormLabel-root {
+
+left: 40px;
+
+}
+
+.MuiInputBase-root {
+  border-color: transparent !important; 
+  
+}
+.css-1869usk-MuiFormControl-root {
+display: none;
+
+border-color: transparent !important; 
+  background: transparent !important;
+}
+.css-1huaqfz-MuiFormLabel-root-MuiInputLabel-root.Mui-focused {
+  color:rgba(0, 0, 0, 0.6)!important;
+  transform: none !important;
+  left: 40px;
+  outline: none !important; 
+  border-color: transparent !important; 
+  box-shadow: none; 
+  background: transparent !important;
+  background-clip: unset !important;
+  border-color: transparent !important;
+}
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: transparent !important; 
+  left: 40px;
+}
+.MuiSelect-select:focus {
+  outline: none; 
+  border-color: transparent; 
+  box-shadow: none; 
+  left: 40px;
+}
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: transparent;
+  left: 40px;
+}
+.css-bgvwm1-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input{
+  color: transparent;
+  left: 40px;
+  transform: none;
+  color: inherit;
+  display: flex;
+  justify-content: center; 
+  align-items: center;    
+  height: 100%;    
+  border-color: transparent !important; 
+  outline: none; 
+  border: none; 
+  box-shadow: none; 
+  background: transparent;
 }
 
 .css-8voplp-MuiFormLabel-root-MuiInputLabel-root {
-    color: rgba(0, 0, 0, 0.6);
+  display: none;
+  left: 40px;
+  border-color: transparent !important; 
     font-family: "Roboto", "Helvetica", "Arial", sans-serif;
     font-weight: 400;
     font-size: 1rem;
@@ -34,15 +109,15 @@ justify-content: center;
     letter-spacing: 0.00938em;
     padding: 0;
     position: relative;
-    display: flex;          /* Make the label flexible */
-    justify-content: center; /* Center the text horizontally */
-    align-items: center;    /* Center the text vertically */
-    width: 100%;            /* Ensure the label takes up the full width of its parent */
-    height: 100%;           /* Ensure the label takes up the full height of its parent */
-    transform: none;        /* Remove any additional transform */
+
+    justify-content: center; 
+    align-items: center;    
+    width: 100%;           
+    height: 100%;           
+    transform: none;        
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
+
     z-index: 1;
     pointer-events: none;
 }
@@ -56,6 +131,8 @@ justify-content: center;
   overflow-y: auto;
   background-color: #606060;
   z-index: 1000;
+  box-shadow: 7px 5px rgba(0, 0, 0, 0.1);
+  
 }
 .search-filter-container {
   position: fixed;
@@ -65,15 +142,10 @@ justify-content: center;
      width: 80%; 
    background-color: #3c3c3c;
      z-index: 1000;
-  
+     box-shadow: 10px 5px rgba(0, 0, 0, 0.1);
+
  }
 .cards-display-area {
-  /* margin-left: 20%; 
-  padding: 30px;
-  margin-top: 100px;
-  overflow-y: auto; */
-
-
     margin-left: 20%;
     padding: 30px;
     margin-top: 100px; 
