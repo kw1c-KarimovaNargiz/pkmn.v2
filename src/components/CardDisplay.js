@@ -71,7 +71,7 @@ const CardDisplay = React.memo(({ card }) => {
                                 {card.name}
                             </Typography>
                             <Typography variant="h6">
-                                Set: {card.set ? card.set.name : "Unknown Set"}
+                                 {card.set ? card.set.set_name : "Unknown Set"}
                             </Typography>
                             <Typography variant="h6">
                                 {card.hp} HP
@@ -93,11 +93,7 @@ const CardDisplay = React.memo(({ card }) => {
                             ) : (
                                 <Typography></Typography>
                             )}
-                            {card.subtypes && card.subtypes.length > 0 && ( 
-                                <Typography variant="h6">
-                                    {card.subtypes} 
-                                </Typography>
-                            )}
+                         
                         </div>
                     </Card>
                 </DialogContent>

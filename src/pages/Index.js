@@ -15,10 +15,13 @@ const Index = () => {
     const [originalCards, setOriginalCards] = useState([]); 
     const [searchResults, setSearchResults] = useState([]);
     const [selectedTypes, setSelectedTypes] = useState([]);
+    const [selectedSubTypes, setSelectedSubTypes] = useState([]);
     const [allTypes, setAllTypes] = useState([]);
+    const [allSubTypes, setAllSubTypes] = useState([]);
     const [subTypes, setSubTypes] = useState([]);
 
     const availableTypes = allTypes;
+    const availableSubTypes = allSubTypes;
 
    const handleSortByEvo = async () => {
     if (selectedSetId) {
@@ -35,9 +38,11 @@ const Index = () => {
             );
 
             //filter sorted cards based on selected types
-            const sortedFilteredCards = uniqueSortedCards.filter(card =>
-                selectedTypes.length === 0 || selectedTypes.some(type => card.types.includes(type))
+            const sortedFilteredCards = uniqueSortedCards.filter(card => 
+                (selectedTypes.length === 0 || selectedTypes.some(type => card.types.includes(type))) &&
+                (selectedSubTypes.length === 0 || selectedSubTypes.some(subtype => card.subtypes.includes(subtype)))
             );
+            
 
             setCards(sortedFilteredCards);
             setFilteredCards(sortedFilteredCards);
@@ -49,24 +54,20 @@ const Index = () => {
         }
 };
 
-        const handleFilterBySubtype = (selectedSubtypes) => {
-            if (selectedSubtypes.length === 0) {
-                return setFilteredCards(cards);
-            }
-            const filtered = cards.filter((card) =>
-                selectedSubtypes.some((subtype) => card.subtypes.includes(subtype))  // Assuming `subtypes` is an array in your card object
-            );
-            setFilteredCards(filtered);
-        };
 
 
     
     //to original unsorted state // also when filter is on - evo checked unchecked 
     const handleRestoreOriginal = () => {
-        setCards(originalCards);
-        setFilteredCards(originalCards.filter(card =>
-          selectedTypes.length === 0 || selectedTypes.some(type => card.types.includes(type))
-        ));
+        if (selectedTypes.length === 0 && selectedSubTypes.length === 0) {
+          setCards(originalCards);
+          setFilteredCards(originalCards);
+        } else {
+          setFilteredCards(originalCards.filter(card =>
+            (selectedTypes.length === 0 || selectedTypes.some(type => card.types.includes(type))) &&
+            (selectedSubTypes.length === 0 || selectedSubTypes.some(subtype => card.subtypes.includes(subtype)))
+          ));
+        }
       };
 
     useEffect(() => {
@@ -113,16 +114,24 @@ const Index = () => {
         }
     };
 
-    const handleFilterByType = (types) => {
-        if (types.length === 0) {
-            return setFilteredCards(cards);
-        }
-        const filtered = cards.filter((card) =>
+    //filter types(energy) and subtypes
+    const handleFilter = (types, subtypes) => {
+        let filtered = cards;
+      
+        if (types.length > 0) {
+          filtered = filtered.filter((card) =>
             types.some((type) => card.types.includes(type))
-        );
-
-        setFilteredCards(filtered); 
-    };
+          );
+        }
+      
+        if (subtypes.length > 0) {
+          filtered = filtered.filter((card) =>
+            subtypes.some((subtype) => card.subtypes.includes(subtype))
+          );
+        }
+        setFilteredCards(filtered);
+      };
+      
 
     const handleSeriesSelect = (selectedSeries) => {
         setSets(selectedSeries.sets || []); 
@@ -131,8 +140,10 @@ const Index = () => {
     useEffect(() => {
         const uniqueTypes = [...new Set(cards.flatMap((card) => card.types))];
         setAllTypes(uniqueTypes);
-    }, [cards]);
-
+      
+        const uniqueSubTypes = [...new Set(cards.flatMap((card) => card.subtypes || []))];
+        setAllSubTypes(uniqueSubTypes); 
+      }, [cards]);
     return (
         <div className="index-container">
             <div className="sidebar">
@@ -145,15 +156,16 @@ const Index = () => {
             </div>
             <div className="search-filter-container">
                 <CombinedSearchFilterBar 
-                    availableTypes={availableTypes} 
-                    onSearch={handleSearch}
-                    availableSubTypes={subTypes}
-                    onFilter={handleFilterByType}
-                    selectedTypes={selectedTypes}
-                    setSelectedTypes={setSelectedTypes}
-                    onFilterBySubtype={handleFilterBySubtype}
-                    onSortByEvo={handleSortByEvo}
-                    onRestoreOriginal={handleRestoreOriginal} 
+                  onSearch={handleSearch}
+                   availableTypes={availableTypes} 
+                   availableSubTypes={subTypes}
+                   onFilter={handleFilter}  
+                   selectedTypes={selectedTypes}
+                   setSelectedTypes={setSelectedTypes}
+                   selectedSubTypes={selectedSubTypes}
+                   setSelectedSubTypes={setSelectedSubTypes}
+                   onSortByEvo={handleSortByEvo}
+                   onRestoreOriginal={handleRestoreOriginal} 
                 />
             </div>
             <div className="cards-display-area">

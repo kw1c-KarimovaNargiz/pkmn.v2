@@ -56,14 +56,14 @@ const CombinedSearchFilterBar = ({
   onSearch,
   selectedTypes = [],
   setSelectedTypes,
+  selectedSubTypes = [],
+  setSelectedSubTypes,
   onSortByEvo,
   onRestoreOriginal,
-  onFilterBySubtype,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [isSortedByEvo, setIsSortedByEvo] = useState(false);
-  const [selectedSubtypes, setSelectedSubtypes] = useState([]);
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -76,11 +76,11 @@ const CombinedSearchFilterBar = ({
 
   const handleTypeChange = (event) => {
     const value = event.target.value;
-
+  
     if (value && !selectedTypes.includes(value)) {
       const newSelectedTypes = [...selectedTypes, value];
       setSelectedTypes(newSelectedTypes);
-      onFilter(newSelectedTypes);
+      onFilter(newSelectedTypes, selectedSubTypes); 
     }
     setSelectedType(value);
   };
@@ -88,13 +88,21 @@ const CombinedSearchFilterBar = ({
   const handleRemoveType = (typeToRemove) => {
     const updatedTypes = selectedTypes.filter((type) => type !== typeToRemove);
     setSelectedTypes(updatedTypes);
-    onFilter(updatedTypes);
+    onFilter(updatedTypes, selectedSubTypes);
   };
 
-  const handleSubtypeChange = (event) => {
-    const { target: { value } } = event;
-    setSelectedSubtypes(value);
-    onFilterBySubtype(value); 
+  const handleSubTypeChange = (event) => {
+    const { value } = event.target;
+    const newSelectedSubTypes = typeof value === 'string' ? value.split(',') : value;
+    
+    setSelectedSubTypes(newSelectedSubTypes);
+    onFilter(selectedTypes, newSelectedSubTypes); 
+  };
+
+  const handleRemoveSubType = (subTypeToRemove) => {
+    const updatedSubTypes = selectedSubTypes.filter((subtype) => subtype !== subTypeToRemove);
+    setSelectedSubTypes(updatedSubTypes);
+    onFilter(selectedTypes, updatedSubTypes); 
   };
 
   const handleSortByEvoChange = async (event) => {
@@ -109,7 +117,7 @@ const CombinedSearchFilterBar = ({
 
   return (
     <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ marginTop: '8px' }}>
-      {/*searchform */}
+      {/*search form*/}
       <form onSubmit={handleSearchSubmit} style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
         <Search>
           <SearchIconWrapper>
@@ -124,7 +132,7 @@ const CombinedSearchFilterBar = ({
         </Search>
       </form>
 
-      {/* selected filters */}
+      {/* filters */}
       <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: '8px' }}>
         {selectedTypes.map((type) => (
           <Chip
@@ -135,7 +143,7 @@ const CombinedSearchFilterBar = ({
           />
         ))}
 
-        {/*type filter*/}
+        {/* (energy)type filter */}
         <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
           <InputLabel id="type-select-label">Type</InputLabel>
           <Select
@@ -157,35 +165,46 @@ const CombinedSearchFilterBar = ({
         </FormControl>
 
         {/* subtype filter */}
-        <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-          <InputLabel id="subtype-select-label">Subtype</InputLabel>
-          <Select
-            labelId="subtype-select-label"
-            id="subtype-select"
-            multiple
-            value={selectedSubtypes}
-            onChange={handleSubtypeChange}
-            renderValue={(selected) => selected.join(', ')}
-          >
-            {availableSubTypes.map((subtype) => (
-              <MenuItem key={subtype} value={subtype}>
-                {subtype}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/*evo*/}
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={isSortedByEvo}
-              onChange={handleSortByEvoChange}
-              color="primary"
+        <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: '8px' }}>
+          {selectedSubTypes.map((subtype) => (
+            <Chip
+              key={subtype}
+              label={subtype}
+              onDelete={() => handleRemoveSubType(subtype)}
+              sx={{ margin: '4px' }}
             />
-          }
-          label="Evo-sort"
-        />
+          ))}
+          <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+            <InputLabel id="subtype-select-label">Subtype</InputLabel>
+            <Select
+              labelId="subtype-select-label"
+              id="subtype-select"
+              multiple
+              value={selectedSubTypes}
+              label="Select a Subtype"
+              onChange={handleSubTypeChange}
+              renderValue={(selected) => selected.join(', ')}
+            >
+              {availableSubTypes.map((subtype) => (
+                <MenuItem key={subtype} value={subtype}>
+                  {subtype}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/*sort by evo checkbox*/}
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={isSortedByEvo}
+                onChange={handleSortByEvoChange}
+                color="primary"
+              />
+            }
+            label="Evo-sort"
+          />
+        </Box>
       </Box>
     </Box>
   );
