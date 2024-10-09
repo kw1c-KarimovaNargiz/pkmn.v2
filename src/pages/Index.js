@@ -12,24 +12,23 @@ const Index = () => {
     const [selectedSetId, setSelectedSetId] = useState(null);
     const [cards, setCards] = useState([]);
     const [filteredCards, setFilteredCards] = useState([]);
+    const [originalCards, setOriginalCards] = useState([]); 
     const [searchResults, setSearchResults] = useState([]);
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [allTypes, setAllTypes] = useState([]);
     
     const availableTypes = allTypes;
 
-
- 
     const handleSortByEvo = async () => {
         if (selectedSetId) {
             try {
                 const sortedCards = await fetchSortedEvolutionCards(selectedSetId);
-                
-               //deduplicate sorted cards
+    
+                //setting deduplicate card by id
                 const uniqueSortedCards = sortedCards.filter((card, index, self) => 
                     index === self.findIndex((c) => c.id === card.id)
                 );
-                
+
                 setCards(uniqueSortedCards); 
                 setFilteredCards(uniqueSortedCards); 
             } catch (error) {
@@ -40,7 +39,12 @@ const Index = () => {
         }
     };
     
-    
+    //to original unsorted state
+    const handleRestoreOriginal = () => {
+        setCards(originalCards); 
+        setFilteredCards(originalCards); 
+    };
+
     useEffect(() => {
         const loadSeries = async () => {
             try {
@@ -53,18 +57,15 @@ const Index = () => {
         loadSeries(); 
     }, []);
 
+
+    //selecting set - saving the original unsorted state 
     const handleSetSelect = async (setId) => {
-        setSelectedSetId(setId); 
+        setSelectedSetId(setId);
         try {
-            let cardData = await fetchCardsForSet(setId); 
-            
-            //deduplicate cards by id before setting state
-            const uniqueCards = cardData.filter((card, index, self) => 
-                index === self.findIndex((c) => c.id === card.id)
-            );
-            
-            setCards(uniqueCards); 
-            setFilteredCards(uniqueCards); 
+            const cardData = await fetchCardsForSet(setId); 
+            setCards(cardData);
+            setOriginalCards(cardData); 
+            setFilteredCards(cardData);
         } catch (error) {
             console.error("Error loading cards:", error);
             setCards([]); 
@@ -72,7 +73,7 @@ const Index = () => {
         }
     };
     
-
+    //searching
     const handleSearch = async (searchTerm) => {
         try {
             const results = await searchCard(searchTerm); 
@@ -87,7 +88,6 @@ const Index = () => {
         if (types.length === 0) {
             return setFilteredCards(cards);
         }
-
         const filtered = cards.filter((card) =>
             types.some((type) => card.types.includes(type))
         );
@@ -122,10 +122,11 @@ const Index = () => {
                     selectedTypes={selectedTypes}
                     setSelectedTypes={setSelectedTypes}
                     onSortByEvo={handleSortByEvo}
+                    onRestoreOriginal={handleRestoreOriginal} 
                 />
             </div>
             <div className="cards-display-area">
-            <CardList cards={searchResults.length > 0 ? searchResults : filteredCards} />
+                <CardList cards={searchResults.length > 0 ? searchResults : filteredCards} />
 
                 {cards.length === 0 && (
                     <Typography variant="h6" component="div" align="center">

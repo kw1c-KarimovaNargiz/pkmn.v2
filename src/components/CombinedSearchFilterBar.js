@@ -5,7 +5,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-import { Box, Chip, Button } from '@mui/material'; 
+import { Box, Chip, Button, Checkbox, FormControlLabel } from '@mui/material'; 
 import SearchIcon from '@mui/icons-material/Search';
 
 const Search = styled('div')(({ theme }) => ({
@@ -49,9 +49,10 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const CombinedSearchFilterBar = ({ availableTypes, onFilter, onSearch, selectedTypes = [], setSelectedTypes, onSortByEvo }) => {
+const CombinedSearchFilterBar = ({ availableTypes, onFilter, onSearch, selectedTypes = [], setSelectedTypes, onSortByEvo, onRestoreOriginal}) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('');
+  const [isSortedByEvo, setIsSortedByEvo] = useState(false);
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -77,6 +78,17 @@ const CombinedSearchFilterBar = ({ availableTypes, onFilter, onSearch, selectedT
     const updatedTypes = selectedTypes.filter((type) => type !== typeToRemove);
     setSelectedTypes(updatedTypes);
     onFilter(updatedTypes);
+  };
+
+
+  const handleSortByEvoChange = async (event) => {
+    const checked = event.target.checked;
+    setIsSortedByEvo(checked);
+    if (checked) {
+      await onSortByEvo(); 
+    } else {
+      onRestoreOriginal(); 
+    }
   };
 
   return (
@@ -125,9 +137,16 @@ const CombinedSearchFilterBar = ({ availableTypes, onFilter, onSearch, selectedT
           </Select>
         </FormControl>
 
-        <Button variant="contained" color="primary" onClick={onSortByEvo}>
-    Sort by Evo
-</Button>
+        <FormControlLabel
+          control={
+            <Checkbox 
+              checked={isSortedByEvo} 
+              onChange={handleSortByEvoChange} 
+              color="primary" 
+            />
+          }
+          label="Sort by Evo"
+        />
       </Box>
     </Box>
   );
