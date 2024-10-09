@@ -34,6 +34,7 @@ export const fetchSeries = async () => {
             }  
         };
 
+        //loading cards per page ??? nog niet in gebruik
         export const loadMoreCards = async (page) => {
             try {
                 const response = await axios.get(`http://127.0.0.1:8000/api/cards?page=${page}`);
@@ -44,6 +45,7 @@ export const fetchSeries = async () => {
             }
         };
 
+        //filtering
     export const handleFilter = async (type) => {
         try {
             const response = await axios.get(`http://127.0.0.1:8000/api/cards/filter?type=${type}`);
@@ -53,3 +55,14 @@ export const fetchSeries = async () => {
                 throw error;
         }
     }
+
+      //evo's per set for now
+      export const fetchSortedEvolutionCards = async (setId) => {
+          try {
+              const response = await axios.get(`http://127.0.0.1:8000/api/cards/set/${setId}/sorted`);
+              return response.data; 
+          } catch (error) {
+              console.error("Error fetching sorted evolution cards:", error);
+              throw error; 
+          }
+      };

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Typography } from '@mui/material';
 import CardList from '../components/CardList';
 import SetsSidebar from '../components/SetsSideBar'; 
-import CombinedSearchFilterBar from '../components/CombinedSearchFilterBar'; // Make sure the import path is correct
-import { fetchSeries, fetchCardsForSet, searchCard } from '../services/api';
+import CombinedSearchFilterBar from '../components/CombinedSearchFilterBar'; 
+import { fetchSeries, fetchCardsForSet, searchCard, fetchSortedEvolutionCards } from '../services/api';
 import '../styling/Index.css'; 
 
 const Index = () => {
@@ -16,9 +16,31 @@ const Index = () => {
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [allTypes, setAllTypes] = useState([]);
     
-   
     const availableTypes = allTypes;
 
+
+ 
+    const handleSortByEvo = async () => {
+        if (selectedSetId) {
+            try {
+                const sortedCards = await fetchSortedEvolutionCards(selectedSetId);
+                
+               //deduplicate sorted cards
+                const uniqueSortedCards = sortedCards.filter((card, index, self) => 
+                    index === self.findIndex((c) => c.id === card.id)
+                );
+                
+                setCards(uniqueSortedCards); 
+                setFilteredCards(uniqueSortedCards); 
+            } catch (error) {
+                console.error("Error fetching sorted evolution cards:", error);
+                setCards([]); 
+                setFilteredCards([]); 
+            }
+        }
+    };
+    
+    
     useEffect(() => {
         const loadSeries = async () => {
             try {
@@ -34,15 +56,22 @@ const Index = () => {
     const handleSetSelect = async (setId) => {
         setSelectedSetId(setId); 
         try {
-            const cardData = await fetchCardsForSet(setId);
-            setCards(cardData); 
-            setFilteredCards(cardData);
+            let cardData = await fetchCardsForSet(setId); 
+            
+            //deduplicate cards by id before setting state
+            const uniqueCards = cardData.filter((card, index, self) => 
+                index === self.findIndex((c) => c.id === card.id)
+            );
+            
+            setCards(uniqueCards); 
+            setFilteredCards(uniqueCards); 
         } catch (error) {
             console.error("Error loading cards:", error);
             setCards([]); 
             setFilteredCards([]); 
         }
     };
+    
 
     const handleSearch = async (searchTerm) => {
         try {
@@ -92,14 +121,12 @@ const Index = () => {
                     onFilter={handleFilterByType}
                     selectedTypes={selectedTypes}
                     setSelectedTypes={setSelectedTypes}
+                    onSortByEvo={handleSortByEvo}
                 />
             </div>
             <div className="cards-display-area">
-                {searchResults.length > 0 ? (
-                    <CardList cards={searchResults} /> 
-                ) : (
-                    <CardList cards={filteredCards} /> 
-                )}
+            <CardList cards={searchResults.length > 0 ? searchResults : filteredCards} />
+
                 {cards.length === 0 && (
                     <Typography variant="h6" component="div" align="center">
                         Select a set or search for a Pokémon to see the cards.

@@ -19,7 +19,32 @@ body {
 #filter-select-label{
 transform: none;
 color: inherit;
+display: flex;
+justify-content: center; 
+    align-items: center;    /* Center vertically */
+    height: 100%;        
+}
 
+.css-8voplp-MuiFormLabel-root-MuiInputLabel-root {
+    color: rgba(0, 0, 0, 0.6);
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.4375em;
+    letter-spacing: 0.00938em;
+    padding: 0;
+    position: relative;
+    display: flex;          /* Make the label flexible */
+    justify-content: center; /* Center the text horizontally */
+    align-items: center;    /* Center the text vertically */
+    width: 100%;            /* Ensure the label takes up the full width of its parent */
+    height: 100%;           /* Ensure the label takes up the full height of its parent */
+    transform: none;        /* Remove any additional transform */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 1;
+    pointer-events: none;
 }
 .sidebar {
   position: fixed;

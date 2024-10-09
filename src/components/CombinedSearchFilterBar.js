@@ -5,9 +5,8 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-import { Box, Chip } from '@mui/material'; 
+import { Box, Chip, Button } from '@mui/material'; 
 import SearchIcon from '@mui/icons-material/Search';
-
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -50,7 +49,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const CombinedSearchFilterBar = ({ availableTypes, onFilter, onSearch, selectedTypes = [], setSelectedTypes }) => {
+const CombinedSearchFilterBar = ({ availableTypes, onFilter, onSearch, selectedTypes = [], setSelectedTypes, onSortByEvo }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('');
 
@@ -97,7 +96,6 @@ const CombinedSearchFilterBar = ({ availableTypes, onFilter, onSearch, selectedT
       </form>
 
       <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: '8px' }}>
-   
         {selectedTypes.map((type) => (
           <Chip
             key={type}
@@ -126,6 +124,10 @@ const CombinedSearchFilterBar = ({ availableTypes, onFilter, onSearch, selectedT
             ))}
           </Select>
         </FormControl>
+
+        <Button variant="contained" color="primary" onClick={onSortByEvo}>
+    Sort by Evo
+</Button>
       </Box>
     </Box>
   );
