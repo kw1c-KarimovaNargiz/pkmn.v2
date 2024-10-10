@@ -19,6 +19,7 @@ const Index = () => {
     const [allTypes, setAllTypes] = useState([]);
     const [allSubTypes, setAllSubTypes] = useState([]);
     const [subTypes, setSubTypes] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const availableTypes = allTypes;
     const availableSubTypes = allSubTypes;
@@ -86,6 +87,9 @@ const Index = () => {
     //selecting set - saving the original unsorted state 
     const handleSetSelect = async (setId) => {
         setSelectedSetId(setId);
+
+        setSearchResults([]);
+        setSearchTerm('');
         try {
             const cardData = await fetchCardsForSet(setId); 
             setCards(cardData);
@@ -166,6 +170,8 @@ const Index = () => {
                    setSelectedSubTypes={setSelectedSubTypes}
                    onSortByEvo={handleSortByEvo}
                    onRestoreOriginal={handleRestoreOriginal} 
+                   searchTerm={searchTerm}
+                   setSearchTerm={setSearchTerm}
                 />
             </div>
             <div className="cards-display-area">

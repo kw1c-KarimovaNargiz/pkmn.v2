@@ -60,8 +60,10 @@ const CombinedSearchFilterBar = ({
   setSelectedSubTypes,
   onSortByEvo,
   onRestoreOriginal,
+  searchTerm,
+  setSearchTerm,
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
+
   const [selectedType, setSelectedType] = useState('');
   const [isSortedByEvo, setIsSortedByEvo] = useState(false);
 
