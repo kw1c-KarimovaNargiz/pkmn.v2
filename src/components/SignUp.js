@@ -55,7 +55,6 @@ export default function SignUp() {
 
   const [message, setMessage] = useState('');
 
-  // Handle input changes
   const handleChange = (event) => {
     const { name, email, password, value } = event.target;
     setFormData((prevData) => ({
@@ -66,21 +65,15 @@ export default function SignUp() {
     }));
   };
 
-  // Handle form submission
-  // Handle form submission
-const handleSubmit = async (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-  
+    
     try {
-      // Call the registerUser function with the form data
       const response = await registerUser(formData);
-      
-      // Handle success response
       setMessage('User registered successfully!');
       console.log('Response:', response);
   
     } catch (error) {
-
       if (error.response && error.response.data && error.response.data.error) {
         setMessage(`Error: ${JSON.stringify(error.response.data.error)}`);
       } else {
@@ -89,6 +82,7 @@ const handleSubmit = async (event) => {
       console.error('Error registering user:', error);
     }
   };
+  
   
 
   return (
@@ -101,7 +95,7 @@ const handleSubmit = async (event) => {
         <Typography component="h1" variant="h5">
           Sign up
         </Typography>
-        {/* Display success/error message */}
+        {/* error / succes msg */}
         {message && (
           <Typography variant="body2" color={message.includes('Error') ? 'error' : 'primary'}>
             {message}
@@ -109,22 +103,22 @@ const handleSubmit = async (event) => {
         )}
         <Form noValidate onSubmit={handleSubmit}>
           <Grid container spacing={2}>
-            {/* Username */}
+            {/* username*/}
             <Grid item xs={12}>
-  <TextField
-    variant="outlined"
-    required
-    fullWidth
-    id="name"
-    label="Name"
-    name="name"
-    autoComplete="name"
-    value={formData.name}
-    onChange={handleChange}
-  />
-</Grid>
+          <TextField
+            variant="outlined"
+            required
+            fullWidth
+            id="name"
+            label="Name"
+            name="name"
+            autoComplete="name"
+            value={formData.name}
+            onChange={handleChange}
+          />
+        </Grid>
 
-            {/* Email */}
+            {/*email*/}
             <Grid item xs={12}>
   <TextField
     variant="outlined"

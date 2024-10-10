@@ -85,7 +85,7 @@ export default function Login() {
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        {/* Display success/error message */}
+        {/* succes / error msg */}
         {message && (
           <Typography variant="body2" color={message.includes('Error') ? 'error' : 'primary'}>
             {message}
@@ -93,7 +93,7 @@ export default function Login() {
         )}
         <Form noValidate onSubmit={handleSubmit}>
           <Grid container spacing={2}>
-            {/* Email */}
+            {/*email */}
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
