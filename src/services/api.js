@@ -1,5 +1,21 @@
 import axios from 'axios';
 
+//register a new user
+
+export const registerUser = async (formData) => {
+  const response = await axios.post('http://127.0.0.1:8000/api/register', formData);
+  return response.data;
+};
+//login
+export const loginUser = async () => {
+  try {
+    const response = await axios.post('http://127.0.0.1:8000/api/login');
+    return response.data;
+  } catch (error) {
+    console.error('Error during login:', error);
+    throw error;
+  }
+};
 
 //fetch all series and their according sets
 export const fetchSeries = async () => {

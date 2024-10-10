@@ -7,6 +7,9 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Decks from './pages/Decks';
 import Index from './pages/Index'; 
+import SignIn from './components/SignIn';  
+import SignUp from './components/SignUp';  
+
 function App() {
     return (
         <Router>
@@ -18,6 +21,8 @@ function App() {
                             <Route path="/" element={<Home />} />
                             <Route path="/Decks" element={<Decks />} />
                             <Route path="/Index" element={<Index />} />
+                            <Route path="/login" element={<SignIn />} /> 
+                            <Route path="/signup" element={<SignUp />} /> 
                         </Routes>
                     </Container>
                 </Box>
@@ -25,5 +30,6 @@ function App() {
         </Router>
     );
 }
+
 setBodyColor({ color: "#262626" });
 export default App;
