@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom'; 
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -9,9 +9,9 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';  
+import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
-import { loginUser} from '../services/api'; 
+import { loginUser } from '../services/api'; 
 
 const Copyright = () => (
   <Typography variant="body2" color="textSecondary" align="center">
@@ -23,7 +23,6 @@ const Copyright = () => (
     {'.'}
   </Typography>
 );
-
 
 const PaperContainer = styled(Box)(({ theme }) => ({
   marginTop: theme.spacing(8),
@@ -38,7 +37,7 @@ const AvatarStyled = styled(Avatar)(({ theme }) => ({
 }));
 
 const Form = styled('form')(({ theme }) => ({
-  width: '100%', 
+  width: '100%',
   marginTop: theme.spacing(3),
 }));
 
@@ -51,7 +50,7 @@ export default function Login() {
     email: '',
     password: '',
   });
-
+  const navigate = useNavigate();  
   const [message, setMessage] = useState('');
 
   const handleChange = (event) => {
@@ -62,16 +61,17 @@ export default function Login() {
     }));
   };
 
-  //form submission
+  
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await loginUser(formData);
-      setMessage('Login successful!');
-      console.log('Response:', response);
+      const response = await loginUser(formData); 
+      console.log('Login successful:', response);
+
+      navigate('/Index'); 
     } catch (error) {
-      setMessage('Login failed, please check your credentials.');
-      console.error('Error logging in:', error);
+      setMessage('Error logging in, please check your credentials.');
+      console.error('Login error:', error);
     }
   };
 
@@ -85,7 +85,7 @@ export default function Login() {
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        {/* succes / error msg */}
+        {/* success / error message */}
         {message && (
           <Typography variant="body2" color={message.includes('Error') ? 'error' : 'primary'}>
             {message}
@@ -93,7 +93,7 @@ export default function Login() {
         )}
         <Form noValidate onSubmit={handleSubmit}>
           <Grid container spacing={2}>
-            {/*email */}
+            {/* email */}
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
@@ -107,7 +107,7 @@ export default function Login() {
                 onChange={handleChange}
               />
             </Grid>
-            {/* Password */}
+            {/* password */}
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
@@ -133,7 +133,7 @@ export default function Login() {
           </SubmitButton>
           <Grid container justifyContent="flex-end">
             <Grid item>
-            <Link component={RouterLink} to="/signup" variant="body2">
+              <Link component={RouterLink} to="/signup" variant="body2">
                 Don't have an account? Sign up
               </Link>
             </Grid>
