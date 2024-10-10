@@ -118,8 +118,8 @@ const Index = () => {
         }
     };
 
-    //filter types(energy) and subtypes
-    const handleFilter = (types, subtypes) => {
+    //filter types(energy) and subtypes - even if evo box is checked 
+    const handleFilter = (types, subtypes, isSortedByEvo) => {
         let filtered = cards;
       
         if (types.length > 0) {
@@ -132,6 +132,11 @@ const Index = () => {
           filtered = filtered.filter((card) =>
             subtypes.some((subtype) => card.subtypes.includes(subtype))
           );
+        }
+        if (isSortedByEvo) {
+          filtered = filtered.sort((a, b) => {
+            return a.evolutionStage - b.evolutionStage;
+          });
         }
         setFilteredCards(filtered);
       };
@@ -148,6 +153,7 @@ const Index = () => {
         const uniqueSubTypes = [...new Set(cards.flatMap((card) => card.subtypes || []))];
         setAllSubTypes(uniqueSubTypes); 
       }, [cards]);
+
     return (
         <div className="index-container">
             <div className="sidebar">

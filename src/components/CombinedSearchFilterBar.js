@@ -82,7 +82,7 @@ const CombinedSearchFilterBar = ({
     if (value && !selectedTypes.includes(value)) {
       const newSelectedTypes = [...selectedTypes, value];
       setSelectedTypes(newSelectedTypes);
-      onFilter(newSelectedTypes, selectedSubTypes); 
+      onFilter(newSelectedTypes, selectedSubTypes, isSortedByEvo);
     }
     setSelectedType(value);
   };
@@ -107,14 +107,11 @@ const CombinedSearchFilterBar = ({
     onFilter(selectedTypes, updatedSubTypes); 
   };
 
-  const handleSortByEvoChange = async (event) => {
+  const handleSortByEvoChange = (event) => {
     const checked = event.target.checked;
     setIsSortedByEvo(checked);
-    if (checked) {
-      await onSortByEvo();
-    } else {
-      onRestoreOriginal();
-    }
+  
+    onFilter(selectedTypes, selectedSubTypes, checked);
   };
 
   return (
