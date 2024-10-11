@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { styled, alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
-import { Box, Chip, FormControlLabel, Checkbox } from '@mui/material';
+import { Box, Chip, FormControlLabel, Checkbox, Autocomplete, TextField } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -59,12 +61,9 @@ const CombinedSearchFilterBar = ({
   selectedSubTypes = [],
   setSelectedSubTypes,
   onSortByEvo,
-  onRestoreOriginal,
   searchTerm,
   setSearchTerm,
 }) => {
-
-  const [selectedType, setSelectedType] = useState('');
   const [isSortedByEvo, setIsSortedByEvo] = useState(false);
 
   const handleSearchChange = (event) => {
@@ -76,41 +75,19 @@ const CombinedSearchFilterBar = ({
     onSearch(searchTerm);
   };
 
-  const handleTypeChange = (event) => {
-    const value = event.target.value;
-  
-    if (value && !selectedTypes.includes(value)) {
-      const newSelectedTypes = [...selectedTypes, value];
-      setSelectedTypes(newSelectedTypes);
-      onFilter(newSelectedTypes, selectedSubTypes, isSortedByEvo);
-    }
-    setSelectedType(value);
+  const handleTypeChange = (event, newValue) => {
+    setSelectedTypes(newValue);
+    onFilter(newValue, selectedSubTypes, isSortedByEvo);
   };
 
-  const handleRemoveType = (typeToRemove) => {
-    const updatedTypes = selectedTypes.filter((type) => type !== typeToRemove);
-    setSelectedTypes(updatedTypes);
-    onFilter(updatedTypes, selectedSubTypes);
-  };
-
-  const handleSubTypeChange = (event) => {
-    const { value } = event.target;
-    const newSelectedSubTypes = typeof value === 'string' ? value.split(',') : value;
-    
-    setSelectedSubTypes(newSelectedSubTypes);
-    onFilter(selectedTypes, newSelectedSubTypes); 
-  };
-
-  const handleRemoveSubType = (subTypeToRemove) => {
-    const updatedSubTypes = selectedSubTypes.filter((subtype) => subtype !== subTypeToRemove);
-    setSelectedSubTypes(updatedSubTypes);
-    onFilter(selectedTypes, updatedSubTypes); 
+  const handleSubTypeChange = (event, newValue) => {
+    setSelectedSubTypes(newValue);
+    onFilter(selectedTypes, newValue, isSortedByEvo);
   };
 
   const handleSortByEvoChange = (event) => {
     const checked = event.target.checked;
     setIsSortedByEvo(checked);
-  
     onFilter(selectedTypes, selectedSubTypes, checked);
   };
 
@@ -133,77 +110,82 @@ const CombinedSearchFilterBar = ({
 
       {/* filters */}
       <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: '8px' }}>
-        {selectedTypes.map((type) => (
-          <Chip
-            key={type}
-            label={type}
-            onDelete={() => handleRemoveType(type)}
-            sx={{ margin: '4px' }}
-          />
-        ))}
-
-        {/* (energy)type filter */}
-        <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-          <InputLabel id="type-select-label">Type</InputLabel>
-          <Select
-            labelId="type-select-label"
-            id="type-select"
-            value={selectedType}
-            label="Select a Type"
-            onChange={handleTypeChange}
-          >
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
-            {availableTypes.map((type) => (
-              <MenuItem key={type} value={type}>
-                {type}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* subtype filter */}
-        <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: '8px' }}>
-          {selectedSubTypes.map((subtype) => (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', mb: 1 }}>
+          {selectedTypes.map((type) => (
             <Chip
-              key={subtype}
-              label={subtype}
-              onDelete={() => handleRemoveSubType(subtype)}
+              key={type}
+              label={type}
+              onDelete={() => setSelectedTypes(selectedTypes.filter((t) => t !== type))}
               sx={{ margin: '4px' }}
             />
           ))}
-          <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-            <InputLabel id="subtype-select-label">Subtype</InputLabel>
-            <Select
-              labelId="subtype-select-label"
-              id="subtype-select"
-              multiple
-              value={selectedSubTypes}
-              label="Select a Subtype"
-              onChange={handleSubTypeChange}
-              renderValue={(selected) => selected.join(', ')}
-            >
-              {availableSubTypes.map((subtype) => (
-                <MenuItem key={subtype} value={subtype}>
-                  {subtype}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/*sort by evo checkbox*/}
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={isSortedByEvo}
-                onChange={handleSortByEvoChange}
-                color="primary"
-              />
-            }
-            label="Evo-sort"
-          />
         </Box>
+
+        {/* (energy)type filter with checkboxes */}
+        <Autocomplete
+          multiple
+          id="checkboxes-types"
+          options={availableTypes}
+          disableCloseOnSelect
+          value={selectedTypes}
+          onChange={handleTypeChange}
+          getOptionLabel={(option) => option}
+          renderOption={(props, option, { selected }) => (
+            <li {...props}>
+              <Checkbox
+                icon={icon}
+                checkedIcon={checkedIcon}
+                style={{ marginRight: 8 }}
+                checked={selected}
+              />
+              {option}
+            </li>
+          )}
+          renderTags={() => null} 
+          renderInput={(params) => (
+            <TextField {...params} label="Type" placeholder="Select types" />
+          )}
+          sx={{ width: 200, marginRight: 2 }}
+        />
+
+        {/* subtype filter with checkboxes */}
+        <Autocomplete
+          multiple
+          id="checkboxes-subtypes"
+          options={availableSubTypes}
+          disableCloseOnSelect
+          value={selectedSubTypes}
+          onChange={handleSubTypeChange}
+          getOptionLabel={(option) => option}
+          renderOption={(props, option, { selected }) => (
+            <li {...props}>
+              <Checkbox
+                icon={icon}
+                checkedIcon={checkedIcon}
+                style={{ marginRight: 8 }}
+                checked={selected}
+              />
+              {option}
+            </li>
+          )}
+          renderInput={(params) => (
+            <TextField {...params} label="Subtype" placeholder="Select subtypes" />
+          )}
+          sx={{ width: 200 }}
+        />
+
+        {/*sort by evo checkbox*/}
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={isSortedByEvo}
+              onChange={handleSortByEvoChange}
+              color="primary"
+            />
+          }
+          label="Evo-sort"
+          sx={{ marginLeft: 2 }}
+        />
       </Box>
     </Box>
   );

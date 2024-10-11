@@ -9,6 +9,7 @@ import Decks from './pages/Decks';
 import Index from './pages/Index'; 
 import SignIn from './components/SignIn';  
 import SignUp from './components/SignUp';  
+import Collection from './pages/Collection';
 
 function App() {
     return (
@@ -21,6 +22,7 @@ function App() {
                             <Route path="/" element={<Home />} />
                             <Route path="/Decks" element={<Decks />} />
                             <Route path="/Index" element={<Index />} />
+                            <Route path="/Collection" element={<Collection />} />
                             <Route path="/login" element={<SignIn />} /> 
                             <Route path="/signup" element={<SignUp />} /> 
                         </Routes>

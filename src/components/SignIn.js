@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom'; 
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -61,13 +61,15 @@ export default function Login() {
     }));
   };
 
-  
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
       const response = await loginUser(formData); 
       console.log('Login successful:', response);
 
+      //save login auth
+      localStorage.setItem('authToken', response.token); 
+      
       navigate('/Index'); 
     } catch (error) {
       setMessage('Error logging in, please check your credentials.');

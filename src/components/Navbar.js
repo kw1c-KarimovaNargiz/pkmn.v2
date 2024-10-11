@@ -1,18 +1,21 @@
 import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AppBar, Toolbar, Button, IconButton } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const pages = [
   { name: 'Home', path: '/' },
-  { name: 'Pokemons', path: '/Index' },
+  { name: 'Library', path: '/Index' },
   { name: 'My decks', path: '/Decks' },
+  { name: 'My Collection', path: '/Collection'
+  }
 ];
 
 function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const isLoggedIn = !!localStorage.getItem('authToken');
 
   const handleClick = (path) => {
     if (location.pathname === path) {
@@ -23,6 +26,11 @@ function Navbar() {
   };
 
   const handleLoginClick = () => {
+    navigate('/login');
+  };
+
+  const handleLogoutClick = () => {
+    localStorage.removeItem('authToken'); 
     navigate('/login'); 
   };
 
@@ -41,15 +49,15 @@ function Navbar() {
           ))}
         </div>
 
-        {/*login*/}
-        <IconButton
-          edge="end"
-          color="inherit"
-          onClick={handleLoginClick} 
-          aria-label="login"
-        >
-          <AccountCircleIcon />
-        </IconButton>
+        {isLoggedIn ? (
+          <Button color="inherit" onClick={handleLogoutClick}>
+            Logout
+          </Button>
+        ) : (
+          <Button color="inherit" onClick={handleLoginClick}>
+            Login
+          </Button>
+        )}
       </Toolbar>
     </AppBar>
   );
