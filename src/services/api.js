@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { UserProvider, useUser } from '../pages/UserContext';
+
 
 //register
 export const registerUser = async (formData) => {
@@ -91,3 +93,38 @@ export const fetchSeries = async () => {
             throw error; 
         }
     };
+
+
+export const addCardToCollection = async (payload) => {
+  try {
+    const url = 'http://127.0.0.1:8000/api/collections/add';
+    const response = await axios.post(url, payload);
+    return response.data;
+  } catch (error) {
+    console.error('Error adding card to collection:', error);
+    throw error;
+  }
+};
+
+
+export const fetchUserCollection = async (email) => {
+  try {
+      const response = await axios.get(`http://127.0.0.1:8000/api/collections`, {
+          params: { email: email }
+      });
+      return response.data;
+  } catch (error) {
+      console.error('Error fetching user collection:', error);
+      throw error; 
+  }
+};
+
+export const removeCardFromCollection = async (userId, cardId) => {
+  try {
+    const response = await axios.delete(`http://127.0.0.1:8000/api/collections/${userId}/${cardId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error removing card from collection:", error);
+    throw error;
+  }
+};

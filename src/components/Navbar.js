@@ -5,10 +5,11 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const pages = [
   { name: 'Home', path: '/' },
-  { name: 'Library', path: '/Index' },
-  { name: 'My decks', path: '/Decks' },
-  { name: 'My Collection', path: '/Collection'
-  }
+  { name: 'Index', path: '/Index' },
+
+  { name: 'My Collection', path: '/Collection'},
+    { name: 'My decks', path: '/Decks' }
+  
 ];
 
 function Navbar() {

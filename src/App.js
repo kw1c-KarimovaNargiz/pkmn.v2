@@ -1,6 +1,7 @@
 // src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { UserProvider } from './pages/UserContext';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { Box, Container } from '@mui/material';
 import setBodyColor from './setBodyColor';
 import Navbar from './components/Navbar'; 
@@ -9,26 +10,29 @@ import Decks from './pages/Decks';
 import Index from './pages/Index'; 
 import SignIn from './components/SignIn';  
 import SignUp from './components/SignUp';  
-import Collection from './pages/Collection';
+import CollectionPage from './pages/CollectionPage';
 
 function App() {
     return (
         <Router>
-            <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-                <Navbar />
-                <Box sx={{ flexGrow: 1 }}>
-                    <Container>
-                        <Routes>
-                            <Route path="/" element={<Home />} />
-                            <Route path="/Decks" element={<Decks />} />
-                            <Route path="/Index" element={<Index />} />
-                            <Route path="/Collection" element={<Collection />} />
-                            <Route path="/login" element={<SignIn />} /> 
-                            <Route path="/signup" element={<SignUp />} /> 
-                        </Routes>
-                    </Container>
+            <UserProvider>
+                <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+                    <Navbar />
+                    <Box sx={{ flexGrow: 1 }}>
+                        <Container>
+                            <Routes>
+                                <Route path="/" element={<Home />} />
+                                <Route path="/Decks" element={<Decks />} />
+                                <Route path="/Index" element={<Index />} />
+                                <Route path="/collection" element={<CollectionPage />} />
+                                <Route path="/login" element={<SignIn />} /> 
+                                <Route path="/signup" element={<SignUp />} /> 
+                                <Route path="*" element={<Navigate to="/login" replace />} /> {/* Catch-all route */}
+                            </Routes>
+                        </Container>
+                    </Box>
                 </Box>
-            </Box>
+            </UserProvider>
         </Router>
     );
 }
