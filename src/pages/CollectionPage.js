@@ -1,30 +1,57 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useUser } from '../pages/UserContext';
 import { fetchUserCollection } from '../services/api'; 
+import CardList from '../components/CardList'; 
 
 const CollectionPage = () => {
     const { user } = useUser();
+    const [userCollection, setUserCollection] = useState([]); 
+    const [loading, setLoading] = useState(true); 
+    const [error, setError] = useState(null); 
 
     useEffect(() => {
         const fetchCollection = async () => {
-            if (user) { 
+            if (user) {
                 try {
                     const response = await fetchUserCollection(user.email);
-                    console.log('User collection:', response);
+                    console.log('User collection response:', response);
+
+                    if (Array.isArray(response)) {
+                        setUserCollection(response); 
+                    } else {
+                        console.error('Unexpected response structure:', response);
+                        setError('Unexpected response structure');
+                    }
                 } catch (error) {
                     console.error('Error fetching user collection:', error);
+                    setError('Failed to fetch user collection'); 
+                } finally {
+                    setLoading(false);
                 }
             } else {
                 console.log('User information is undefined.');
+                setLoading(false); 
             }
         };
 
         fetchCollection();
     }, [user]);
 
+    if (loading) {
+        return <div>Loading...</div>; 
+    }
+
+    if (error) {
+        return <div>{error}</div>; 
+    }
+
     return (
         <div>
-          
+            {userCollection.length > 0 ? (
+                <CardList cards={userCollection.map(item => item.card)} /> 
+            ) : (
+                <p>No cards in your collection.</p>
+            )}
         </div>
     );
 };

@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import axios from 'axios';
 import { Grid, Typography, Checkbox, FormControlLabel, IconButton } from '@mui/material';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
@@ -11,6 +10,7 @@ const CardList = ({ cards }) => {
     const [visibleCards, setVisibleCards] = useState([]);
     const [cardCounts, setCardCounts] = useState({});
     const observerRef = useRef(null);
+    const [selectedCard, setSelectedCard] = useState(null); 
 
     useEffect(() => {
         const handleIntersect = (entries) => {
@@ -40,7 +40,6 @@ const CardList = ({ cards }) => {
     const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "Unknown Set";
 
     const handleIncrement = (index) => {
-        console.log(`Incrementing card at index ${index}`);
         setCardCounts((prev) => ({
             ...prev,
             [index]: (prev[index] || 0) + 1,
@@ -66,8 +65,6 @@ const CardList = ({ cards }) => {
             count: count,
         };
     
-        console.log('Payload:', payload); 
-    
         try {
             const response = await addCardToCollection(payload);
             console.log('Card added:', response.data);
@@ -76,17 +73,27 @@ const CardList = ({ cards }) => {
             console.error('Error adding card:', error.response ? error.response.data : error.message);
             if (error.response && error.response.status === 401) {
                 alert('You must be logged in to add cards to your collection.');
+            } else if (error.response && error.response.status === 404) {
+                alert('The card was not found.');
+            } else {
+                alert('An error occurred while adding the card.');
             }
         }
     };
     
-
     const handleCheckboxChange = (index) => {
-        const cardId = cards[index].card_id; // Assuming the card object has an 'id'
+        const cardId = cards[index].id; 
         const count = cardCounts[index] || 0;
 
-        console.log(`Checkbox changed for card ${cardId} with count ${count}`);
         handleAddCardToCollection(cardId, count);
+    };
+
+    const handleCardClick = (card) => {
+        setSelectedCard(card); 
+    };
+
+    const handleCloseCardDisplay = () => {
+        setSelectedCard(null);
     };
 
     return (
@@ -99,7 +106,7 @@ const CardList = ({ cards }) => {
                 {cards.map((card, index) => (
                     <Grid 
                         item 
-                        key={card.id || index} 
+                        key={card.id} 
                         xs={12} 
                         sm={6} 
                         md={4} 
@@ -126,15 +133,17 @@ const CardList = ({ cards }) => {
                                 <Add />
                             </IconButton>
                         </div>
-                        
-                        {visibleCards.includes(card) ? (
-                            <CardDisplay card={card} />
-                        ) : (
-                            <div style={{ minHeight: '150px' }}>Loading...</div>
-                        )}
+
+                        <CardDisplay card={card} onClick={() => handleCardClick(card)} /> {/* Pass click handler */}
                     </Grid>
                 ))}
             </Grid>
+
+            {/* Card Details Dialog */}
+            {selectedCard && (
+                <CardDisplay card={selectedCard} onClose={handleCloseCardDisplay} />
+            
+                )}
         </div>
     );
 };
