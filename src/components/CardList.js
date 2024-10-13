@@ -1,16 +1,52 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Grid, Typography, Checkbox, FormControlLabel, IconButton } from '@mui/material';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
-import { addCardToCollection } from '../services/api';
+import { addCardToCollection, removeCardFromCollection, fetchUserCollection } from '../services/api';
 import { useUser } from '../pages/UserContext';
 
 const CardList = ({ cards }) => {
-    const { user } = useUser();
+    const { user } = useUser(); 
     const [visibleCards, setVisibleCards] = useState([]);
     const [cardCounts, setCardCounts] = useState({});
+    const [userCards, setUserCards] = useState([]);
     const observerRef = useRef(null);
-    const [selectedCard, setSelectedCard] = useState(null); 
+    const [selectedCard, setSelectedCard] = useState(null);
+
+    useEffect(() => {
+        const fetchCollection = async () => {
+            if (!user || !user.email) {
+                console.error('User is not logged in, cannot fetch their collection');
+                return; 
+            }
+
+            try {
+                const data = await fetchUserCollection(user.email);
+                setUserCards(data); 
+            } catch (error) {
+                console.error('Error fetching user collection:', error);
+            }
+        };
+
+        fetchCollection();
+    }, [user]); 
+
+    useEffect(() => {
+        const initialCounts = {};
+
+    
+        if (Array.isArray(userCards)) {
+            userCards.forEach(card => {
+                initialCounts[card.card_id] = card.count;
+            });
+        }
+
+    
+        setCardCounts(prevCounts => {
+            const hasDifferentCounts = Object.keys(initialCounts).some(id => initialCounts[id] !== prevCounts[id]);
+            return hasDifferentCounts ? initialCounts : prevCounts;
+        });
+    }, [userCards]);
 
     useEffect(() => {
         const handleIntersect = (entries) => {
@@ -37,34 +73,46 @@ const CardList = ({ cards }) => {
         };
     }, [cards]);
 
-    const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "Unknown Set";
+    const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
 
-    const handleIncrement = (index) => {
+    const handleIncrement = useCallback(async (index) => {
+        const cardId = cards[index].id;
+        const newCount = (cardCounts[cardId] || 0) + 1;
+
         setCardCounts((prev) => ({
             ...prev,
-            [index]: (prev[index] || 0) + 1,
+            [cardId]: newCount,
         }));
-    };
 
-    const handleDecrement = (index) => {
+        await handleAddCardToCollection(cardId, newCount);
+    }, [cardCounts, cards]);
+
+    const handleDecrement = useCallback(async (index) => {
+        const cardId = cards[index].id;
+        const newCount = Math.max((cardCounts[cardId] || 0) - 1, 0);
+        
         setCardCounts((prev) => ({
             ...prev,
-            [index]: Math.max((prev[index] || 0) - 1, 0),
+            [cardId]: newCount,
         }));
-    };
+
+        if (newCount > 0) {
+            await handleAddCardToCollection(cardId, newCount);
+        }
+    }, [cardCounts, cards]);
 
     const handleAddCardToCollection = async (cardId, count) => {
         if (count <= 0) {
             alert('You must select at least one card to add to your collection.');
             return;
         }
-    
+
         const payload = {
             email: user.email,
             card_id: cardId,
             count: count,
         };
-    
+
         try {
             const response = await addCardToCollection(payload);
             console.log('Card added:', response.data);
@@ -80,16 +128,9 @@ const CardList = ({ cards }) => {
             }
         }
     };
-    
-    const handleCheckboxChange = (index) => {
-        const cardId = cards[index].id; 
-        const count = cardCounts[index] || 0;
-
-        handleAddCardToCollection(cardId, count);
-    };
 
     const handleCardClick = (card) => {
-        setSelectedCard(card); 
+        setSelectedCard(card);
     };
 
     const handleCloseCardDisplay = () => {
@@ -114,19 +155,18 @@ const CardList = ({ cards }) => {
                         data-index={index} 
                     >
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <IconButton onClick={() => handleDecrement(index)} size="small" disabled={cardCounts[index] === 0}>
+                            <IconButton onClick={() => handleDecrement(index)} size="small" disabled={cardCounts[card.id] === 0}>
                                 <Remove />
                             </IconButton>
 
                             <FormControlLabel
                                 control={
                                     <Checkbox 
-                                        checked={!!cardCounts[index]} 
+                                        checked={!!cardCounts[card.id]} 
                                         color="primary" 
-                                        onChange={() => handleCheckboxChange(index)}
                                     />
                                 }
-                                label={cardCounts[index] || 0}
+                                label={cardCounts[card.id] || 0} 
                             />
 
                             <IconButton onClick={() => handleIncrement(index)} size="small">
@@ -134,7 +174,7 @@ const CardList = ({ cards }) => {
                             </IconButton>
                         </div>
 
-                        <CardDisplay card={card} onClick={() => handleCardClick(card)} /> {/* Pass click handler */}
+                        <CardDisplay card={card} onClick={() => handleCardClick(card)} /> 
                     </Grid>
                 ))}
             </Grid>
@@ -142,8 +182,7 @@ const CardList = ({ cards }) => {
             {/* Card Details Dialog */}
             {selectedCard && (
                 <CardDisplay card={selectedCard} onClose={handleCloseCardDisplay} />
-            
-                )}
+            )}
         </div>
     );
 };

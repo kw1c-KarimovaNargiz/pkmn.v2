@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useUser } from '../pages/UserContext';
 import { fetchUserCollection } from '../services/api'; 
 import CardList from '../components/CardList'; 
+import '../styling/Index.css'; 
 
 const CollectionPage = () => {
     const { user } = useUser();
@@ -46,7 +47,7 @@ const CollectionPage = () => {
     }
 
     return (
-        <div>
+        <div className="cards-display-area">
             {userCollection.length > 0 ? (
                 <CardList cards={userCollection.map(item => item.card)} /> 
             ) : (
