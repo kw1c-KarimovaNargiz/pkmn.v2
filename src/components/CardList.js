@@ -89,7 +89,7 @@ const CardList = ({ cards }) => {
 
     const handleDecrement = useCallback(async (index) => {
         const cardId = cards[index].id;
-        const newCount = Math.max((cardCounts[cardId] || 0) - 1, 0);
+        const newCount = ((cardCounts[cardId] || 0) - 1);
         
         setCardCounts((prev) => ({
             ...prev,
@@ -97,7 +97,7 @@ const CardList = ({ cards }) => {
         }));
 
         if (newCount > 0) {
-            await handleAddCardToCollection(cardId, newCount);
+            await handleRemoveCardFromCollection(cardId, newCount);
         }
     }, [cardCounts, cards]);
 
@@ -128,6 +128,31 @@ const CardList = ({ cards }) => {
             }
         }
     };
+
+    const handleRemoveCardFromCollection = async (cardId, count) => {
+        if (count <= 0) {
+            alert('You must select at least one card to remove from your collection.');
+            return;
+        }
+    
+        const email = user.email; // Retrieve the user's email
+    
+        try {
+            const response = await removeCardFromCollection(email, cardId, count);
+            console.log('Card removed:', response);
+            alert('Card removed successfully!');
+        } catch (error) {
+            console.error('Error removing card:', error.response ? error.response.data : error.message);
+            if (error.response && error.response.status === 401) {
+                alert('You must be logged in to remove cards from your collection.');
+            } else if (error.response && error.response.status === 404) {
+                alert('The card was not found in your collection.');
+            } else {
+                alert('An error occurred while removing the card.');
+            }
+        }
+    };
+    
 
     const handleCardClick = (card) => {
         setSelectedCard(card);

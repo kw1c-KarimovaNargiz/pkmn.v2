@@ -5,7 +5,8 @@ import CardList from '../components/CardList';
 import '../styling/Index.css'; 
 
 const CollectionPage = () => {
-    const { user } = useUser();
+    const { user, loading: userLoading } = useUser();
+
     const [userCollection, setUserCollection] = useState([]); 
     const [loading, setLoading] = useState(true); 
     const [error, setError] = useState(null); 
@@ -29,16 +30,18 @@ const CollectionPage = () => {
                 } finally {
                     setLoading(false);
                 }
-            } else {
+            } else if (!userLoading) {
                 console.log('User information is undefined.');
                 setLoading(false); 
             }
         };
 
-        fetchCollection();
-    }, [user]);
+        if (!userLoading) {
+            fetchCollection();
+        }
+    }, [user, userLoading]);
 
-    if (loading) {
+    if (userLoading || loading) {
         return <div>Loading...</div>; 
     }
 

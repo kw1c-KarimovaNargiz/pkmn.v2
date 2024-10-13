@@ -24,19 +24,19 @@ const Index = () => {
     const [loading, setLoading] = useState(false); 
     const { user } = useUser(); 
 
-    const handleAddCard = async (cardId, count) => {
-        if (!user) {
-            console.warn('User must be logged in to add cards to the collection.');
-            return; 
-        }
+    // const handleAddCard = async (cardId, count) => {
+    //     if (!user) {
+    //         console.warn('User must be logged in to add cards to the collection.');
+    //         return; 
+    //     }
 
-        try {
-            const response = await addCardToCollection(user.email, cardId, count);
-            console.log('Card added to collection:', response);
-        } catch (error) {
-            console.error('Failed to add card to collection:', error);
-        }
-    };
+    //     try {
+    //         const response = await addCardToCollection(user.email, cardId, count);
+    //         console.log('Card added to collection:', response);
+    //     } catch (error) {
+    //         console.error('Failed to add card to collection:', error);
+    //     }
+    // };
 
     const handleSortByEvo = async () => {
         if (selectedSetId) {
@@ -60,7 +60,7 @@ const Index = () => {
                 console.error("Error fetching sorted evolution cards:", error);
                 setCards([]);
                 setFilteredCards([]);
-            } finally { // End loading
+            } finally { 
             }
         }
     };
@@ -192,7 +192,7 @@ const Index = () => {
           <div className="cards-display-area">
               <CardList 
                 cards={searchResults.length > 0 ? searchResults : filteredCards} 
-                onAddCard={handleAddCard}
+                // onAddCard={handleAddCard}
               />
 
               {cards.length === 0 && (
