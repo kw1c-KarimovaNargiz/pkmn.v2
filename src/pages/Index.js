@@ -3,7 +3,7 @@ import { Typography } from '@mui/material';
 import CardList from '../components/CardList';
 import SetsSidebar from '../components/SetsSideBar'; 
 import CombinedSearchFilterBar from '../components/CombinedSearchFilterBar'; 
-import { UserProvider, useUser } from '../pages/UserContext';
+import { useUser } from '../pages/UserContext';
 import { fetchSeries, fetchCardsForSet, searchCard, fetchSortedEvolutionCards, fetchSubTypes, addCardToCollection } from '../services/api';
 import '../styling/Index.css'; 
 
@@ -18,25 +18,24 @@ const Index = () => {
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [selectedSubTypes, setSelectedSubTypes] = useState([]);
     const [allTypes, setAllTypes] = useState([]);
-    const [allSubTypes, setAllSubTypes] = useState([]);
     const [subTypes, setSubTypes] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false); 
     const { user } = useUser(); 
 
-    // const handleAddCard = async (cardId, count) => {
-    //     if (!user) {
-    //         console.warn('User must be logged in to add cards to the collection.');
-    //         return; 
-    //     }
+    const handleAddCard = async (cardId, count) => {
+        if (!user) {
+            console.warn('User must be logged in to add cards to the collection.');
+            return; 
+        }
 
-    //     try {
-    //         const response = await addCardToCollection(user.email, cardId, count);
-    //         console.log('Card added to collection:', response);
-    //     } catch (error) {
-    //         console.error('Failed to add card to collection:', error);
-    //     }
-    // };
+        try {
+            const response = await addCardToCollection(user.email, cardId, count);
+            console.log('Card added to collection:', response);
+        } catch (error) {
+            console.error('Failed to add card to collection:', error);
+        }
+    };
 
     const handleSortByEvo = async () => {
         if (selectedSetId) {
@@ -61,6 +60,7 @@ const Index = () => {
                 setCards([]);
                 setFilteredCards([]);
             } finally { 
+                setLoading(false);
             }
         }
     };
@@ -160,7 +160,7 @@ const Index = () => {
         setAllTypes(uniqueTypes);
       
         const uniqueSubTypes = [...new Set(cards.flatMap((card) => card.subtypes || []))];
-        setAllSubTypes(uniqueSubTypes); 
+        setSubTypes(uniqueSubTypes); 
     }, [cards]);
 
     return (
@@ -192,7 +192,7 @@ const Index = () => {
           <div className="cards-display-area">
               <CardList 
                 cards={searchResults.length > 0 ? searchResults : filteredCards} 
-                // onAddCard={handleAddCard}
+                onAddCard={handleAddCard} 
               />
 
               {cards.length === 0 && (
@@ -202,7 +202,7 @@ const Index = () => {
               )}
           </div>
       </div>
-  );
+    );
 };
 
 export default Index;

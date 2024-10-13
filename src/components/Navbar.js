@@ -1,27 +1,24 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { AppBar, Toolbar, Button, IconButton } from '@mui/material';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { AppBar, Toolbar, Button } from '@mui/material';
+import { useUser } from '../pages/UserContext'; 
 
 const pages = [
   { name: 'Home', path: '/' },
   { name: 'Index', path: '/Index' },
-
-  { name: 'My Collection', path: '/Collection'},
-    { name: 'My decks', path: '/Decks' }
-  
+  { name: 'My Collection', path: '/Collection' },
+  { name: 'My decks', path: '/Decks' }
 ];
 
 function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, logout } = useUser();
 
-  const isLoggedIn = !!localStorage.getItem('authToken');
-
+  const isLoggedIn = !!user; 
+  
   const handleClick = (path) => {
-    if (location.pathname === path) {
-      window.location.reload();
-    } else {
+    if (location.pathname !== path) {
       navigate(path);
     }
   };
@@ -31,8 +28,8 @@ function Navbar() {
   };
 
   const handleLogoutClick = () => {
-    localStorage.removeItem('authToken'); 
-    navigate('/login'); 
+    logout(); 
+    navigate('/login');
   };
 
   return (

@@ -1,4 +1,3 @@
-// src/App.js
 import React from 'react';
 import { UserProvider } from './pages/UserContext';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
@@ -14,8 +13,8 @@ import CollectionPage from './pages/CollectionPage';
 
 function App() {
     return (
+        <UserProvider>
         <Router>
-            <UserProvider>
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
                     <Navbar />
                     <Box sx={{ flexGrow: 1 }}>
@@ -27,13 +26,13 @@ function App() {
                                 <Route path="/collection" element={<CollectionPage />} />
                                 <Route path="/login" element={<SignIn />} /> 
                                 <Route path="/signup" element={<SignUp />} /> 
-                                <Route path="*" element={<Navigate to="/login" replace />} /> {/* Catch-all route */}
+                                <Route path="*" element={<Navigate to="/login" replace />} /> 
                             </Routes>
                         </Container>
                     </Box>
                 </Box>
-            </UserProvider>
         </Router>
+        </UserProvider>
     );
 }
 

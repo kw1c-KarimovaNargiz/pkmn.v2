@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserProvider, useUser } from '../pages/UserContext'; // Ensure the path is correct
+import { useUser } from '../pages/UserContext';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -38,7 +38,7 @@ const AvatarStyled = styled(Avatar)(({ theme }) => ({
 }));
 
 const Form = styled('form')(({ theme }) => ({
-    width: '100%', // Fix IE 11 issue.
+    width: '100%',
     marginTop: theme.spacing(3),
 }));
 
@@ -47,48 +47,51 @@ const SubmitButton = styled(Button)(({ theme }) => ({
 }));
 
 export default function SignIn() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-  const navigate = useNavigate();  
-  const [message, setMessage] = useState('');
-  const { setUser } = useUser();
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+    });
+    const navigate = useNavigate();
+    const [message, setMessage] = useState('');
+    const { setUser } = useUser();
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-  };
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    try {
-        const response = await loginUser(formData); 
-        console.log('Login successful:', response);
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: value,
+        }));
+    };
+    const [isLoading, setIsLoading] = useState(false);
 
-      
-        if (response.status === 'success' && response.data) {
-            const userData = {
-                name: response.data.name,
-                email: response.data.email,
-            };
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+        setIsLoading(true);
+        try {
+            const response = await loginUser(formData);
+            console.log('Login response:', response);
 
-            //userdata in context
-            setUser(userData); 
-            localStorage.setItem('authToken', response.token); 
-            navigate('/Index'); 
-        } else {
-            setMessage('Invalid login response.');
+            if (response.status === 'success' && response.data) {
+                const userData = {
+                    name: response.data.name,
+                    email: response.data.email,
+                };
+
+              
+                setUser(userData);
+                localStorage.setItem('authToken', response.token);
+                setMessage('Login successful!');
+                navigate('/Index');
+            } else {
+                setMessage('Invalid login credentials.');
+            }
+        } catch (error) {
+            setMessage('Error logging in. Please check your credentials.');
+            console.error('Login error:', error);
+        } finally {
+            setIsLoading(false); 
         }
-        
-    } catch (error) {
-        setMessage('Error logging in, please check your credentials.');
-        console.error('Login error:', error);
-    }
-};
-
+    };
 
     return (
         <Container component="main" maxWidth="xs">
@@ -100,7 +103,6 @@ export default function SignIn() {
                 <Typography component="h1" variant="h5">
                     Sign in
                 </Typography>
-                {/* success / error message */}
                 {message && (
                     <Typography variant="body2" color={message.includes('Error') ? 'error' : 'primary'}>
                         {message}
@@ -108,7 +110,6 @@ export default function SignIn() {
                 )}
                 <Form noValidate onSubmit={handleSubmit}>
                     <Grid container spacing={2}>
-                        {/* email */}
                         <Grid item xs={12}>
                             <TextField
                                 variant="outlined"
@@ -122,7 +123,6 @@ export default function SignIn() {
                                 onChange={handleChange}
                             />
                         </Grid>
-                        {/* password */}
                         <Grid item xs={12}>
                             <TextField
                                 variant="outlined"

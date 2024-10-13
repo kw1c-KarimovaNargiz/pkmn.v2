@@ -5,43 +5,42 @@ import CardList from '../components/CardList';
 import '../styling/Index.css'; 
 
 const CollectionPage = () => {
-    const { user, loading: userLoading } = useUser();
-
+    const { user } = useUser();
     const [userCollection, setUserCollection] = useState([]); 
     const [loading, setLoading] = useState(true); 
     const [error, setError] = useState(null); 
 
     useEffect(() => {
         const fetchCollection = async () => {
-            if (user) {
-                try {
-                    const response = await fetchUserCollection(user.email);
-                    console.log('User collection response:', response);
+            if (!user) { 
+                console.log('User is not logged in, cannot fetch their collection');
+                setError('You need to log in to view your collection.');
+                setLoading(false);
+                return;
+            }
 
-                    if (Array.isArray(response)) {
-                        setUserCollection(response); 
-                    } else {
-                        console.error('Unexpected response structure:', response);
-                        setError('Unexpected response structure');
-                    }
-                } catch (error) {
-                    console.error('Error fetching user collection:', error);
-                    setError('Failed to fetch user collection'); 
-                } finally {
-                    setLoading(false);
+            try {
+                const response = await fetchUserCollection(user.email);
+                console.log('User collection response:', response);
+
+                if (Array.isArray(response)) {
+                    setUserCollection(response); 
+                } else {
+                    console.error('Unexpected response structure:', response);
+                    setError('Unexpected response structure');
                 }
-            } else if (!userLoading) {
-                console.log('User information is undefined.');
-                setLoading(false); 
+            } catch (error) {
+                console.error('Error fetching user collection:', error);
+                setError('Failed to fetch user collection'); 
+            } finally {
+                setLoading(false);
             }
         };
 
-        if (!userLoading) {
-            fetchCollection();
-        }
-    }, [user, userLoading]);
+        fetchCollection();
+    }, [user]);
 
-    if (userLoading || loading) {
+    if (loading) {
         return <div>Loading...</div>; 
     }
 

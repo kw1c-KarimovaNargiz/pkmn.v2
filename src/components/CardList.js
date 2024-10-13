@@ -6,7 +6,7 @@ import { addCardToCollection, removeCardFromCollection, fetchUserCollection } fr
 import { useUser } from '../pages/UserContext';
 
 const CardList = ({ cards }) => {
-    const { user } = useUser(); 
+    const { user } = useUser();
     const [visibleCards, setVisibleCards] = useState([]);
     const [cardCounts, setCardCounts] = useState({});
     const [userCards, setUserCards] = useState([]);
@@ -17,37 +17,33 @@ const CardList = ({ cards }) => {
         const fetchCollection = async () => {
             if (!user || !user.email) {
                 console.error('User is not logged in, cannot fetch their collection');
-                return; 
+                return;
             }
-
             try {
                 const data = await fetchUserCollection(user.email);
-                setUserCards(data); 
+                setUserCards(data);
             } catch (error) {
                 console.error('Error fetching user collection:', error);
             }
         };
-
         fetchCollection();
-    }, [user]); 
-
-    useEffect(() => {
-        const initialCounts = {};
+    }, [user]);
 
     
+    useEffect(() => {
+        const initialCounts = {};
         if (Array.isArray(userCards)) {
             userCards.forEach(card => {
                 initialCounts[card.card_id] = card.count;
             });
         }
 
-    
         setCardCounts(prevCounts => {
             const hasDifferentCounts = Object.keys(initialCounts).some(id => initialCounts[id] !== prevCounts[id]);
             return hasDifferentCounts ? initialCounts : prevCounts;
         });
     }, [userCards]);
-
+        //intersect observer
     useEffect(() => {
         const handleIntersect = (entries) => {
             entries.forEach((entry) => {
@@ -89,8 +85,10 @@ const CardList = ({ cards }) => {
 
     const handleDecrement = useCallback(async (index) => {
         const cardId = cards[index].id;
-        const newCount = ((cardCounts[cardId] || 0) - 1);
-        
+        const newCount = (cardCounts[cardId] || 0) - 1;
+
+        if (newCount < 0) return; 
+
         setCardCounts((prev) => ({
             ...prev,
             [cardId]: newCount,
@@ -98,6 +96,8 @@ const CardList = ({ cards }) => {
 
         if (newCount > 0) {
             await handleRemoveCardFromCollection(cardId, newCount);
+        } else {
+            await handleRemoveCardFromCollection(cardId, 0);
         }
     }, [cardCounts, cards]);
 
@@ -119,40 +119,27 @@ const CardList = ({ cards }) => {
             alert('Card added successfully!');
         } catch (error) {
             console.error('Error adding card:', error.response ? error.response.data : error.message);
-            if (error.response && error.response.status === 401) {
-                alert('You must be logged in to add cards to your collection.');
-            } else if (error.response && error.response.status === 404) {
-                alert('The card was not found.');
-            } else {
-                alert('An error occurred while adding the card.');
-            }
+            alert('An error occurred while adding the card.');
         }
     };
 
     const handleRemoveCardFromCollection = async (cardId, count) => {
-        if (count <= 0) {
-            alert('You must select at least one card to remove from your collection.');
+        if (count < 0) {
+            alert('You cannot remove less than zero cards.');
             return;
         }
-    
-        const email = user.email; // Retrieve the user's email
-    
+
+        const email = user.email;
+
         try {
             const response = await removeCardFromCollection(email, cardId, count);
             console.log('Card removed:', response);
             alert('Card removed successfully!');
         } catch (error) {
             console.error('Error removing card:', error.response ? error.response.data : error.message);
-            if (error.response && error.response.status === 401) {
-                alert('You must be logged in to remove cards from your collection.');
-            } else if (error.response && error.response.status === 404) {
-                alert('The card was not found in your collection.');
-            } else {
-                alert('An error occurred while removing the card.');
-            }
+            alert('An error occurred while removing the card.');
         }
     };
-    
 
     const handleCardClick = (card) => {
         setSelectedCard(card);
@@ -199,12 +186,12 @@ const CardList = ({ cards }) => {
                             </IconButton>
                         </div>
 
-                        <CardDisplay card={card} onClick={() => handleCardClick(card)} /> 
+                        <CardDisplay card={card} onClick={() => handleCardClick(card)} />
                     </Grid>
                 ))}
             </Grid>
 
-            {/* Card Details Dialog */}
+            {/* carddetails */}
             {selectedCard && (
                 <CardDisplay card={selectedCard} onClose={handleCloseCardDisplay} />
             )}

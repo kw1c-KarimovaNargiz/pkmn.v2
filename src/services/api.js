@@ -1,6 +1,4 @@
 import axios from 'axios';
-import { UserProvider, useUser } from '../pages/UserContext';
-
 
 //register
 export const registerUser = async (formData) => {
