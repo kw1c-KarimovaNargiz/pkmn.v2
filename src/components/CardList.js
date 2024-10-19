@@ -13,23 +13,24 @@ const CardList = ({ cards }) => {
     const observerRef = useRef(null);
     const [selectedCard, setSelectedCard] = useState(null);
 
+    //fetch users collection 
     useEffect(() => {
-        const fetchCollection = async () => {
-            if (!user || !user.email) {
-                console.error('User is not logged in, cannot fetch their collection');
-                return;
-            }
-            try {
-                const data = await fetchUserCollection(user.email);
-                setUserCards(data);
-            } catch (error) {
-                console.error('Error fetching user collection:', error);
-            }
-        };
-        fetchCollection();
+        if (user?.email) {
+            const fetchCollection = async () => {
+                try {
+                    const data = await fetchUserCollection(user.email);
+                    setUserCards(data);
+                } catch (error) {
+                    console.error('Error fetching user collection:', error);
+                }
+            };
+            fetchCollection();
+        } else {
+            setUserCards([]);
+        }
     }, [user]);
 
-    
+    //state of amount cards in collection 
     useEffect(() => {
         const initialCounts = {};
         if (Array.isArray(userCards)) {
@@ -43,7 +44,10 @@ const CardList = ({ cards }) => {
             return hasDifferentCounts ? initialCounts : prevCounts;
         });
     }, [userCards]);
-        //intersect observer
+
+    
+    //lazy loading mechanism
+    //manages visibility of cards for rendering
     useEffect(() => {
         const handleIntersect = (entries) => {
             entries.forEach((entry) => {
@@ -69,41 +73,63 @@ const CardList = ({ cards }) => {
         };
     }, [cards]);
 
+    //title current set based on first card
     const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
 
+
+    //handling state of adding card to a collection based on current count
     const handleIncrement = useCallback(async (index) => {
+        if (!user?.email) {
+            alert('You must be logged in to do this');
+            return;
+        }
+    
         const cardId = cards[index].id;
         const newCount = (cardCounts[cardId] || 0) + 1;
-
+    
         setCardCounts((prev) => ({
             ...prev,
             [cardId]: newCount,
         }));
-
+    
         await handleAddCardToCollection(cardId, newCount);
-    }, [cardCounts, cards]);
+    }, [cardCounts, cards, user]);
 
+
+      //handling state of removing card from a collection based on current count
     const handleDecrement = useCallback(async (index) => {
+        if (!user?.email) {
+            alert('You must be logged in to do this');
+            return;
+        }
+    
         const cardId = cards[index].id;
         const newCount = (cardCounts[cardId] || 0) - 1;
 
-        if (newCount < 0) return; 
-
+        //cant go negative in card count
+        if (newCount < 0) return;
+    
         setCardCounts((prev) => ({
             ...prev,
             [cardId]: newCount,
         }));
-
+    
         if (newCount > 0) {
             await handleRemoveCardFromCollection(cardId, newCount);
         } else {
             await handleRemoveCardFromCollection(cardId, 0);
         }
-    }, [cardCounts, cards]);
+    }, [cardCounts, cards, user]);
 
+    //adds card to collection
     const handleAddCardToCollection = async (cardId, count) => {
+        if (!user?.email) {
+            alert('You must be logged in to do this');
+            return;
+        }
+
         if (count <= 0) {
-            alert('You must select at least one card to add to your collection.');
+            alert('You must be logged in to do this');
             return;
         }
 
@@ -112,6 +138,7 @@ const CardList = ({ cards }) => {
             card_id: cardId,
             count: count,
         };
+
 
         try {
             const response = await addCardToCollection(payload);
@@ -123,16 +150,20 @@ const CardList = ({ cards }) => {
         }
     };
 
+    //removes card from collection
     const handleRemoveCardFromCollection = async (cardId, count) => {
+        if (!user?.email) {
+            alert('You must be logged in to do this');
+            return;
+        }
+
         if (count < 0) {
             alert('You cannot remove less than zero cards.');
             return;
         }
 
-        const email = user.email;
-
         try {
-            const response = await removeCardFromCollection(email, cardId, count);
+            const response = await removeCardFromCollection(user.email, cardId, count);
             console.log('Card removed:', response);
             alert('Card removed successfully!');
         } catch (error) {
@@ -141,6 +172,7 @@ const CardList = ({ cards }) => {
         }
     };
 
+    //clicking on a card
     const handleCardClick = (card) => {
         setSelectedCard(card);
     };
