@@ -77,12 +77,24 @@ const Index = () => {
         }
     };
 
+    
     useEffect(() => {
         const loadSeries = async () => {
             setLoading(true);
             try {
                 const seriesData = await fetchSeries(); 
                 setSeries(seriesData);
+    
+                if (seriesData.length > 0) {
+                    const firstSeries = seriesData[0];
+                    setSets(firstSeries.sets || []);
+    
+                    if (firstSeries.sets && firstSeries.sets.length > 0) {
+                        const firstSet = firstSeries.sets[0];
+                        setSelectedSetId(firstSet.id);
+                        await handleSetSelect(firstSet.id);
+                    }
+                }
             } catch (error) {
                 console.error("Cannot fetch series/sets", error);
             } finally {
@@ -91,6 +103,7 @@ const Index = () => {
         };
         loadSeries(); 
     }, []);
+    
 
     const handleSetSelect = async (setId) => {
         setLoading(true);
@@ -195,11 +208,11 @@ const Index = () => {
                 onAddCard={handleAddCard} 
               />
 
-              {cards.length === 0 && (
+              {/* {cards.length === 0 && (
                   <Typography variant="h6" component="div" align="center">
                       Select a set or search for a Pokémon to see the cards.
                   </Typography>
-              )}
+              )} */}
           </div>
       </div>
     );

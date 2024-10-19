@@ -12,7 +12,10 @@ const CardDisplay = React.memo(({ card }) => {
             <Card 
                 sx={{ backgroundColor: 'transparent', boxShadow: 'none' }} 
                 onClick={handleCardClick}
-            >
+            >  <Typography variant="h5" component="div" sx={{ alignItems: 'center',  justifyContent: 'center',  display: 'flex' }}>
+
+            {card.name}
+        </Typography>
                 <CardContent sx={{ background: 'none', backgroundColor: 'transparent' }}>
                     <img 
                         src={card.images.large}
@@ -20,9 +23,7 @@ const CardDisplay = React.memo(({ card }) => {
                         loading="lazy"
                         style={{ width: '100%', height: 'auto' }}
                     />
-                    <Typography variant="h5" component="div">
-                        {card.name}
-                    </Typography>
+                   
                 </CardContent>
             </Card>
 

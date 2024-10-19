@@ -166,32 +166,51 @@ const CardList = ({ cards }) => {
                         className="card-item" 
                         data-index={index} 
                     >
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <IconButton onClick={() => handleDecrement(index)} size="small" disabled={cardCounts[card.id] === 0}>
-                                <Remove />
-                            </IconButton>
+                        <div style={{ 
+                            display: 'flex', 
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '4px'
+                        }}>
+                            <CardDisplay card={card} onClick={() => handleCardClick(card)} />
+                            
+                            <div style={{ 
+                                display: 'flex', 
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '100%',
+                                marginTop: '-30px'
+                            }}>
+                                <IconButton 
+                                    onClick={() => handleDecrement(index)} 
+                                    size="small" 
+                                    disabled={cardCounts[card.id] === 0}
+                                >
+                                    <Remove />
+                                </IconButton>
 
-                            <FormControlLabel
-                                control={
-                                    <Checkbox 
-                                        checked={!!cardCounts[card.id]} 
-                                        color="primary" 
-                                    />
-                                }
-                                label={cardCounts[card.id] || 0} 
-                            />
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox 
+                                            checked={!!cardCounts[card.id]} 
+                                            color="primary" 
+                                        />
+                                    }
+                                    label={cardCounts[card.id] || 0} 
+                                />
 
-                            <IconButton onClick={() => handleIncrement(index)} size="small">
-                                <Add />
-                            </IconButton>
+                                <IconButton 
+                                    onClick={() => handleIncrement(index)} 
+                                    size="small"
+                                >
+                                    <Add />
+                                </IconButton>
+                            </div>
                         </div>
-
-                        <CardDisplay card={card} onClick={() => handleCardClick(card)} />
                     </Grid>
                 ))}
             </Grid>
 
-            {/* carddetails */}
             {selectedCard && (
                 <CardDisplay card={selectedCard} onClose={handleCloseCardDisplay} />
             )}
