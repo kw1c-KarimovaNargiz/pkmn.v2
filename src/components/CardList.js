@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import {toast} from 'react-toastify';
 import { Grid, Typography, Checkbox, FormControlLabel, IconButton } from '@mui/material';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
@@ -105,7 +106,7 @@ const CardList = ({ cards }) => {
     //when adding it adds 3x the count
     const handleAddCardToCollection = async (cardId, count) => {
         if (count <= 0) {
-            alert('You must select at least one card to add to your collection.');
+            toast.error('You must select at least one card to add to your collection.');
             return;
         }
     
@@ -129,7 +130,7 @@ const CardList = ({ cards }) => {
             }));
             
             // Optional: Show success message
-            alert('Card added successfully!');
+            toast.success('Card added successfully!');
         } catch (error) {
             console.error('Error details:', {
                 status: error.response?.status,
@@ -140,13 +141,13 @@ const CardList = ({ cards }) => {
             if (error.response?.status === 422) {
                 const validationErrors = error.response.data.errors;
                 const errorMessage = Object.values(validationErrors).flat().join('\n');
-                alert(`Validation failed: ${errorMessage}`);
+                toast.error(`Validation failed: ${errorMessage}`);
             } else if (error.response?.status === 401) {
-                alert('You must be logged in to add cards to your collection.');
+                toast.error('You must be logged in to add cards to your collection.');
             } else if (error.response?.status === 404) {
-                alert('The card was not found.');
+                toast.error('The card was not found.');
             } else {
-                alert('An error occurred while adding the card.');
+                toast.error('An error occurred while adding the card.');
             }
         }
     };
