@@ -78,7 +78,7 @@ const CombinedSearchFilterBar = ({
   const handleTypeChange = (event, newValue) => {
     setSelectedTypes(newValue);
     onFilter(newValue, selectedSubTypes, isSortedByEvo);
-  };
+};
 
   const handleSubTypeChange = (event, newValue) => {
     setSelectedSubTypes(newValue);
@@ -112,12 +112,16 @@ const CombinedSearchFilterBar = ({
       <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: '8px' }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', mb: 1 }}>
           {selectedTypes.map((type) => (
-            <Chip
-              key={type}
-              label={type}
-              onDelete={() => setSelectedTypes(selectedTypes.filter((t) => t !== type))}
-              sx={{ margin: '4px' }}
-            />
+         <Chip
+         key={type}
+         label={type}
+         onDelete={() => {
+             const updatedTypes = selectedTypes.filter((t) => t !== type);
+             setSelectedTypes(updatedTypes);
+             onFilter(updatedTypes, selectedSubTypes, isSortedByEvo); // Update the filter here
+         }}
+         sx={{ margin: '4px' }}
+     />
           ))}
         </Box>
 

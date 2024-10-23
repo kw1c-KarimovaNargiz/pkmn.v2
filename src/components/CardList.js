@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Grid, Typography, Checkbox, FormControlLabel, IconButton } from '@mui/material';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
-import { addCardToCollection, removeCardFromCollection, fetchUserCollection } from '../services/api';
+import { addCardToCollection,  fetchUserCollection } from '../services/api';
 import { useUser } from '../pages/UserContext';
 
 const CardList = ({ cards }) => {
@@ -84,7 +84,7 @@ const CardList = ({ cards }) => {
             [cardId]: newCount,
         }));
 
-        await handleAddCardToCollection(cardId, newCount);
+        await handleCardToCollection(cardId, newCount);
     }, [cardCounts, cards]);
 
     const handleDecrement = useCallback(async (index) => {
@@ -97,13 +97,13 @@ const CardList = ({ cards }) => {
         }));
 
         if (newCount > 0) {
-            await handleAddCardToCollection(cardId, newCount);
+            await handleCardToCollection(cardId, newCount);
         }
     }, [cardCounts, cards]);
 
 
     //when adding it adds 3x the count
-    const handleAddCardToCollection = async (cardId, count) => {
+    const handleCardToCollection = async (cardId, count) => {
         if (count <= 0) {
             alert('You must select at least one card to add to your collection.');
             return;
@@ -129,7 +129,7 @@ const CardList = ({ cards }) => {
             }));
             
             // Optional: Show success message
-            alert('Card added successfully!');
+            alert('Card added successfully! ADD');
         } catch (error) {
             console.error('Error details:', {
                 status: error.response?.status,
