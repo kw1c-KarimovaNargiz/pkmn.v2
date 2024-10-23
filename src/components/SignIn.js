@@ -79,7 +79,9 @@ export default function SignIn() {
 
 
                 setUser(userData);
-                localStorage.setItem('authToken', response.token);
+                console.log(response.data.email)
+                // todo, make this token
+                localStorage.setItem('authToken', response.data.email);
                 toast.success('Login successful!');
                 navigate('/Index');
             } else {

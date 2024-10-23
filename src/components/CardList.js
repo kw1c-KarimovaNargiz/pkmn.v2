@@ -1,48 +1,53 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import {toast} from 'react-toastify';
+import { toast } from 'react-toastify';
 import { Grid, Typography, Checkbox, FormControlLabel, IconButton } from '@mui/material';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
 import { addCardToCollection, removeCardFromCollection, fetchUserCollection } from '../services/api';
 import { useUser } from '../pages/UserContext';
 
+
 const CardList = ({ cards }) => {
-    const { user } = useUser(); 
+    const { user } = useUser();
     const [visibleCards, setVisibleCards] = useState([]);
     const [cardCounts, setCardCounts] = useState({});
     const [userCards, setUserCards] = useState([]);
     const observerRef = useRef(null);
     const [selectedCard, setSelectedCard] = useState(null);
 
+    const [toastId, setToastId] = useState(null);
+    const [toastCount, setToastCount] = useState(0);
+
+
     useEffect(() => {
         const fetchCollection = async () => {
             if (!user || !user.email) {
                 console.error('User is not logged in, cannot fetch their collection');
-                return; 
+                return;
             }
 
             try {
                 const data = await fetchUserCollection(user.email);
-                setUserCards(data); 
+                setUserCards(data);
             } catch (error) {
                 console.error('Error fetching user collection:', error);
             }
         };
 
         fetchCollection();
-    }, [user]); 
+    }, [user]);
 
     useEffect(() => {
         const initialCounts = {};
 
-    
+
         if (Array.isArray(userCards)) {
             userCards.forEach(card => {
                 initialCounts[card.card_id] = card.count;
             });
         }
 
-    
+
         setCardCounts(prevCounts => {
             const hasDifferentCounts = Object.keys(initialCounts).some(id => initialCounts[id] !== prevCounts[id]);
             return hasDifferentCounts ? initialCounts : prevCounts;
@@ -91,7 +96,7 @@ const CardList = ({ cards }) => {
     const handleDecrement = useCallback(async (index) => {
         const cardId = cards[index].id;
         const newCount = Math.max((cardCounts[cardId] || 0) - 1, 0);
-        
+
         setCardCounts((prev) => ({
             ...prev,
             [cardId]: newCount,
@@ -103,41 +108,55 @@ const CardList = ({ cards }) => {
     }, [cardCounts, cards]);
 
 
+
     //when adding it adds 3x the count
     const handleAddCardToCollection = async (cardId, count) => {
         if (count <= 0) {
             toast.error('You must select at least one card to add to your collection.');
             return;
         }
-    
+
         const payload = {
             email: user.email,
             card_id: cardId,
             count: count,
         };
-    
+
         try {
             // Add logging to debug the payload
             console.log('Sending payload:', payload);
-            
+
             const response = await addCardToCollection(payload);
             console.log('Card added:', response.data);
-            
-            // Update the local state
+
             setCardCounts(prevCounts => ({
                 ...prevCounts,
                 [cardId]: count
             }));
-            
-            // Optional: Show success message
-            toast.success('Card added successfully!');
+            console.log('toast is active:', toast.isActive(toastId));
+            if (toast.isActive(toastId)) {
+                let newToastCount = toastCount + 1;
+                setToastCount(newToastCount);
+                toast.update(toastId, {
+                    render: `Card added successfully! (${++newToastCount})`,
+                    type: 'success',
+                    autoClose: 3000,
+                });
+            } else {
+                setToastId(toast.success(toastCount ? `Card added successfully! (${toastCount})` : 'Card added successfully!'), {
+                    onClose: () => {
+                        setToastId(null);
+                    }
+                });
+            }
+
         } catch (error) {
             console.error('Error details:', {
                 status: error.response?.status,
                 data: error.response?.data,
                 message: error.message
             });
-            
+
             if (error.response?.status === 422) {
                 const validationErrors = error.response.data.errors;
                 const errorMessage = Object.values(validationErrors).flat().join('\n');
@@ -168,14 +187,14 @@ const CardList = ({ cards }) => {
 
             <Grid container spacing={2}>
                 {cards.map((card, index) => (
-                    <Grid 
-                        item 
-                        key={card.id} 
-                        xs={12} 
-                        sm={6} 
-                        md={4} 
-                        className="card-item" 
-                        data-index={index} 
+                    <Grid
+                        item
+                        key={card.id}
+                        xs={12}
+                        sm={6}
+                        md={4}
+                        className="card-item"
+                        data-index={index}
                     >
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                             <IconButton onClick={() => handleDecrement(index)} size="small" disabled={cardCounts[card.id] === 0}>
@@ -184,12 +203,12 @@ const CardList = ({ cards }) => {
 
                             <FormControlLabel
                                 control={
-                                    <Checkbox 
-                                        checked={!!cardCounts[card.id]} 
-                                        color="primary" 
+                                    <Checkbox
+                                        checked={!!cardCounts[card.id]}
+                                        color="primary"
                                     />
                                 }
-                                label={cardCounts[card.id] || 0} 
+                                label={cardCounts[card.id] || 0}
                             />
 
                             <IconButton onClick={() => handleIncrement(index)} size="small">
@@ -197,7 +216,7 @@ const CardList = ({ cards }) => {
                             </IconButton>
                         </div>
 
-                        <CardDisplay card={card} onClick={() => handleCardClick(card)} /> 
+                        <CardDisplay card={card} onClick={() => handleCardClick(card)} />
                     </Grid>
                 ))}
             </Grid>

@@ -21,7 +21,7 @@ const Index = () => {
     const [subTypes, setSubTypes] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false); 
-    const { user } = useUser(); 
+    const { user, userLoading  } = useUser(); 
 
     const handleAddCard = async (cardId, count) => {
         if (!user) {
@@ -175,6 +175,8 @@ const Index = () => {
         const uniqueSubTypes = [...new Set(cards.flatMap((card) => card.subtypes || []))];
         setSubTypes(uniqueSubTypes); 
     }, [cards]);
+    console.log("user", userLoading);
+    if( userLoading ) return null;
 
     return (
       <div className="index-container">
