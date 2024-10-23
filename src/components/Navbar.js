@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { AppBar, Toolbar, Button } from '@mui/material';
 import { useUser } from '../pages/UserContext'; 
 
@@ -29,6 +30,7 @@ function Navbar() {
 
   const handleLogoutClick = () => {
     logout(); 
+    toast.success('You have been logged out');
     navigate('/login');
   };
 

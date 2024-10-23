@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useUser } from '../pages/UserContext';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';  
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -52,7 +53,6 @@ export default function SignIn() {
         password: '',
     });
     const navigate = useNavigate();
-    const [message, setMessage] = useState('');
     const { setUser } = useUser();
 
     const handleChange = (event) => {
@@ -77,19 +77,19 @@ export default function SignIn() {
                     email: response.data.email,
                 };
 
-              
+
                 setUser(userData);
                 localStorage.setItem('authToken', response.token);
-                setMessage('Login successful!');
+                toast.success('Login successful!');
                 navigate('/Index');
             } else {
-                setMessage('Invalid login credentials.');
+                toast.error('Invalid login credentials.');
             }
         } catch (error) {
-            setMessage('Error logging in. Please check your credentials.');
+            toast.error('Error logging in. Please check your credentials.');
             console.error('Login error:', error);
         } finally {
-            setIsLoading(false); 
+            setIsLoading(false);
         }
     };
 
@@ -103,11 +103,6 @@ export default function SignIn() {
                 <Typography component="h1" variant="h5">
                     Sign in
                 </Typography>
-                {message && (
-                    <Typography variant="body2" color={message.includes('Error') ? 'error' : 'primary'}>
-                        {message}
-                    </Typography>
-                )}
                 <Form noValidate onSubmit={handleSubmit}>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
