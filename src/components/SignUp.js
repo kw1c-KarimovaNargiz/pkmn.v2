@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -8,9 +10,9 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';  
+import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
-import { registerUser } from '../services/api';  
+import { registerUser } from '../services/api';
 
 const Copyright = () => (
   <Typography variant="body2" color="textSecondary" align="center">
@@ -46,6 +48,7 @@ const SubmitButton = styled(Button)(({ theme }) => ({
 }));
 
 export default function SignUp() {
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -53,7 +56,6 @@ export default function SignUp() {
     password: '',
   });
 
-  const [message, setMessage] = useState('');
 
   const handleChange = (event) => {
     const { name, email, password, value } = event.target;
@@ -67,23 +69,25 @@ export default function SignUp() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     try {
       const response = await registerUser(formData);
-      setMessage('User registered successfully!');
-      console.log('Response:', response);
-  
+      if (response.status === 'success') {
+        // console.log('Response:', response);
+        toast.success('User registered successfully!');
+        navigate('/login');
+      } else {
+        toast.error('Error registering user, please try again.');
+      }
     } catch (error) {
       if (error.response && error.response.data && error.response.data.error) {
-        setMessage(`Error: ${JSON.stringify(error.response.data.error)}`);
+        toast.error(`Error: ${JSON.stringify(error.response.data.error)}`);
       } else {
-        setMessage('Error registering user, please try again.');
+        toast.error('Error registering user, please try again.');
       }
       console.error('Error registering user:', error);
     }
   };
-  
-  
 
   return (
     <Container component="main" maxWidth="xs">
@@ -95,58 +99,53 @@ export default function SignUp() {
         <Typography component="h1" variant="h5">
           Sign up
         </Typography>
-        {/* error / succes msg */}
-        {message && (
-          <Typography variant="body2" color={message.includes('Error') ? 'error' : 'primary'}>
-            {message}
-          </Typography>
-        )}
+  
         <Form noValidate onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             {/* username*/}
             <Grid item xs={12}>
-          <TextField
-            variant="outlined"
-            required
-            fullWidth
-            id="name"
-            label="Name"
-            name="name"
-            autoComplete="name"
-            value={formData.name}
-            onChange={handleChange}
-          />
-        </Grid>
+              <TextField
+                variant="outlined"
+                required
+                fullWidth
+                id="name"
+                label="Name"
+                name="name"
+                autoComplete="name"
+                value={formData.name}
+                onChange={handleChange}
+              />
+            </Grid>
 
             {/*email*/}
             <Grid item xs={12}>
-  <TextField
-    variant="outlined"
-    required
-    fullWidth
-    id="email"
-    label="Email Address"
-    name="email"
-    autoComplete="email"
-    value={formData.email}
-    onChange={handleChange}
-  />
-</Grid>
+              <TextField
+                variant="outlined"
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                value={formData.email}
+                onChange={handleChange}
+              />
+            </Grid>
 
-<Grid item xs={12}>
-  <TextField
-    variant="outlined"
-    required
-    fullWidth
-    name="password"
-    label="Password"
-    type="password"
-    id="password"
-    autoComplete="current-password"
-    value={formData.password}
-    onChange={handleChange}
-  />
-</Grid>
+            <Grid item xs={12}>
+              <TextField
+                variant="outlined"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                value={formData.password}
+                onChange={handleChange}
+              />
+            </Grid>
 
           </Grid>
           <SubmitButton
@@ -159,7 +158,7 @@ export default function SignUp() {
           </SubmitButton>
           <Grid container justifyContent="flex-end">
             <Grid item>
-              <Link href="#" variant="body2">
+              <Link component={RouterLink} to="/signin" variant="body2">
                 Already have an account? Sign in
               </Link>
             </Grid>
