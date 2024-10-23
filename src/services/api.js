@@ -94,16 +94,24 @@ export const fetchSeries = async () => {
 
 
     //add card
-export const addCardToCollection = async (payload) => {
-  try {
-    const url = 'http://127.0.0.1:8000/api/collections/add';
-    const response = await axios.post(url, payload);
-    return response.data;
-  } catch (error) {
-    console.error('Error adding card to collection:', error);
-    throw error;
-  }
-};
+    export const addCardToCollection = async (payload) => {
+      try {
+          const response = await axios.post('http://127.0.0.1:8000/api/collections/add', {
+              email: payload.email,
+              card_id: payload.card_id.toString(),
+              count: parseInt(payload.count), 
+          }, {
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+              }
+          });
+          return response;
+      } catch (error) {
+          throw error;
+      }
+  };
+  
 
 //user's collection of cards
 export const fetchUserCollection = async (email) => {
