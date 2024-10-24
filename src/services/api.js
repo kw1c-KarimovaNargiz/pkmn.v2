@@ -127,31 +127,47 @@ export const fetchUserCollection = async (email) => {
 };
 
 export const removeCardFromCollection = async (email, cardId, count) => {
-  try {
-      const response = await fetch('http://127.0.0.1:8000/api/collections/remove', {
-          method: 'DELETE',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-              email: email,
-              card_id: cardId,
-              count: count,
-          }),
-      });
-
-      if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-      }
-
-      const data = await response.json(); 
-      console.log('Card removed successfully:', data);
-      return data; 
-  } catch (error) {
-      console.error('Error removing card from collection:', error);
-      throw error; 
-  }
+    try {
+        const response = await axios.delete('http://127.0.0.1:8000/api/collections/remove', {
+            data: {
+                email,
+                card_id: cardId,
+                count
+            }
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
 };
+
+
+// export const removeCardFromCollection = async (email, cardId) => {
+//   try {
+//       const response = await fetch('http://127.0.0.1:8000/api/collections/remove', {
+//           method: 'DELETE',
+//           headers: {
+//               'Content-Type': 'application/json',
+//           },
+//           body: JSON.stringify({
+//               email: email,
+//               card_id: cardId,
+//               count: count,
+//           }),
+//       });
+
+//       if (!response.ok) {
+//           throw new Error(`Error: ${response.statusText}`);
+//       }
+
+//       const data = await response.json(); 
+//       console.log('Card removed successfully:', data);
+//       return data; 
+//   } catch (error) {
+//       console.error('Error removing card from collection:', error);
+//       throw error; 
+//   }
+// };
 
 // export const removeCardFromCollection = async ( cardId) => {
 //   try {

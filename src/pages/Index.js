@@ -4,7 +4,7 @@ import CardList from '../components/CardList';
 import SetsSidebar from '../components/SetsSideBar'; 
 import CombinedSearchFilterBar from '../components/CombinedSearchFilterBar'; 
 import { useUser } from '../pages/UserContext';
-import { fetchSeries, fetchCardsForSet, searchCard, fetchSortedEvolutionCards, fetchSubTypes, addCardToCollection } from '../services/api';
+import { fetchSeries, fetchCardsForSet, searchCard, fetchSortedEvolutionCards, fetchSubTypes, addCardToCollection, removeCardFromCollection } from '../services/api';
 import '../styling/Index.css'; 
 
 const Index = () => {
@@ -25,7 +25,7 @@ const Index = () => {
 
     const handleAddCard = async (cardId, count) => {
         if (!user) {
-            console.warn('User must be logged in to add cards to the collection.');
+            console.warn('User must be logged in to handle their collection');
             return; 
         }
 
@@ -34,6 +34,21 @@ const Index = () => {
             console.log('Card added to collection:', response);
         } catch (error) {
             console.error('Failed to add card to collection:', error);
+        }
+    };
+
+    
+    const handleRemoveCard = async (cardId, count) => {
+        if (!user) {
+            console.warn('User must be logged in to handle their collection');
+            return; 
+        }
+
+        try {
+            const response = await removeCardFromCollection(user.email, cardId, count);
+            console.log('Card removed from collection:', response);
+        } catch (error) {
+            console.error('Failed to remove card from collection:', error);
         }
     };
 
@@ -206,6 +221,7 @@ const Index = () => {
               <CardList 
                 cards={searchResults.length > 0 ? searchResults : filteredCards} 
                 onAddCard={handleAddCard} 
+                onnRemoveCard={handleRemoveCard}
               />
 
               {/* {cards.length === 0 && (
