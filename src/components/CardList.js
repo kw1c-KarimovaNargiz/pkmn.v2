@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Grid, Typography, Checkbox, FormControlLabel, IconButton } from '@mui/material';
+import { toast } from 'react-toastify';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
 import { addCardToCollection,  removeCardFromCollection, fetchUserCollection } from '../services/api';
@@ -12,7 +13,8 @@ const CardList = ({ cards }) => {
     const [userCards, setUserCards] = useState([]);
     const observerRef = useRef(null);
     const [selectedCard, setSelectedCard] = useState(null);
-
+    const [toastId, setToastId] = useState(null);
+    const [toastCount, setToastCount] = useState(0);
     //handle add card
     const handleCardToCollection = useCallback(async (cardId, count) => {
         if (count <= 0) {
@@ -43,6 +45,22 @@ const CardList = ({ cards }) => {
             const collectionData = await fetchUserCollection(user?.email);
             setUserCards(collectionData);
             
+            console.log('toast is active:', toast.isActive(toastId));
+            if (toast.isActive(toastId)) {
+                let newToastCount = toastCount + 1;
+                setToastCount(newToastCount);
+                toast.update(toastId, {
+                    render: `Card added successfully! (${++newToastCount})`,
+                    type: 'success',
+                    autoClose: 3000,
+                });
+            } else {
+                setToastId(toast.success(toastCount ? `Card added successfully! (${toastCount})` : 'Card added successfully!'), {
+                    onClose: () => {
+                        setToastId(null);
+                    }
+                });
+            }
         } catch (error) {
             console.error('Error details:', {
                 status: error.response?.status,

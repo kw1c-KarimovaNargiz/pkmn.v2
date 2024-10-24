@@ -10,12 +10,16 @@ export const UserProvider = ({ children }) => {
         const fetchUser = async () => {
             setUserLoading(true);
             try {
-                const authToken = localStorage.getItem('authToken');
+                const authToken = await localStorage.getItem('authToken');
+                console.log('authToken:', authToken);
                 if (authToken) {
                     const savedUser = JSON.parse(localStorage.getItem('user'));
                     if (savedUser) {
+                        console.log('setting user')
                         setUser(savedUser);
                     }
+                }else{
+                    console.log('No authToken found');
                 }
             } catch (error) {
                 console.error('Failed to fetch user:', error);
