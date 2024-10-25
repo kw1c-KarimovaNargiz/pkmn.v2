@@ -12,10 +12,15 @@ const CardDisplay = React.memo(({ card }) => {
             <Card 
                 sx={{ backgroundColor: 'transparent', boxShadow: 'none' }} 
                 onClick={handleCardClick}
-            >  <Typography variant="h5" component="div" sx={{ alignItems: 'center',  justifyContent: 'center',  display: 'flex' }}>
-
-            {card.name}
-        </Typography>
+                style={{ display: 'flex', flexDirection: 'column' }} // Apply flexbox to Card
+            >
+                <Typography 
+                    variant="h5" 
+                    component="div" 
+                    sx={{ textAlign: 'right', width: '90%'}} // Right-align title and expand
+                >
+                    {card.name}
+                </Typography>
                 <CardContent sx={{ background: 'none', backgroundColor: 'transparent' }}>
                     <img 
                         src={card.images.large}

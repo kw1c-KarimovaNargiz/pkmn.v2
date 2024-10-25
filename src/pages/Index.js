@@ -192,6 +192,7 @@ const Index = () => {
     }, [cards]);
     console.log("user", userLoading);
     if( userLoading ) return null;
+    const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "No Title Available";
 
     return (
       <div className="index-container">
@@ -217,6 +218,7 @@ const Index = () => {
                 onRestoreOriginal={handleRestoreOriginal} 
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
+                setTitle={setTitle}
               />
           </div>
           <div className="cards-display-area">

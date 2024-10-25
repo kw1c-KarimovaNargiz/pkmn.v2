@@ -30,7 +30,40 @@ body {
     overflow-y: auto; 
 
 }
+.card-list-title {
+  font-size:20px !important; 
+color: #000000de;
+   letter-spacing:1px;
+    text-transform:uppercase; 
+    width:160px; 
+    text-align:center;
+}
 
+.card-list-title:before {
+  background-color: #8a3f3f;
+  content: '';
+  display: block;
+  height: 3px;
+  width: auto; 
+  padding: 0 10px;
+  margin-bottom: 5px;
+}
+
+.card-list-title:after{
+  background-color: #8a3f3f;
+  content: '';
+  display: block;
+  height: 3px;
+  width: auto;
+  padding: 0 10px;
+  margin-bottom: 0.25em;
+}
+
+/* .card-title {
+  font-size: 24px;
+  padding: 10px;
+  
+} */
 #filter-select{
   background-color: rgba(255, 255, 255, 0.15);
   color: transparent;
@@ -146,15 +179,19 @@ border-color: transparent !important;
   position: fixed;
   width: 20%;
   left: 0;
+  background-color: #3c3c3c;
   height: 100vh;
   margin: 0;
-  top: 60px;
+  top: 50px;
   overflow-y: auto;
-  background-color: #606060;
+  background-color: inherit;
   z-index: 1000;
-  box-shadow: 7px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 5px 0 5px rgba(0, 0, 0, 0.1);
+ 
   
 }
+
+
 
 
 

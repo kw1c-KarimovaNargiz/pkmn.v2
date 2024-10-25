@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { styled, alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 import InputLabel from '@mui/material/InputLabel';
-import { Box, Chip, FormControlLabel, Checkbox, Autocomplete, TextField } from '@mui/material';
+import { Box, Chip,Typography, FormControlLabel, Checkbox, Autocomplete, TextField } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
@@ -63,9 +63,10 @@ const CombinedSearchFilterBar = ({
   onSortByEvo,
   searchTerm,
   setSearchTerm,
+  setTitle,
 }) => {
   const [isSortedByEvo, setIsSortedByEvo] = useState(false);
-
+ 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
@@ -110,6 +111,7 @@ const CombinedSearchFilterBar = ({
 
       {/* filters */}
       <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: '8px' }}>
+        
         <Box sx={{ display: 'flex', flexWrap: 'wrap', mb: 1 }}>
           {selectedTypes.map((type) => (
          <Chip
@@ -191,6 +193,12 @@ const CombinedSearchFilterBar = ({
           sx={{ marginLeft: 2 }}
         />
       </Box>
+ 
+       <Typography variant="h4" gutterBottom className="card-list-title">
+  {setTitle}
+  </Typography>
+ 
+
     </Box>
   );
 };

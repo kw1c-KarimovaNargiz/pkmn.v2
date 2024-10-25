@@ -186,7 +186,7 @@ const CardList = ({ cards }) => {
     }, [userCards]);
 
  
-    const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
+    // const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
     const handleCardClick = (card) => {
         setSelectedCard(card);
     };
@@ -196,9 +196,9 @@ const CardList = ({ cards }) => {
     };
     return (
         <div>
-            <Typography variant="h4" gutterBottom>
-                {setTitle}
-            </Typography>
+            {/* <Typography variant="h4" gutterBottom className="card-list-title">
+  {setTitle}
+</Typography> */}
 
             <Grid container spacing={2}>
                 {cards.map((card, index) => (

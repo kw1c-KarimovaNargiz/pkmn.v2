@@ -40,5 +40,5 @@ function App() {
     );
 }
 
-setBodyColor({ color: "#262626" });
+setBodyColor({ color: "#1f1f1f" });
 export default App;
