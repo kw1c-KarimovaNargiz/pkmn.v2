@@ -93,10 +93,13 @@ const CombinedSearchFilterBar = ({
   };
 
   return (
-    <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ marginTop: '8px' }}>
+    <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ marginTop: '8px', margin: 0, padding: 0 }}>
+        {/* <Typography variant="h4"className="card-list-title" style={{marginLeft: '50px'}}>
+  {setTitle}
+  </Typography> */}
       {/*search form*/}
-      <form onSubmit={handleSearchSubmit} style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
-        <Search>
+      <form onSubmit={handleSearchSubmit} style={{ flex: 1, display: 'flex', alignItems: 'center', marginLeft: '', }}>
+        <Search sx={{borderStyle: 'none'}}>
           <SearchIconWrapper>
             <SearchIcon />
           </SearchIconWrapper>
@@ -110,7 +113,7 @@ const CombinedSearchFilterBar = ({
       </form>
 
       {/* filters */}
-      <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: '8px' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: '108px', }}>
         
         <Box sx={{ display: 'flex', flexWrap: 'wrap', mb: 1 }}>
           {selectedTypes.map((type) => (
@@ -194,9 +197,7 @@ const CombinedSearchFilterBar = ({
         />
       </Box>
  
-       <Typography variant="h4" gutterBottom className="card-list-title">
-  {setTitle}
-  </Typography>
+     
  
 
     </Box>
