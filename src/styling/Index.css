@@ -1,0 +1,188 @@
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.index-container {
+  position: static;
+  margin: 0;
+  z-index: 1000;
+}
+
+.sets-sidebar {
+  top: 10px;
+}
+
+.sidebar {
+  position: fixed;
+  width: 17.5%;
+  left: 0;
+
+  background-color: #3c3c3c;
+  height: 100vh;
+  margin: 0;
+  top: 50px;
+  overflow-y: auto;
+  background-color: inherit;
+  z-index: 1;
+  box-shadow: 5px 0 5px rgba(0, 0, 0, 0.1);
+ 
+  
+}
+
+.search-filter-container {
+  position: fixed;
+  top: 64px; 
+  display: flex;
+  left: 0;
+     width: 100%; 
+   background-color: #363636;
+   z-index: 1000; 
+   
+     box-shadow: 10px 5px rgba(0, 0, 0, 0.1);
+
+ }
+.cards-display-area {
+    margin-left: 20%;
+    padding: 30px;
+    margin-top: 100px; 
+    margin-top: calc(100px + 64px); 
+    overflow-y: auto; 
+
+}
+.card-list-title {
+  font-size:20px !important; 
+  color: #999;
+    text-transform:uppercase; 
+ 
+   margin-right: 100px;
+
+  
+  
+}
+
+
+
+/* .card-title {
+  font-size: 24px;
+  padding: 10px;
+  
+} */
+#filter-select{
+  background-color: rgba(255, 255, 255, 0.15);
+  color: transparent;
+  overflow-y: scroll;
+}
+
+#filter-select-label {
+  transform: none;
+  transform-origin: 0%;
+  display: flex;
+  left: 40px;
+  justify-content: center; 
+  align-items: center;    
+  border-color: transparent !important; 
+  height: 100%;        
+  outline: none; 
+  border: none;  
+  box-shadow: none; 
+  overflow-y: auto;
+}
+
+#filter-select-label:active, #filter-select-label:focus {
+  transform: none;
+
+  display: flex;
+  justify-content: center; 
+  align-items: center;    
+  overflow-y: auto;
+  border-color: transparent !important; 
+}
+
+/*when clickin filter, removed blue 'type' tjat transitioned above*/
+.MuiFormLabel-root.Mui-focused,
+.MuiInputLabel-root.Mui-focused,
+.MuiFormLabel-root:hover,
+.MuiInputLabel-root:hover {
+    display: none; 
+    overflow-y: scroll;
+}
+
+
+/*remove border around filterbox*/
+.MuiOutlinedInput-notchedOutline {
+
+  display: none;
+  box-shadow: none !important; /* Ensure no shadow is applied */
+}
+
+.MuiBox-root css-i9gxme {
+  background-color: red !important;
+}
+.MuiPaper-root, .MuiPaper-elevation, .MuiPaper-rounded, .MuiPaper-elevation1, .MuiAutocomplete-paper, .css-1cv3st9-MuiPaper-root-MuiAutocomplete-pape {
+  background-color: red;
+}
+.MuiAutocomplete-listbox {
+  background-color: red;
+}
+/*listbox filter*/
+.MuiAutocomplete-listbox, .css-19166iz-MuiAutocomplete-listbox {
+  background-color: #363636;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: none;
+  border-bottom-left-radius: 10px;
+  height: 100%;
+  box-shadow: 3px 3px 4px  rgba(0,0,0,.5);
+  overflow-y: scroll; /* Enable scrolling */
+  /* Hide scrollbar for WebKit browsers (Safari, Chrome, etc.) */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for Mozilla browsers (Firefox, etc.) */
+  & * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+}
+
+.MuiFormLabel-root {
+
+left: 40px;
+
+}
+
+.MuiInputBase-root {
+  border-color: none !important; 
+  border: none !important;
+}
+
+.MuiInputBase-input {
+  border-bottom-color: none !important;
+  
+border-color: transparent !important; 
+
+}
+
+
+
+.MuiSelect-select:focus {
+  outline: none; 
+  border-color: transparent; 
+  box-shadow: none; 
+  left: 40px;
+}
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border: none !important;
+  transform: none !important;
+
+}
+
+
+.cards-display-area::-webkit-scrollbar {
+  display: none;
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none;
+}
