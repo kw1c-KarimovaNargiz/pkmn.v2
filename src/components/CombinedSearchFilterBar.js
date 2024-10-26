@@ -123,7 +123,7 @@ const CombinedSearchFilterBar = ({
          onDelete={() => {
              const updatedTypes = selectedTypes.filter((t) => t !== type);
              setSelectedTypes(updatedTypes);
-             onFilter(updatedTypes, selectedSubTypes, isSortedByEvo); // Update the filter here
+             onFilter(updatedTypes, selectedSubTypes, isSortedByEvo); 
          }}
          sx={{ margin: '4px' }}
      />
@@ -131,7 +131,7 @@ const CombinedSearchFilterBar = ({
         </Box>
 
         {/* (energy)type filter with checkboxes */}
-        <Autocomplete
+        <Autocomplete 
           multiple
           id="checkboxes-types"
           options={availableTypes}
@@ -140,7 +140,7 @@ const CombinedSearchFilterBar = ({
           onChange={handleTypeChange}
           getOptionLabel={(option) => option}
           renderOption={(props, option, { selected }) => (
-            <li {...props}>
+            <li {...props} >
               <Checkbox
                 icon={icon}
                 checkedIcon={checkedIcon}
@@ -154,7 +154,7 @@ const CombinedSearchFilterBar = ({
           renderInput={(params) => (
             <TextField {...params} label="Type" placeholder="Select types" />
           )}
-          sx={{ width: 200, marginRight: 2 }}
+          sx={{ width: 200, marginRight: 2}}
         />
 
         {/* subtype filter with checkboxes */}

@@ -9,30 +9,9 @@ body {
   margin: 0;
   z-index: 1000;
 }
-.MuiFormLabel-root.Mui-focused,
-.MuiInputLabel-root.Mui-focused,
-.MuiFormLabel-root:hover,
-.MuiInputLabel-root:hover {
 
-   
-    display: none; 
-  
-    color: inherit; 
-  
-}
-.MuiAutocomplete-root:hover .MuiOutlinedInput-root,
-.MuiAutocomplete-root.Mui-focused .MuiOutlinedInput-root,
-.MuiAutocomplete-root.Mui-expanded .MuiOutlinedInput-root {
-    outline: none; /* Remove the focus outline */
-    border: none; /* Remove any border */
-    box-shadow: none; /* Remove any box shadow */
-}
 
-.MuiFormControl-root.MuiFormControl-fullWidth.MuiTextField-root:hover,
-.MuiFormControl-root.MuiFormControl-fullWidth.MuiTextField-root:focus {
-    border: none !important; /* Remove any border */
-    box-shadow: none !important; /* Remove any box shadow */
-}
+
 .sidebar {
   position: fixed;
   width: 17.5%;
@@ -41,17 +20,13 @@ body {
   background-color: #3c3c3c;
   height: 100vh;
   margin: 0;
-  top: 130px;
+  top: 110px;
   overflow-y: auto;
   background-color: inherit;
   z-index: 1;
   box-shadow: 5px 0 5px rgba(0, 0, 0, 0.1);
  
   
-}
-.MuiOutlinedInput-notchedOutline {
-  border: none !important; /* Remove the border */
-  box-shadow: none !important; /* Ensure no shadow is applied */
 }
 
 .search-filter-container {
@@ -95,8 +70,7 @@ body {
 #filter-select{
   background-color: rgba(255, 255, 255, 0.15);
   color: transparent;
-  border-style: none !important;
-
+  overflow-y: scroll;
 }
 
 #filter-select-label {
@@ -111,6 +85,7 @@ body {
   outline: none; 
   border: none;  
   box-shadow: none; 
+  overflow-y: auto;
 }
 
 #filter-select-label:active, #filter-select-label:focus {
@@ -119,12 +94,54 @@ body {
   display: flex;
   justify-content: center; 
   align-items: center;    
-     
+  overflow-y: auto;
   border-color: transparent !important; 
 }
-.MuiInputBase-root {
-outline: none !important;
 
+/*when clickin filter, removed blue 'type' tjat transitioned above*/
+.MuiFormLabel-root.Mui-focused,
+.MuiInputLabel-root.Mui-focused,
+.MuiFormLabel-root:hover,
+.MuiInputLabel-root:hover {
+    display: none; 
+    overflow-y: scroll;
+}
+
+
+/*remove border around filterbox*/
+.MuiOutlinedInput-notchedOutline {
+
+  display: none;
+  box-shadow: none !important; /* Ensure no shadow is applied */
+}
+
+.MuiBox-root css-i9gxme {
+  background-color: red !important;
+}
+.MuiPaper-root, .MuiPaper-elevation, .MuiPaper-rounded, .MuiPaper-elevation1, .MuiAutocomplete-paper, .css-1cv3st9-MuiPaper-root-MuiAutocomplete-pape {
+  background-color: red;
+}
+.MuiAutocomplete-listbox {
+  background-color: red;
+}
+/*listbox filter*/
+.MuiAutocomplete-listbox, .css-19166iz-MuiAutocomplete-listbox {
+  background-color: #363636;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-top: none;
+  border-bottom-left-radius: 10px;
+  height: 100%;
+  box-shadow: 3px 3px 4px  rgba(0,0,0,.5);
+  overflow-y: scroll; /* Enable scrolling */
+  /* Hide scrollbar for WebKit browsers (Safari, Chrome, etc.) */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for Mozilla browsers (Firefox, etc.) */
+  & * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
 }
 
 .MuiFormLabel-root {
@@ -136,13 +153,13 @@ left: 40px;
 .MuiInputBase-root {
   border-color: none !important; 
   border: none !important;
-  
 }
 
 .MuiInputBase-input {
   border-bottom-color: none !important;
   
 border-color: transparent !important; 
+
 }
 
 
@@ -158,14 +175,6 @@ border-color: transparent !important;
   transform: none !important;
 
 }
-
-
-
-
-
-
-
-
 
 
 .cards-display-area::-webkit-scrollbar {
