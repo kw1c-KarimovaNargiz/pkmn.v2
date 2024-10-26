@@ -10,7 +10,9 @@ body {
   z-index: 1000;
 }
 
-
+.sets-sidebar {
+  top: 10px;
+}
 
 .sidebar {
   position: fixed;
@@ -20,7 +22,7 @@ body {
   background-color: #3c3c3c;
   height: 100vh;
   margin: 0;
-  top: 110px;
+  top: 50px;
   overflow-y: auto;
   background-color: inherit;
   z-index: 1;

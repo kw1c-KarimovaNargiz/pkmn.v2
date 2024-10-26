@@ -25,7 +25,7 @@ const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect }) => {
                             display: 'none' 
                         },
                         top: '10px',
-                       
+                       padding: '10px'
                     }} 
                     expanded={expanded === s.id} 
                     onChange={handleChange(s.id)}
