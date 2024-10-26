@@ -1,85 +1,32 @@
 import React, { useState } from 'react';
-import { styled, alpha } from '@mui/material/styles';
-import InputBase from '@mui/material/InputBase';
-import InputLabel from '@mui/material/InputLabel';
-import { Box, Chip,Typography, FormControlLabel, Checkbox, Autocomplete, TextField } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import { Box, Chip, FormControlLabel, Checkbox, Autocomplete, TextField, Drawer } from '@mui/material';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-const Search = styled('div')(({ theme }) => ({
-  position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.white, 0.15),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.common.white, 0.25),
-  },
-  marginLeft: 0,
-  width: '100%',
-  [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(1),
-    width: 'auto',
-  },
-}));
-
-const SearchIconWrapper = styled('div')(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: '100%',
-  position: 'absolute',
-  pointerEvents: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}));
-
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
-  width: '100%',
-  '& .MuiInputBase-input': {
-    padding: theme.spacing(1, 1, 1, 0),
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create('width'),
-    [theme.breakpoints.up('sm')]: {
-      width: '12ch',
-      '&:focus': {
-        width: '20ch',
-      },
-    },
-  },
-}));
-
 const CombinedSearchFilterBar = ({
   availableTypes,
   availableSubTypes,
   onFilter,
-  onSearch,
+
   selectedTypes = [],
   setSelectedTypes,
   selectedSubTypes = [],
   setSelectedSubTypes,
   onSortByEvo,
-  searchTerm,
-  setSearchTerm,
+
+
   setTitle,
 }) => {
   const [isSortedByEvo, setIsSortedByEvo] = useState(false);
- 
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
-
-  const handleSearchSubmit = (event) => {
-    event.preventDefault();
-    onSearch(searchTerm);
-  };
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const handleTypeChange = (event, newValue) => {
     setSelectedTypes(newValue);
     onFilter(newValue, selectedSubTypes, isSortedByEvo);
-};
+  };
 
   const handleSubTypeChange = (event, newValue) => {
     setSelectedSubTypes(newValue);
@@ -92,114 +39,101 @@ const CombinedSearchFilterBar = ({
     onFilter(selectedTypes, selectedSubTypes, checked);
   };
 
-  return (
-    <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ marginTop: '8px', margin: 0, padding: 0 }}>
-        {/* <Typography variant="h4"className="card-list-title" style={{marginLeft: '50px'}}>
-  {setTitle}
-  </Typography> */}
-      {/*search form*/}
-      <form onSubmit={handleSearchSubmit} style={{ flex: 1, display: 'flex', alignItems: 'center', marginLeft: '', }}>
-        <Search sx={{borderStyle: 'none'}}>
-          <SearchIconWrapper>
-            <SearchIcon />
-          </SearchIconWrapper>
-          <StyledInputBase
-            placeholder="Search…"
-            value={searchTerm}
-            onChange={handleSearchChange}
-            inputProps={{ 'aria-label': 'search' }}
+  const handleDrawerToggle = () => {
+    setIsDrawerOpen(!isDrawerOpen);
+  };
+
+  const FilterContent = () => (
+    <Box sx={{ width: 300, padding: 2 }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', mb: 2 }}>
+        {selectedTypes.map((type) => (
+          <Chip
+            key={type}
+            label={type}
+            onDelete={() => {
+              const updatedTypes = selectedTypes.filter((t) => t !== type);
+              setSelectedTypes(updatedTypes);
+              onFilter(updatedTypes, selectedSubTypes, isSortedByEvo);
+            }}
+            sx={{ margin: '4px' }}
           />
-        </Search>
-      </form>
-
-      {/* filters */}
-      <Box sx={{ display: 'flex', alignItems: 'center', marginLeft: '108px', }}>
-        
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', mb: 1 }}>
-          {selectedTypes.map((type) => (
-         <Chip
-         key={type}
-         label={type}
-         onDelete={() => {
-             const updatedTypes = selectedTypes.filter((t) => t !== type);
-             setSelectedTypes(updatedTypes);
-             onFilter(updatedTypes, selectedSubTypes, isSortedByEvo); 
-         }}
-         sx={{ margin: '4px' }}
-     />
-          ))}
-        </Box>
-
-        {/* (energy)type filter with checkboxes */}
-        <Autocomplete 
-          multiple
-          id="checkboxes-types"
-          options={availableTypes}
-          disableCloseOnSelect
-          value={selectedTypes}
-          onChange={handleTypeChange}
-          getOptionLabel={(option) => option}
-          renderOption={(props, option, { selected }) => (
-            <li {...props} >
-              <Checkbox
-                icon={icon}
-                checkedIcon={checkedIcon}
-                style={{ marginRight: 8 }}
-                checked={selected}
-              />
-              {option}
-            </li>
-          )}
-          renderTags={() => null} 
-          renderInput={(params) => (
-            <TextField {...params} label="Type" placeholder="Select types" />
-          )}
-          sx={{ width: 200, marginRight: 2}}
-        />
-
-        {/* subtype filter with checkboxes */}
-        <Autocomplete
-          multiple
-          id="checkboxes-subtypes"
-          options={availableSubTypes}
-          disableCloseOnSelect
-          value={selectedSubTypes}
-          onChange={handleSubTypeChange}
-          getOptionLabel={(option) => option}
-          renderOption={(props, option, { selected }) => (
-            <li {...props}>
-              <Checkbox
-                icon={icon}
-                checkedIcon={checkedIcon}
-                style={{ marginRight: 8 }}
-                checked={selected}
-              />
-              {option}
-            </li>
-          )}
-          renderInput={(params) => (
-            <TextField {...params} label="Subtype" placeholder="Select subtypes" />
-          )}
-          sx={{ width: 200 }}
-        />
-
-        {/*sort by evo checkbox*/}
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={isSortedByEvo}
-              onChange={handleSortByEvoChange}
-              color="primary"
-            />
-          }
-          label="Evo-sort"
-          sx={{ marginLeft: 2 }}
-        />
+        ))}
       </Box>
- 
-     
- 
 
+      <Autocomplete
+        multiple
+        id="checkboxes-types"
+        options={availableTypes}
+        disableCloseOnSelect
+        value={selectedTypes}
+        onChange={handleTypeChange}
+        getOptionLabel={(option) => option}
+        renderOption={(props, option, { selected }) => (
+          <li {...props}>
+            <Checkbox
+              icon={icon}
+              checkedIcon={checkedIcon}
+              style={{ marginRight: 8 }}
+              checked={selected}
+            />
+            {option}
+          </li>
+        )}
+        renderTags={() => null}
+        renderInput={(params) => (
+          <TextField {...params} label="Type" placeholder="Select types" />
+        )}
+        sx={{ width: '100%', mb: 2 }}
+      />
+
+      <Autocomplete
+        multiple
+        id="checkboxes-subtypes"
+        options={availableSubTypes}
+        disableCloseOnSelect
+        value={selectedSubTypes}
+        onChange={handleSubTypeChange}
+        getOptionLabel={(option) => option}
+        renderOption={(props, option, { selected }) => (
+          <li {...props}>
+            <Checkbox
+              icon={icon}
+              checkedIcon={checkedIcon}
+              style={{ marginRight: 8 }}
+              checked={selected}
+            />
+            {option}
+          </li>
+        )}
+        renderInput={(params) => (
+          <TextField {...params} label="Subtype" placeholder="Select subtypes" />
+        )}
+        sx={{ width: '100%', mb: 2 }}
+      />
+
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={isSortedByEvo}
+            onChange={handleSortByEvoChange}
+            color="primary"
+          />
+        }
+        label="Evo-sort"
+      />
+    </Box>
+  );
+
+  return (
+    <Box sx={{ width: '100%' }}>
+   
+      <Drawer
+        anchor="right"
+        open={isDrawerOpen}
+        onClose={handleDrawerToggle}
+      >
+        <FilterContent />
+      </Drawer>
     </Box>
   );
 };
