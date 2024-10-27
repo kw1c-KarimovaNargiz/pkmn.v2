@@ -79,9 +79,9 @@ export default function SignIn() {
 
 
                 setUser(userData);
-                console.log(response.data.email)
                 // todo, make this token
-                localStorage.setItem('authToken', response.data.email);
+                localStorage.setItem('authToken', response.data.token);
+                localStorage.setItem('user', JSON.stringify(userData));
                 toast.success('Login successful!');
                 navigate('/Index');
             } else {

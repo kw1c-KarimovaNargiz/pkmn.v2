@@ -24,6 +24,7 @@ const CollectionPage = () => {
                 console.log('User collection response:', response);
 
                 if (Array.isArray(response)) {
+                    setError(false)
                     setUserCollection(response); 
                 } else {
                     console.error('Unexpected response structure:', response);
@@ -47,7 +48,6 @@ const CollectionPage = () => {
     if (error) {
         return <div>{error}</div>; 
     }
-
     return (
         <div className="cards-display-area">
             {userCollection.length > 0 ? (

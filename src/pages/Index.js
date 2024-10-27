@@ -192,7 +192,7 @@ const Index = () => {
         const uniqueSubTypes = [...new Set(cards.flatMap((card) => card.subtypes || []))];
         setSubTypes(uniqueSubTypes); 
     }, [cards]);
-    console.log("user", userLoading);
+
     if( userLoading ) return null;
     const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "No Title Available";
 

@@ -1,5 +1,5 @@
 
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { styled, alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
@@ -48,21 +48,23 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const SearchBar = ({ onSearch }) => {
+const SearchBar = ({
+  onSearch = () => { }
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleSearchChange = (event) => {
-      setSearchTerm(event.target.value);
+    setSearchTerm(event.target.value);
   };
 
   const handleSearchSubmit = (event) => {
-      event.preventDefault();
-      onSearch(searchTerm); 
+    event.preventDefault();
+    onSearch(searchTerm);
   };
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-     
-     {/*drawer for filtering */}
+
+      {/*drawer for filtering */}
       {/* <IconButton
         size="large"
         edge="start"
@@ -73,7 +75,7 @@ const SearchBar = ({ onSearch }) => {
       >
         <MenuIcon />
       </IconButton> */}
-      
+
       <form onSubmit={handleSearchSubmit} style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
         <Search sx={{ borderStyle: 'none', width: '100%' }}>
           <SearchIconWrapper>

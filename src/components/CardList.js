@@ -39,8 +39,6 @@ const CardList = ({ cards }) => {
                 [cardId]: count
             }));
             
-            alert('Collection updated');
-    
             //refresh collection
             const collectionData = await fetchUserCollection(user?.email);
             setUserCards(collectionData);

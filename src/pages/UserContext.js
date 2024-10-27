@@ -9,13 +9,15 @@ export const UserProvider = ({ children }) => {
     useEffect(() => {
         const fetchUser = async () => {
             setUserLoading(true);
+
+            //todo fetch user from server
             try {
                 const authToken = await localStorage.getItem('authToken');
                 console.log('authToken:', authToken);
                 if (authToken) {
                     const savedUser = JSON.parse(localStorage.getItem('user'));
                     if (savedUser) {
-                        console.log('setting user')
+                        console.log('setting user', savedUser)
                         setUser(savedUser);
                     }
                 }else{
