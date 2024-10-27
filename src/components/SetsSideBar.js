@@ -17,7 +17,7 @@ const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect }) => {
                     key={s.id} 
                     sx={{ 
                         backgroundColor: '#212121',
-                        width: '100%',
+                       
                         borderBottom: expanded === s.id ? '0px 15px 10px -15px #111' : '#3c3c3c',
                         color: 'black',
                         '&:not(:last-child)': {
@@ -37,7 +37,6 @@ const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect }) => {
                         aria-controls={`${s.id}-content`}
                         id={`${s.id}-header`}
                         onClick={(event) => {
-                            // Prevent the click from triggering the Accordion's onChange
                             event.stopPropagation();
                             onSeriesSelect(s);
                         }}
@@ -45,25 +44,28 @@ const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect }) => {
                             textTransform: 'uppercase',
                             justifyContent: 'center',
                             height: '50px',
+
                         }}
                     >
                         <Typography variant="h6" sx={{ color: '#999' }}>{s.series_name}</Typography>
                     </AccordionSummary>
-                    <AccordionDetails sx={{ backgroundColor: '#363636', color: '#999' }}>
+                    <AccordionDetails sx={{ backgroundColor: 'rgba(33, 33, 33, 10)', color: '#999' }}>
                         <ul style={{ listStyleType: 'none', margin: 0 }}>
                             {s.sets.map((setInfo) => ( 
                                 <li key={setInfo.id}>
                                     <button
                                         onClick={() => onSetSelect(setInfo.id)}
                                         style={{ 
-                                            backgroundColor: '#363636',
+                                       
+                                           padding: 12,
+                                           justifyContent: 'center',
                                             textDecoration: 'none', 
                                             background: 'none', 
                                             border: 'none',
                                             cursor: 'pointer', 
                                             color: '#999', 
                                             fontSize: '15px',
-                                            marginLeft: '-40px',
+                                            marginLeft: '-50px',
                                             height: '30px',
                                         }} 
                                     >
