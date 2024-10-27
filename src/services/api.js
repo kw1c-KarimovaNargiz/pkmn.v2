@@ -97,13 +97,14 @@ export const fetchSeries = async () => {
     export const addCardToCollection = async (payload) => {
       try {
           const response = await axios.post('http://127.0.0.1:8000/api/collections/add', {
-              email: payload.email,
+              token: payload.token,
               card_id: payload.card_id.toString(),
               count: parseInt(payload.count), 
           }, {
               headers: {
                   'Content-Type': 'application/json',
                   'Accept': 'application/json',
+                  'Authorization': `Bearer ${payload.authToken}`,
               }
           });
           return response;
@@ -114,10 +115,10 @@ export const fetchSeries = async () => {
   
 
 //user's collection of cards
-export const fetchUserCollection = async (email) => {
+export const fetchUserCollection = async (token) => {
   try {
       const response = await axios.get(`http://127.0.0.1:8000/api/collections`, {
-          params: { email: email }
+          params: { token: token }
       });
       return response.data;
   } catch (error) {
@@ -126,11 +127,11 @@ export const fetchUserCollection = async (email) => {
   }
 };
 
-export const removeCardFromCollection = async (email, cardId, count) => {
+export const removeCardFromCollection = async (token, cardId, count) => {
     try {
         const response = await axios.delete('http://127.0.0.1:8000/api/collections/remove', {
             data: {
-                email,
+                token,
                 card_id: cardId,
                 count
             }
@@ -142,7 +143,7 @@ export const removeCardFromCollection = async (email, cardId, count) => {
 };
 
 
-// export const removeCardFromCollection = async (email, cardId) => {
+// export const removeCardFromCollection = async (token, cardId) => {
 //   try {
 //       const response = await fetch('http://127.0.0.1:8000/api/collections/remove', {
 //           method: 'DELETE',
@@ -150,7 +151,7 @@ export const removeCardFromCollection = async (email, cardId, count) => {
 //               'Content-Type': 'application/json',
 //           },
 //           body: JSON.stringify({
-//               email: email,
+//               token: token,
 //               card_id: cardId,
 //               count: count,
 //           }),
