@@ -1,8 +1,10 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { AppBar, Toolbar, Button } from '@mui/material';
-import { useUser } from '../pages/UserContext'; 
+import { AppBar, Toolbar, Button, SvgIcon } from '@mui/material';
+import { useUser  } from '../pages/UserContext'; 
+import SearchBar from './SearchBar'; // Import the SearchBar component
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const pages = [
   { name: 'Home', path: '/' },
@@ -11,10 +13,13 @@ const pages = [
   { name: 'My decks', path: '/Decks' }
 ];
 
-function Navbar() {
+
+
+
+function Navbar({ searchTerm, setSearchTerm, onSearch }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useUser();
+  const { user, logout } = useUser ();
 
   const isLoggedIn = !!user; 
   
@@ -49,7 +54,22 @@ function Navbar() {
           ))}
         </div>
 
+        <SearchBar searchTerm={setSearchTerm} onSearch={onSearch} /> {/* Use SearchBar here */}
+
+
         {isLoggedIn ? (
+
+          <AccountCircleIcon  onClick={handleLogoutClick}>
+            
+          </AccountCircleIcon>
+         
+        ) : (
+          <AccountCircleIcon onClick={handleLoginClick}>
+            
+          </AccountCircleIcon>
+        )}
+
+        {/* {isLoggedIn ? (
           <Button color="inherit" onClick={handleLogoutClick}>
             Logout
           </Button>
@@ -57,7 +77,7 @@ function Navbar() {
           <Button color="inherit" onClick={handleLoginClick}>
             Login
           </Button>
-        )}
+        )} */}
       </Toolbar>
     </AppBar>
   );

@@ -3,7 +3,9 @@ import { Typography } from '@mui/material';
 import CardList from '../components/CardList';
 import SetsSidebar from '../components/SetsSideBar'; 
 import CombinedSearchFilterBar from '../components/CombinedSearchFilterBar'; 
-import { useUser } from '../pages/UserContext';
+import Navbar from '../components/Navbar';
+
+import { useUser  } from '../pages/UserContext';
 import { fetchSeries, fetchCardsForSet, searchCard, fetchSortedEvolutionCards, fetchSubTypes, addCardToCollection, removeCardFromCollection } from '../services/api';
 import '../styling/Index.css'; 
 
@@ -124,7 +126,7 @@ const Index = () => {
         setLoading(true);
         setSelectedSetId(setId);
         setSearchResults([]);
-        setSearchTerm('');
+
 
         try {
             const cardData = await fetchCardsForSet(setId); 
@@ -194,47 +196,43 @@ const Index = () => {
     if( userLoading ) return null;
     const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "No Title Available";
 
+   
     return (
-      <div className="index-container">
-          <div className="sidebar">
-              <SetsSidebar
-                  sets={sets}
-                  series={series} 
-                  onSetSelect={handleSetSelect} 
-                  onSeriesSelect={handleSeriesSelect} 
-              />
-          </div>
-          <div className="search-filter-container">
-              <CombinedSearchFilterBar 
-                onSearch={handleSearch}
-                availableTypes={allTypes} 
-                availableSubTypes={subTypes}
-                onFilter={handleFilter}  
-                selectedTypes={selectedTypes}
-                setSelectedTypes={setSelectedTypes}
-                selectedSubTypes={selectedSubTypes}
-                setSelectedSubTypes={setSelectedSubTypes}
-                onSortByEvo={handleSortByEvo}
-                onRestoreOriginal={handleRestoreOriginal} 
-                searchTerm={searchTerm}
+        <div className="index-container">
+            <Navbar 
                 setSearchTerm={setSearchTerm}
-                setTitle={setTitle}
-              />
-          </div>
-          <div className="cards-display-area">
-              <CardList 
-                cards={searchResults.length > 0 ? searchResults : filteredCards} 
-                onAddCard={handleAddCard} 
-                onnRemoveCard={handleRemoveCard}
-              />
-
-              {/* {cards.length === 0 && (
-                  <Typography variant="h6" component="div" align="center">
-                      Select a set or search for a Pokémon to see the cards.
-                  </Typography>
-              )} */}
-          </div>
-      </div>
+                onSearch={handleSearch} 
+            />
+            <div className="sidebar">
+                <SetsSidebar
+                    sets={sets}
+                    series={series} 
+                    onSetSelect={handleSetSelect} 
+                    onSeriesSelect={handleSeriesSelect} 
+                />
+            </div>
+            <div className="search-filter-container">
+                <CombinedSearchFilterBar 
+                  availableTypes={allTypes} 
+                  availableSubTypes={subTypes}
+                  onFilter={handleFilter}  
+                  selectedTypes={selectedTypes}
+                  setSelectedTypes={setSelectedTypes}
+                  selectedSubTypes={selectedSubTypes}
+                  setSelectedSubTypes={setSelectedSubTypes}
+                  onSortByEvo={handleSortByEvo}
+                  onRestoreOriginal={handleRestoreOriginal} 
+                  setTitle={setTitle}
+                />
+            </div>
+            <div className="cards-display-area">
+                <CardList 
+                  cards={searchResults.length > 0 ? searchResults : filteredCards} 
+                  onAddCard={handleAddCard} 
+                  onRemoveCard={handleRemoveCard}
+                />
+            </div>
+        </div>
     );
 };
 
