@@ -3,11 +3,12 @@ import { Grid, Typography, Checkbox, FormControlLabel, IconButton } from '@mui/m
 import { toast } from 'react-toastify';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
-import { addCardToCollection,  removeCardFromCollection, fetchUserCollection } from '../services/api';
+import { addCardToCollection, removeCardFromCollection, fetchUserCollection } from '../services/api';
 import { useUser } from '../pages/UserContext';
+import useApi from '../hooks/useApi';
 
 const CardList = ({ cards }) => {
-    const { user } = useUser(); 
+    const { user, authToken } = useUser();
     const [visibleCards, setVisibleCards] = useState([]);
     const [cardCounts, setCardCounts] = useState({});
     const [userCards, setUserCards] = useState([]);
@@ -15,35 +16,39 @@ const CardList = ({ cards }) => {
     const [selectedCard, setSelectedCard] = useState(null);
     const [toastId, setToastId] = useState(null);
     const [toastCount, setToastCount] = useState(0);
+
+    const { data: collectionData, error: collectionError, isLoading: collectionLoading, triggerFetch: refetchCollection } = useApi('collections', {}, false, 'GET');
+
+    useEffect(() => {
+        setUserCards(collectionData);
+    }, [collectionData, collectionError, collectionLoading]);
+
     //handle add card
     const handleCardToCollection = useCallback(async (cardId, count) => {
         if (count <= 0) {
             alert('You must select at least one card to update to your collection.');
             return;
         }
-    
+
         const payload = {
-            email: user?.email,
+            authToken: authToken,
             card_id: cardId,
             count: count,
         };
-    
+
         try {
             console.log('Sending payload:', payload);
-            
+
             const response = await addCardToCollection(payload);
             console.log('Card updated:', response.data);
-            
+
             setCardCounts(prevCounts => ({
                 ...prevCounts,
                 [cardId]: count
             }));
+
+            refetchCollection();
             
-            //refresh collection
-            const collectionData = await fetchUserCollection(user?.email);
-            setUserCards(collectionData);
-            
-            console.log('toast is active:', toast.isActive(toastId));
             if (toast.isActive(toastId)) {
                 let newToastCount = toastCount + 1;
                 setToastCount(newToastCount);
@@ -65,7 +70,7 @@ const CardList = ({ cards }) => {
                 data: error.response?.data,
                 message: error.message
             });
-            
+
             if (error.response?.status === 422) {
                 const validationErrors = error.response.data.errors;
                 const errorMessage = Object.values(validationErrors).flat().join('\n');
@@ -78,11 +83,11 @@ const CardList = ({ cards }) => {
                 alert('An error occurred while adding the card.');
             }
         }
-    }, [user?.email]);
+    }, [authToken]);
 
     //handle remove card
     const handleRemoveCardFromCollection = useCallback(async (cardId, count) => {
-        if (!user?.email) {
+        if (!authToken) {
             alert('You must be logged in to do this');
             return;
         }
@@ -90,100 +95,78 @@ const CardList = ({ cards }) => {
         //     alert('Please specify a valid number of cards to remove');
         //     return;
         // }
-    
+
         try {
-            const response = await removeCardFromCollection(user.email, cardId, count);
+            const response = await removeCardFromCollection(authToken, cardId, count);
             console.log('Card removed:', response);
-            
+
             //local state update
             setCardCounts(prevCounts => ({
                 ...prevCounts,
                 [cardId]: response.count
             }));
-            
+
             alert(response.message);
-            
-            //update/refresh collection
-            const collectionData = await fetchUserCollection(user.email);
-            setUserCards(collectionData);
-            
+            refetchCollection();
         } catch (error) {
             console.error('Error removing card:', error);
             const errorMessage = error.response?.data?.message || 'An error occurred while removing the card';
             alert(errorMessage);
-            
+
             //refresh collection to ensure proper state
-            const collectionData = await fetchUserCollection(user.email);
+            const collectionData = await fetchUserCollection(authToken);
             setUserCards(collectionData);
         }
-    }, [user?.email]);
+    }, [authToken]);
 
- 
+
     //increment for addcard function
     const handleIncrement = useCallback(async (index) => {
         const cardId = cards[index].id;
         const newCount = (cardCounts[cardId] || 0) + 1;
-    
+
         setCardCounts((prev) => ({
             ...prev,
             [cardId]: newCount,
         }));
-    
+
         await handleCardToCollection(cardId, newCount);
     }, [cards, cardCounts, handleCardToCollection]);
-    
+
     //decrement for remove card function
     const handleDecrement = useCallback(async (index) => {
         const cardId = cards[index].id;
-        const currentCount = cardCounts[cardId] || 0; 
-      
+        const currentCount = cardCounts[cardId] || 0;
+
         setCardCounts((prev) => ({
-          ...prev,
-          [cardId]: currentCount - 1, 
+            ...prev,
+            [cardId]: currentCount - 1,
         }));
-      
-        await handleRemoveCardFromCollection(cardId, 1); 
+
+        await handleRemoveCardFromCollection(cardId, 1);
         //check if last card 1 to 0 succeeded
         if (currentCount === 1) {
-          alert("Last card removed from your collection.");
+            alert("Last card removed from your collection.");
         }
-      }, [cards, cardCounts, handleRemoveCardFromCollection]);
-
-      
-    useEffect(() => {
-        const fetchCollection = async () => {
-            if (!user || !user.email) {
-                console.error('User is not logged in, cannot fetch their collection');
-                return; 
-            }
-
-            try {
-                const data = await fetchUserCollection(user.email);
-                setUserCards(data); 
-            } catch (error) {
-                console.error('Error fetching user collection:', error);
-            }
-        };
-
-        fetchCollection();
-    }, [user]); 
+    }, [cards, cardCounts, handleRemoveCardFromCollection]);
 
     useEffect(() => {
         const initialCounts = {};
-    
+
         if (Array.isArray(userCards)) {
             userCards.forEach(card => {
                 initialCounts[card.card_id] = card.count;
             });
         }
-    
+
         setCardCounts(prevCounts => {
             const hasDifferentCounts = Object.keys(initialCounts).some(id => initialCounts[id] !== prevCounts[id]);
             return hasDifferentCounts ? initialCounts : prevCounts;
         });
+
+
     }, [userCards]);
 
- 
     // const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
     const handleCardClick = (card) => {
         setSelectedCard(card);
@@ -200,33 +183,34 @@ const CardList = ({ cards }) => {
 
             <Grid container spacing={2}>
                 {cards.map((card, index) => (
-                    <Grid 
-                        item 
-                        key={card.id} 
-                        xs={12} 
-                        sm={6} 
-                        md={4} 
-                        className="card-item" 
-                        data-index={index} 
+                    console.log(card),
+                    <Grid
+                        item
+                        key={card.id}
+                        xs={12}
+                        sm={6}
+                        md={4}
+                        className="card-item"
+                        data-index={index}
                     >
-                        <div style={{ 
-                            display: 'flex', 
+                        <div style={{
+                            display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
                             gap: '4px'
                         }}>
                             <CardDisplay card={card} onClick={() => handleCardClick(card)} />
-                            
-                            <div style={{ 
-                                display: 'flex', 
+
+                            <div style={{
+                                display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 width: '100%',
                                 marginTop: '-30px'
                             }}>
-                                <IconButton 
-                                    onClick={() => handleDecrement(index)} 
-                                    size="small" 
+                                <IconButton
+                                    onClick={() => handleDecrement(index)}
+                                    size="small"
                                     disabled={cardCounts[card.id] === 0}
                                 >
                                     <Remove />
@@ -234,16 +218,16 @@ const CardList = ({ cards }) => {
 
                                 <FormControlLabel
                                     control={
-                                        <Checkbox 
-                                            checked={!!cardCounts[card.id]} 
-                                            color="primary" 
+                                        <Checkbox
+                                            checked={!!cardCounts[card.id]}
+                                            color="primary"
                                         />
                                     }
-                                    label={cardCounts[card.id] || 0} 
+                                    label={cardCounts[card.id] || card.count || 0}
                                 />
 
-                                <IconButton 
-                                    onClick={() => handleIncrement(index)} 
+                                <IconButton
+                                    onClick={() => handleIncrement(index)}
                                     size="small"
                                 >
                                     <Add />

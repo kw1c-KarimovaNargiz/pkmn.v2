@@ -1,57 +1,46 @@
 import React, { useEffect, useState } from 'react';
 import { useUser } from '../pages/UserContext';
-import { fetchUserCollection } from '../services/api'; 
-import CardList from '../components/CardList'; 
-import '../styling/Index.css'; 
+import CardList from '../components/CardList';
+import '../styling/Index.css';
+import useApi from '../hooks/useApi';
 
 const CollectionPage = () => {
-    const { user } = useUser();
-    const [userCollection, setUserCollection] = useState([]); 
-    const [loading, setLoading] = useState(true); 
-    const [error, setError] = useState(null); 
+    const { user, authToken, userLoading } = useUser();
+    const [userCollection, setUserCollection] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const { data: collectionData, error: collectionError, isLoading: collectionLoading, triggerFetch: refetchCollection } = useApi('collections', {}, false, 'GET');
 
     useEffect(() => {
-        const fetchCollection = async () => {
-            if (!user) { 
-                console.log('User is not logged in, cannot fetch their collection');
-                setError('You need to log in to view your collection.');
-                setLoading(false);
-                return;
-            }
+        if (authToken && !userLoading) {
+            refetchCollection();
+        }
+    }, [authToken, userLoading]);
 
-            try {
-                const response = await fetchUserCollection(user.email);
-                console.log('User collection response:', response);
-
-                if (Array.isArray(response)) {
-                    setError(false)
-                    setUserCollection(response); 
-                } else {
-                    console.error('Unexpected response structure:', response);
-                    setError('Unexpected response structure');
-                }
-            } catch (error) {
-                console.error('Error fetching user collection:', error);
-                setError('Failed to fetch user collection'); 
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchCollection();
-    }, [user]);
+    useEffect(() => {
+        if (collectionData) {
+            setUserCollection(collectionData);
+            setLoading(false);
+        }
+        if (collectionError) {
+            setError('Failed to fetch user collection');
+            setLoading(false);
+        }
+    }, [collectionData, collectionError, collectionLoading]);
 
     if (loading) {
-        return <div>Loading...</div>; 
+        return <div>Loading...</div>;
     }
 
     if (error) {
-        return <div>{error}</div>; 
+        return <div>{error}</div>;
     }
+
     return (
         <div className="cards-display-area">
             {userCollection.length > 0 ? (
-                <CardList cards={userCollection.map(item => item.card)} /> 
+                <CardList cards={userCollection.map(item => item.card)} />
             ) : (
                 <p>No cards in your collection.</p>
             )}
