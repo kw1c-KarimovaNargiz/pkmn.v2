@@ -23,13 +23,14 @@ function App() {
                     <Box sx={{ flexGrow: 1 }}>
                         <Container>
                             <Routes>
+                            <Route path="/login" element={<SignIn />} /> 
+                                <Route path="/signup" element={<SignUp />} /> 
+                                <Route path="*" element={<Navigate to="/login" replace />} /> 
                                 <Route path="/" element={<Home />} />
                                 <Route path="/Decks" element={<Decks />} />
                                 <Route path="/Index" element={<Index />} />
                                 <Route path="/collection" element={<CollectionPage />} />
-                                <Route path="/login" element={<SignIn />} /> 
-                                <Route path="/signup" element={<SignUp />} /> 
-                                <Route path="*" element={<Navigate to="/login" replace />} /> 
+                               
                             </Routes>
                         </Container>
                     </Box>

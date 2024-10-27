@@ -31,7 +31,7 @@ body {
   
 }
 
-.search-filter-container {
+/* .search-filter-container {
   position: fixed;
   top: 64px; 
   display: flex;
@@ -42,7 +42,7 @@ body {
    
      box-shadow: 10px 5px rgba(0, 0, 0, 0.1);
 
- }
+ } */
 .cards-display-area {
     margin-left: 20%;
     padding: 30px;

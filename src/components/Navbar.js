@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { AppBar, Toolbar, Button, SvgIcon } from '@mui/material';
+import { AppBar, Toolbar, Button, SvgIcon, Box } from '@mui/material';
 import { useUser  } from '../pages/UserContext'; 
 import SearchBar from './SearchBar'; // Import the SearchBar component
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
@@ -13,16 +13,13 @@ const pages = [
   { name: 'My decks', path: '/Decks' }
 ];
 
-
-
-
 function Navbar({ searchTerm, setSearchTerm, onSearch }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useUser ();
 
   const isLoggedIn = !!user; 
-  
+
   const handleClick = (path) => {
     if (location.pathname !== path) {
       navigate(path);
@@ -40,8 +37,10 @@ function Navbar({ searchTerm, setSearchTerm, onSearch }) {
   };
 
   return (
+    
     <AppBar sx={{ backgroundColor: '#8a3f3f', position: 'fixed', zIndex: '1100' }}>
       <Toolbar sx={{ justifyContent: 'space-between' }}>
+      
         <div>
           {pages.map((page) => (
             <Button
@@ -53,31 +52,16 @@ function Navbar({ searchTerm, setSearchTerm, onSearch }) {
             </Button>
           ))}
         </div>
-
-        <SearchBar searchTerm={setSearchTerm} onSearch={onSearch} /> {/* Use SearchBar here */}
-
-
+        <Box sx={{ marginLeft: 105}}>
+        <SearchBar searchTerm={setSearchTerm} onSearch={onSearch} />
+        </Box>
+        <Box sx={{ marginLeft: 0 }} />
+        
         {isLoggedIn ? (
-
-          <AccountCircleIcon  onClick={handleLogoutClick}>
-            
-          </AccountCircleIcon>
-         
+          <AccountCircleIcon onClick={handleLogoutClick} />
         ) : (
-          <AccountCircleIcon onClick={handleLoginClick}>
-            
-          </AccountCircleIcon>
+          <AccountCircleIcon onClick={handleLoginClick} />
         )}
-
-        {/* {isLoggedIn ? (
-          <Button color="inherit" onClick={handleLogoutClick}>
-            Logout
-          </Button>
-        ) : (
-          <Button color="inherit" onClick={handleLoginClick}>
-            Login
-          </Button>
-        )} */}
       </Toolbar>
     </AppBar>
   );
