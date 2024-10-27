@@ -6,12 +6,12 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import { Box, Container } from '@mui/material';
 import setBodyColor from './setBodyColor';
-import Navbar from './components/Navbar'; 
+import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Decks from './pages/Decks';
-import Index from './pages/Index'; 
-import SignIn from './components/SignIn';  
-import SignUp from './components/SignUp';  
+import Index from './pages/Index';
+import SignIn from './components/SignIn';
+import SignUp from './components/SignUp';
 import CollectionPage from './pages/CollectionPage';
 
 function App() {
@@ -27,14 +27,25 @@ function App() {
                                 <Route path="/Decks" element={<Decks />} />
                                 <Route path="/Index" element={<Index />} />
                                 <Route path="/collection" element={<CollectionPage />} />
-                                <Route path="/login" element={<SignIn />} /> 
-                                <Route path="/signup" element={<SignUp />} /> 
-                                <Route path="*" element={<Navigate to="/login" replace />} /> 
+                                <Route path="/login" element={<SignIn />} />
+                                <Route path="/signup" element={<SignUp />} />
+                                <Route path="*" element={<Navigate to="/login" replace />} />
                             </Routes>
                         </Container>
                     </Box>
                 </Box>
-                <ToastContainer />
+                <ToastContainer
+                    position="top-right"
+                    autoClose={1000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    closeButton={false}
+                />
             </Router>
         </UserProvider>
     );
