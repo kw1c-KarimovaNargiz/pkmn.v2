@@ -23,7 +23,6 @@ const CardList = ({ cards }) => {
         setUserCards(collectionData);
     }, [collectionData, collectionError, collectionLoading]);
 
-
     //handle add card
     const handleCardToCollection = useCallback(async (cardId, count) => {
         if (count <= 0) {
@@ -151,7 +150,6 @@ const CardList = ({ cards }) => {
         }
     }, [cards, cardCounts, handleRemoveCardFromCollection]);
 
-
     useEffect(() => {
         console.log(userCards)
         const initialCounts = {};
@@ -172,6 +170,8 @@ const CardList = ({ cards }) => {
             const hasDifferentCounts = Object.keys(initialCounts).some(id => initialCounts[id] !== prevCounts[id]);
             return hasDifferentCounts ? initialCounts : prevCounts;
         });
+
+
     }, [userCards]);
 
     // const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
