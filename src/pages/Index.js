@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Typography } from '@mui/material';
 import CardList from '../components/CardList';
-import SetsSidebar from '../components/SetsSideBar'; 
+import SetsSidebar from '../components/SetsSideBar';
 import CombinedSearchFilterBar from '../components/CombinedSearchFilterBar'; 
 import Navbar from '../components/Navbar';
-
-import { useUser  } from '../pages/UserContext';
+import { useUser } from '../pages/UserContext';
 import { fetchSeries, fetchCardsForSet, searchCard, fetchSortedEvolutionCards, fetchSubTypes, addCardToCollection, removeCardFromCollection } from '../services/api';
 import '../styling/Index.css'; 
 
@@ -23,7 +22,7 @@ const Index = () => {
     const [subTypes, setSubTypes] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false); 
-    const { user, userLoading  } = useUser(); 
+    const { user, userLoading } = useUser(); 
 
     const handleAddCard = async (cardId, count) => {
         if (!user) {
@@ -39,7 +38,6 @@ const Index = () => {
         }
     };
 
-    
     const handleRemoveCard = async (cardId, count) => {
         if (!user) {
             console.warn('User must be logged in to handle their collection');
@@ -59,7 +57,6 @@ const Index = () => {
             setLoading(true); 
             try {
                 setOriginalCards(cards);
-
                 const sortedCards = await fetchSortedEvolutionCards(selectedSetId);
                 const uniqueSortedCards = sortedCards.filter((card, index, self) => 
                     index === self.findIndex((c) => c.id === card.id)
@@ -94,7 +91,6 @@ const Index = () => {
         }
     };
 
-    
     useEffect(() => {
         const loadSeries = async () => {
             setLoading(true);
@@ -120,13 +116,11 @@ const Index = () => {
         };
         loadSeries(); 
     }, []);
-    
 
     const handleSetSelect = async (setId) => {
         setLoading(true);
         setSelectedSetId(setId);
         setSearchResults([]);
-
 
         try {
             const cardData = await fetchCardsForSet(setId); 
@@ -173,11 +167,11 @@ const Index = () => {
                 subtypes.some((subtype) => card.subtypes.includes(subtype))
             );
         }
+
         if (isSortedByEvo) {
-            filtered = filtered.sort((a, b) => {
-                return a.evolutionStage - b.evolutionStage;
-            });
+            filtered = filtered.sort((a, b) => a.evolutionStage - b.evolutionStage);
         }
+
         setFilteredCards(filtered);
     };
     
@@ -192,44 +186,31 @@ const Index = () => {
         const uniqueSubTypes = [...new Set(cards.flatMap((card) => card.subtypes || []))];
         setSubTypes(uniqueSubTypes); 
     }, [cards]);
+
     console.log("user", userLoading);
-    if( userLoading ) return null;
+    if (userLoading) return null;
+    
     const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "No Title Available";
 
-   
     return (
         <div className="index-container">
-            <Navbar 
-                setSearchTerm={setSearchTerm}
-                onSearch={handleSearch} 
-            />
+            <Navbar setSearchTerm={setSearchTerm} onSearch={handleSearch} />
             <div className="sidebar">
                 <SetsSidebar
-                    sets={sets}
                     series={series} 
                     onSetSelect={handleSetSelect} 
                     onSeriesSelect={handleSeriesSelect} 
+                    availableTypes={allTypes}
+                    availableSubTypes={subTypes}
+                    onFilter={handleFilter}  
                 />
             </div>
-            <div className="search-filter-container">
-                <CombinedSearchFilterBar 
-                  availableTypes={allTypes} 
-                  availableSubTypes={subTypes}
-                  onFilter={handleFilter}  
-                  selectedTypes={selectedTypes}
-                  setSelectedTypes={setSelectedTypes}
-                  selectedSubTypes={selectedSubTypes}
-                  setSelectedSubTypes={setSelectedSubTypes}
-                  onSortByEvo={handleSortByEvo}
-                  onRestoreOriginal={handleRestoreOriginal} 
-                  setTitle={setTitle}
-                />
-            </div>
+        
             <div className="cards-display-area">
                 <CardList 
-                  cards={searchResults.length > 0 ? searchResults : filteredCards} 
-                  onAddCard={handleAddCard} 
-                  onRemoveCard={handleRemoveCard}
+                    cards={searchResults.length > 0 ? searchResults : filteredCards} 
+                    onAddCard={handleAddCard} 
+                    onRemoveCard={handleRemoveCard}
                 />
             </div>
         </div>
