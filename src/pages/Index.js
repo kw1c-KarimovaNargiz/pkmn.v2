@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Typography } from '@mui/material';
 import CardList from '../components/CardList';
 import SetsSidebar from '../components/SetsSideBar';
@@ -23,6 +23,8 @@ const Index = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false); 
     const { user, userLoading } = useUser(); 
+    const [cardCache, setCardCache] = useState({});
+    const [subTypeCache, setSubTypeCache] = useState({});
 
     const handleAddCard = async (cardId, count) => {
         if (!user) {
@@ -117,28 +119,51 @@ const Index = () => {
         loadSeries(); 
     }, []);
 
-    const handleSetSelect = async (setId) => {
-        setLoading(true);
-        setSelectedSetId(setId);
-        setSearchResults([]);
+   const handleSetSelect = useCallback(async (setId) => {
+    setLoading(true);
+    setSelectedSetId(setId);
+    setSearchResults([]);
 
-        try {
-            const cardData = await fetchCardsForSet(setId); 
-            setCards(cardData);
-            setOriginalCards(cardData); 
-            setFilteredCards(cardData);
+    try {
+        let cardData, subTypeData;
 
-            const subTypeData = await fetchSubTypes(setId); 
-            setSubTypes(subTypeData);
-        } catch (error) {
-            console.error("Error loading cards:", error);
-            setCards([]); 
-            setFilteredCards([]); 
-            setSubTypes([]);
-        } finally {
-            setLoading(false); 
+        // Check if we have cached data
+        if (cardCache[setId] && subTypeCache[setId]) {
+            cardData = cardCache[setId];
+            subTypeData = subTypeCache[setId];
+        } else {
+            // Fetch card data and subtype data in parallel
+            [cardData, subTypeData] = await Promise.all([
+                fetchCardsForSet(setId),
+                fetchSubTypes(setId)
+            ]);
+
+            // Cache the results
+            setCardCache(prev => ({ ...prev, [setId]: cardData }));
+            setSubTypeCache(prev => ({ ...prev, [setId]: subTypeData }));
         }
-    };
+
+        setCards(cardData);
+        setOriginalCards(cardData);
+        setFilteredCards(cardData);
+        setSubTypes(subTypeData);
+    } catch (error) {
+        console.error("Error loading cards:", error);
+        setCards([]);
+        setFilteredCards([]);
+        setSubTypes([]);
+    } finally {
+        setLoading(false);
+    }
+}, [cardCache, subTypeCache]);
+
+const uniqueTypes = useMemo(() => [...new Set(cards.flatMap((card) => card.types))], [cards]);
+const uniqueSubTypes = useMemo(() => [...new Set(cards.flatMap((card) => card.subtypes || []))], [cards]);
+
+useEffect(() => {
+    setAllTypes(uniqueTypes);
+    setSubTypes(uniqueSubTypes);
+}, [uniqueTypes, uniqueSubTypes]);
 
     const handleSearch = async (term) => {
         setLoading(true); 
