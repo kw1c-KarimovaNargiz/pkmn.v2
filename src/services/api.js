@@ -16,9 +16,9 @@ export const loginUser = async (formData) => {
   }
 };
 
-export const fetchCardPrices = async () => {
+export const fetchCardPrices = async (cardId) => {
     try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/card-prices`);
+        const response = await axios.get(`http://127.0.0.1:8000/api/card-prices/${cardId}`);
         return response.data; 
     } catch (error) {
         console.error("Er is een fout opgetreden bij het ophalen van de kaartprijzen:", error);

@@ -3,9 +3,9 @@ import { Grid, Typography, Checkbox, FormControlLabel, IconButton } from '@mui/m
 import { toast } from 'react-toastify';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay'; 
-import PriceDisplay from './PriceDisplay';
 import { fetchCardPrices, addCardToCollection, removeCardFromCollection, fetchUserCollection } from '../services/api';
 import { useUser } from '../pages/UserContext';
+import PriceDisplay from './PriceDisplay'; // Import your PriceDisplay component
 
 const CardList = ({ cards }) => {
     const { user } = useUser();
@@ -14,26 +14,58 @@ const CardList = ({ cards }) => {
     const [selectedCard, setSelectedCard] = useState(null);
     const [toastId, setToastId] = useState(null);
     const [toastCount, setToastCount] = useState(0);
-    const [cardPrices, setCardPrices] = useState([]); // State to store card prices
+    const [cardPrices, setCardPrices] = useState({});
+    const [loadingPrices, setLoadingPrices] = useState(true);
+    const [priceError, setPriceError] = useState(null);
+    
 
-    // Fetch card prices on component mount
+    const displayPriceInfo = (cardPrice) => {
+        if (cardPrice) {
+            return (
+                <div>
+                    <p>URL: {cardPrice.url}</p>
+                    <p>Updated At: {cardPrice.updatedAt}</p>
+                    <p>Low: {cardPrice.prices?.holofoil?.low ?? 'N/A'}</p>
+                    <p>Mid: {cardPrice.prices?.holofoil?.mid ?? 'N/A'}</p>
+                    <p>High: {cardPrice.prices?.holofoil?.high ?? 'N/A'}</p>
+                    <p>Market: {cardPrice.prices?.holofoil?.market ?? 'N/A'}</p>
+                    <p>Direct Low: {cardPrice.prices?.holofoil?.directLow ?? 'N/A'}</p>
+                </div>
+            );
+        }
+        return <p>No price data available</p>;
+    };
+
     useEffect(() => {
-        const fetchPrices = async () => {
+        const fetchPricesForCards = async () => {
+            setLoadingPrices(true);
+            setPriceError(null);
+        
             try {
-                const prices = await fetchCardPrices();
-                const pricesByCardId = prices.reduce((acc, price) => {
-                    acc[price.card_id] = price; // Map prices by card_id for quick lookup
+                const pricePromises = cards.map(card => fetchCardPrices(card.card_id));
+                const prices = await Promise.all(pricePromises);
+                
+                // Create a lookup object for faster access (key by card_id), skipping those without prices
+                const pricesById = prices.reduce((acc, priceData, index) => {
+                    if (priceData && cards[index]) {
+                        // Only add to the accumulator if priceData is valid
+                        acc[cards[index].card_id] = priceData;
+                    }
                     return acc;
                 }, {});
-                setCardPrices(pricesByCardId);
+        
+                setCardPrices(pricesById);
             } catch (error) {
-                console.error("Error fetching card prices:", error);
+                console.error("Error fetching prices:", error);
+                setPriceError("An error occurred fetching prices.");
+            } finally {
+                setLoadingPrices(false);
             }
         };
-
-        fetchPrices();
-    }, []);
-
+    
+        fetchPricesForCards();
+    }, [cards]);
+    
     // Handle adding card to collection
     const handleCardToCollection = useCallback(async (cardId, count) => {
         if (count <= 0) {
@@ -94,8 +126,6 @@ const CardList = ({ cards }) => {
         }
     }, [user?.email, toastId, toastCount]);
 
-
-    
     // Handle removing card from collection
     const handleRemoveCardFromCollection = useCallback(async (cardId) => {
         if (!user?.email) {
@@ -191,70 +221,79 @@ const CardList = ({ cards }) => {
 
     return (
         <div>
-            {/* <Typography variant="h4" gutterBottom className="card-list-title">
-  {setTitle}
-</Typography> */}
-
             <Grid container spacing={2}>
-                {cards.map((card, index) => (
-                    <Grid 
-                        item 
-                        key={card.id} 
-                        xs={12} 
-                        sm={6} 
-                        md={4} 
-                        className="card-item" 
-                        data-index={index} 
-                    >
-                        <div style={{ 
-                            display: 'flex', 
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '4px'
-                        }}>
-                            <CardDisplay card={card} onClick={() => handleCardClick(card)} />
-                            
+                {cards.map((card, index) => {
+                    const priceData = cardPrices[card.card_id];
+
+                    // Skip cards without price data
+                    if (!priceData) {
+                        return null; // Skip rendering this card
+                    }
+
+                    return (
+                        <Grid 
+                            item 
+                            key={card.id} 
+                            xs={12} 
+                            sm={6} 
+                            md={4} 
+                            className="card-item" 
+                            data-index={index} 
+                        >
                             <div style={{ 
                                 display: 'flex', 
+                                flexDirection: 'column',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '100%',
-                                marginTop: '-30px'
+                                gap: '4px'
                             }}>
-                                <IconButton 
-                                    onClick={() => handleDecrement(index)} 
-                                    size="small" 
-                                    disabled={cardCounts[card.id] === 0}
-                                >
-                                    <Remove />
-                                </IconButton>
+                                <CardDisplay card={card} onClick={() => handleCardClick(card)} />
+                                
+                                <div style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: '100%',
+                                    marginTop: '-30px'
+                                }}>
+                                    <IconButton 
+                                        onClick={() => handleDecrement(index)} 
+                                        size="small" 
+                                        disabled={cardCounts[card.id] === 0}
+                                    >
+                                        <Remove />
+                                    </IconButton>
 
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox 
-                                            checked={!!cardCounts[card.id]} 
-                                            color="primary" 
-                                        />
-                                    }
-                                    label={cardCounts[card.id] || 0} 
-                                />
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox 
+                                                checked={!!cardCounts[card.id]} 
+                                                color="primary" 
+                                            />
+                                        }
+                                        label={cardCounts[card.id] || 0} 
+                                    />
 
-                                <IconButton 
-                                    onClick={() => handleIncrement(index)} 
-                                    size="small"
-                                >
-                                    <Add />
-                                </IconButton>
-                                <PriceDisplay price={cardPrices[card.id]?.prices} />
+                                    <IconButton 
+                                        onClick={() => handleIncrement(index)} 
+                                        size="small"
+                                    >
+                                        <Add />
+                                    </IconButton>
+                                    
+                                    {/* Use displayPriceInfo function to display card prices */}
+                                    {displayPriceInfo(priceData)}
+                                </div>
                             </div>
-                        </div>
-                    </Grid>
-                ))}
+                        </Grid>
+                    );
+                })}
             </Grid>
 
             {selectedCard && (
                 <CardDisplay card={selectedCard} onClose={handleCloseCardDisplay} />
             )}
+            {loadingPrices && <Typography>Loading prices...</Typography>}
+            {priceError && <Typography color="error">{priceError}</Typography>}
         </div>
     );
 };
