@@ -2,55 +2,67 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Grid, Typography, Checkbox, FormControlLabel, IconButton } from '@mui/material';
 import { toast } from 'react-toastify';
 import { Add, Remove } from '@mui/icons-material';
-import CardDisplay from './CardDisplay';
-import { addCardToCollection,  removeCardFromCollection, fetchUserCollection } from '../services/api';
+import CardDisplay from './CardDisplay'; 
+import PriceDisplay from './PriceDisplay';
+import { fetchCardPrices, addCardToCollection, removeCardFromCollection, fetchUserCollection } from '../services/api';
 import { useUser } from '../pages/UserContext';
 
 const CardList = ({ cards }) => {
-    const { user } = useUser(); 
-    const [visibleCards, setVisibleCards] = useState([]);
+    const { user } = useUser();
     const [cardCounts, setCardCounts] = useState({});
     const [userCards, setUserCards] = useState([]);
-    const observerRef = useRef(null);
     const [selectedCard, setSelectedCard] = useState(null);
     const [toastId, setToastId] = useState(null);
     const [toastCount, setToastCount] = useState(0);
-    //handle add card
+    const [cardPrices, setCardPrices] = useState([]); // State to store card prices
+
+    // Fetch card prices on component mount
+    useEffect(() => {
+        const fetchPrices = async () => {
+            try {
+                const prices = await fetchCardPrices();
+                const pricesByCardId = prices.reduce((acc, price) => {
+                    acc[price.card_id] = price; // Map prices by card_id for quick lookup
+                    return acc;
+                }, {});
+                setCardPrices(pricesByCardId);
+            } catch (error) {
+                console.error("Error fetching card prices:", error);
+            }
+        };
+
+        fetchPrices();
+    }, []);
+
+    // Handle adding card to collection
     const handleCardToCollection = useCallback(async (cardId, count) => {
         if (count <= 0) {
             alert('You must select at least one card to update to your collection.');
             return;
         }
-    
+
         const payload = {
             email: user?.email,
             card_id: cardId,
             count: count,
         };
-    
+
         try {
-            console.log('Sending payload:', payload);
-            
             const response = await addCardToCollection(payload);
             console.log('Card updated:', response.data);
-            
-            setCardCounts(prevCounts => ({
-                ...prevCounts,
-                [cardId]: count
-            }));
-            
+            setCardCounts(prevCounts => ({ ...prevCounts, [cardId]: count }));
             alert('Collection updated');
-    
-            //refresh collection
+
+            // Refresh collection
             const collectionData = await fetchUserCollection(user?.email);
             setUserCards(collectionData);
-            
-            console.log('toast is active:', toast.isActive(toastId));
+
+            // Handle toast notification
             if (toast.isActive(toastId)) {
                 let newToastCount = toastCount + 1;
                 setToastCount(newToastCount);
                 toast.update(toastId, {
-                    render: `Card added successfully! (${++newToastCount})`,
+                    render: `Card added successfully! (${newToastCount})`,
                     type: 'success',
                     autoClose: 3000,
                 });
@@ -67,7 +79,7 @@ const CardList = ({ cards }) => {
                 data: error.response?.data,
                 message: error.message
             });
-            
+
             if (error.response?.status === 422) {
                 const validationErrors = error.response.data.errors;
                 const errorMessage = Object.values(validationErrors).flat().join('\n');
@@ -80,113 +92,95 @@ const CardList = ({ cards }) => {
                 alert('An error occurred while adding the card.');
             }
         }
-    }, [user?.email]);
+    }, [user?.email, toastId, toastCount]);
 
-    //handle remove card
-    const handleRemoveCardFromCollection = useCallback(async (cardId, count) => {
+
+    
+    // Handle removing card from collection
+    const handleRemoveCardFromCollection = useCallback(async (cardId) => {
         if (!user?.email) {
             alert('You must be logged in to do this');
             return;
         }
-        // if (count <= 0) {
-        //     alert('Please specify a valid number of cards to remove');
-        //     return;
-        // }
-    
+
         try {
-            const response = await removeCardFromCollection(user.email, cardId, count);
+            const response = await removeCardFromCollection(user.email, cardId, 1);
             console.log('Card removed:', response);
-            
-            //local state update
-            setCardCounts(prevCounts => ({
-                ...prevCounts,
-                [cardId]: response.count
-            }));
-            
+            setCardCounts(prevCounts => ({ ...prevCounts, [cardId]: response.count }));
             alert(response.message);
-            
-            //update/refresh collection
+
+            // Update/refresh collection
             const collectionData = await fetchUserCollection(user.email);
             setUserCards(collectionData);
-            
         } catch (error) {
             console.error('Error removing card:', error);
             const errorMessage = error.response?.data?.message || 'An error occurred while removing the card';
             alert(errorMessage);
-            
-            //refresh collection to ensure proper state
+
+            // Refresh collection to ensure proper state
             const collectionData = await fetchUserCollection(user.email);
             setUserCards(collectionData);
         }
     }, [user?.email]);
 
- 
-    //increment for addcard function
+    // Increment card count
     const handleIncrement = useCallback(async (index) => {
         const cardId = cards[index].id;
         const newCount = (cardCounts[cardId] || 0) + 1;
-    
-        setCardCounts((prev) => ({
-            ...prev,
-            [cardId]: newCount,
-        }));
-    
+
+        setCardCounts(prev => ({ ...prev, [cardId]: newCount }));
         await handleCardToCollection(cardId, newCount);
     }, [cards, cardCounts, handleCardToCollection]);
-    
-    //decrement for remove card function
+
+    // Decrement card count
     const handleDecrement = useCallback(async (index) => {
         const cardId = cards[index].id;
-        const currentCount = cardCounts[cardId] || 0; 
-      
-        setCardCounts((prev) => ({
-          ...prev,
-          [cardId]: currentCount - 1, 
-        }));
-      
-        await handleRemoveCardFromCollection(cardId, 1); 
-        //check if last card 1 to 0 succeeded
-        if (currentCount === 1) {
-          alert("Last card removed from your collection.");
-        }
-      }, [cards, cardCounts, handleRemoveCardFromCollection]);
+        const currentCount = cardCounts[cardId] || 0;
 
-      
+        if (currentCount > 0) {
+            setCardCounts(prev => ({ ...prev, [cardId]: currentCount - 1 }));
+            await handleRemoveCardFromCollection(cardId);
+
+            if (currentCount === 1) {
+                alert("Last card removed from your collection.");
+            }
+        }
+    }, [cards, cardCounts, handleRemoveCardFromCollection]);
+
+    // Fetch user collection on user change
     useEffect(() => {
         const fetchCollection = async () => {
             if (!user || !user.email) {
                 console.error('User is not logged in, cannot fetch their collection');
-                return; 
+                return;
             }
 
             try {
                 const data = await fetchUserCollection(user.email);
-                setUserCards(data); 
+                setUserCards(data);
             } catch (error) {
                 console.error('Error fetching user collection:', error);
             }
         };
 
         fetchCollection();
-    }, [user]); 
+    }, [user]);
 
+    // Initialize card counts from user cards
     useEffect(() => {
         const initialCounts = {};
-    
         if (Array.isArray(userCards)) {
             userCards.forEach(card => {
                 initialCounts[card.card_id] = card.count;
             });
         }
-    
         setCardCounts(prevCounts => {
             const hasDifferentCounts = Object.keys(initialCounts).some(id => initialCounts[id] !== prevCounts[id]);
             return hasDifferentCounts ? initialCounts : prevCounts;
         });
     }, [userCards]);
 
- 
-    // const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
+    // Card click handling
     const handleCardClick = (card) => {
         setSelectedCard(card);
     };
@@ -194,6 +188,7 @@ const CardList = ({ cards }) => {
     const handleCloseCardDisplay = () => {
         setSelectedCard(null);
     };
+
     return (
         <div>
             {/* <Typography variant="h4" gutterBottom className="card-list-title">
@@ -250,6 +245,7 @@ const CardList = ({ cards }) => {
                                 >
                                     <Add />
                                 </IconButton>
+                                <PriceDisplay price={cardPrices[card.id]?.prices} />
                             </div>
                         </div>
                     </Grid>
