@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent, Typography, Dialog, DialogContent } from '@mui/material';
+import { Card, CardContent, Typography, Dialog, DialogContent, Box } from '@mui/material';
 
 const CardDisplay = React.memo(({ card }) => {
     const [open, setOpen] = useState(false);
@@ -10,27 +10,77 @@ const CardDisplay = React.memo(({ card }) => {
     return (
         <>
             <Card 
-                sx={{ backgroundColor: 'transparent', boxShadow: 'none' }} 
-                onClick={handleCardClick}
-                style={{ display: 'flex', flexDirection: 'column' }} // Apply flexbox to Card
-            >
-                <Typography 
-                    variant="h5" 
-                    component="div" 
-                    sx={{ textAlign: 'right', width: '90%'}} // Right-align title and expand
-                >
-                    {card.name}
-                </Typography>
-                <CardContent sx={{ background: 'none', backgroundColor: 'transparent' }}>
-                    <img 
-                        src={card.images.large}
-                        alt={card.name} 
-                        loading="lazy"
-                        style={{ width: '100%', height: 'auto' }}
-                    />
-                   
-                </CardContent>
-            </Card>
+    sx={{ backgroundColor: 'transparent', boxShadow: 'none' }}
+    onClick={handleCardClick}
+    style={{ display: 'flex', flexDirection: 'column' }}
+>
+    <Typography
+        variant="h5"
+        component="div"
+        sx={{ textAlign: 'right', width: '90%' }}
+    >
+        {card.name}
+    </Typography>
+    <CardContent sx={{ background: 'none', backgroundColor: 'transparent' }}>
+        <img
+            src={card.images.large}
+            alt={card.name}
+            loading="lazy"
+            style={{ width: '100%', height: 'auto' }}
+        />
+        {card.price_data && (
+            <Box sx={{ mt: 2, textAlign: 'center' }}>
+                {/* TCGPlayer Prices */}
+                {card.price_data.tcgplayer && (
+                    <Box sx={{ mb: 1 }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                            TCGPlayer
+                        </Typography>
+                        {card.price_data.tcgplayer.normal && (
+                            <Typography>
+                                Normal: ${card.price_data.tcgplayer.normal.low}
+                            </Typography>
+                        )}
+                        {card.price_data.tcgplayer.holofoil && (
+                            <Typography>
+                                Holofoil: ${card.price_data.tcgplayer.holofoil.low}
+                            </Typography>
+                        )}
+                        {card.price_data.tcgplayer.reverseHolofoil && (
+                            <Typography>
+                                Reverse Holo: ${card.price_data.tcgplayer.reverseHolofoil.low}
+                            </Typography>
+                        )}
+                    </Box>
+                )}
+
+                {/* Cardmarket Prices */}
+                {card.price_data.cardmarket && (
+                    <Box>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                            Cardmarket
+                        </Typography>
+                        {card.price_data.cardmarket.prices.averageSellPrice && (
+                            <Typography>
+                                Avg Sell: €{card.price_data.cardmarket.prices.averageSellPrice}
+                            </Typography>
+                        )}
+                        {card.price_data.cardmarket.prices.trendPrice && (
+                            <Typography>
+                                Trend: €{card.price_data.cardmarket.prices.trendPrice}
+                            </Typography>
+                        )}
+                        {card.price_data.cardmarket.prices.lowPrice && (
+                            <Typography>
+                                Low: €{card.price_data.cardmarket.prices.lowPrice}
+                            </Typography>
+                        )}
+                    </Box>
+                )}
+            </Box>
+        )}
+    </CardContent>
+</Card>
 
         {/*card deets*/}
             <Dialog 
