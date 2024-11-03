@@ -1,192 +1,141 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Grid, Typography, Checkbox, FormControlLabel, IconButton } from '@mui/material';
+import { Grid, Typography, Checkbox, FormControlLabel, IconButton, Button } from '@mui/material';
 import { toast } from 'react-toastify';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
-import { addCardToCollection,  removeCardFromCollection, fetchUserCollection } from '../services/api';
+import { addCardToCollection, removeCardFromCollection, fetchUserCollection } from '../services/api';
 import { useUser } from '../pages/UserContext';
 
 const CardList = ({ cards }) => {
-    const { user } = useUser(); 
-    const [visibleCards, setVisibleCards] = useState([]);
+    const { user } = useUser();
     const [cardCounts, setCardCounts] = useState({});
     const [userCards, setUserCards] = useState([]);
-    const observerRef = useRef(null);
     const [selectedCard, setSelectedCard] = useState(null);
     const [toastId, setToastId] = useState(null);
     const [toastCount, setToastCount] = useState(0);
-    //handle add card
-    const handleCardToCollection = useCallback(async (cardId, count) => {
-        if (count <= 0) {
-            alert('You must select at least one card to update to your collection.');
-            return;
-        }
-    
-        const payload = {
-            email: user?.email,
-            card_id: cardId,
-            count: count,
-        };
-    
-        try {
-            console.log('Sending payload:', payload);
-            
-            const response = await addCardToCollection(payload);
-            console.log('Card updated:', response.data);
-            
-            setCardCounts(prevCounts => ({
-                ...prevCounts,
-                [cardId]: count
-            }));
-            
-            alert('Collection updated');
-    
-            //refresh collection
-            const collectionData = await fetchUserCollection(user?.email);
-            setUserCards(collectionData);
-            
-            console.log('toast is active:', toast.isActive(toastId));
-            if (toast.isActive(toastId)) {
-                let newToastCount = toastCount + 1;
-                setToastCount(newToastCount);
-                toast.update(toastId, {
-                    render: `Card added successfully! (${++newToastCount})`,
-                    type: 'success',
-                    autoClose: 3000,
-                });
-            } else {
-                setToastId(toast.success(toastCount ? `Card added successfully! (${toastCount})` : 'Card added successfully!'), {
-                    onClose: () => {
-                        setToastId(null);
-                    }
-                });
-            }
-        } catch (error) {
-            console.error('Error details:', {
-                status: error.response?.status,
-                data: error.response?.data,
-                message: error.message
-            });
-            
-            if (error.response?.status === 422) {
-                const validationErrors = error.response.data.errors;
-                const errorMessage = Object.values(validationErrors).flat().join('\n');
-                alert(`Validation failed: ${errorMessage}`);
-            } else if (error.response?.status === 401) {
-                alert('You must be logged in to update cards to your collection.');
-            } else if (error.response?.status === 404) {
-                alert('The card was not found.');
-            } else {
-                alert('An error occurred while adding the card.');
-            }
-        }
-    }, [user?.email]);
 
-    //handle remove card
-    const handleRemoveCardFromCollection = useCallback(async (cardId, count) => {
+    const handleCardToCollection = useCallback(async (cardId, variant, count) => {
         if (!user?.email) {
             alert('You must be logged in to do this');
             return;
         }
-        // if (count <= 0) {
-        //     alert('Please specify a valid number of cards to remove');
-        //     return;
-        // }
-    
+        
+        if (count <= 0) {
+            alert('You must select at least one card to update to your collection.');
+            return;
+        }
+
+        const payload = {
+            email: user.email,
+            card_id: cardId,
+            variant,
+            count: count,
+        };
+
         try {
-            const response = await removeCardFromCollection(user.email, cardId, count);
-            console.log('Card removed:', response);
+            const response = await addCardToCollection(payload);
             
-            //local state update
             setCardCounts(prevCounts => ({
                 ...prevCounts,
-                [cardId]: response.count
+               
+                    ...prevCounts,
+                    [variant]: count,
+                  
+             
             }));
-            
-            alert(response.message);
-            
-            //update/refresh collection
+
+            // Handle toast notification
+            if (toast.isActive(toastId)) {
+                const newToastCount = toastCount + 1;
+                setToastCount(newToastCount);
+                toast.update(toastId, {
+                    render: `Card added successfully! (${newToastCount})`,
+                    type: 'success',
+                    autoClose: 3000,
+                });
+            } else {
+                setToastId(toast.success('Card added successfully!'));
+            }
+
+            // Refresh collection
             const collectionData = await fetchUserCollection(user.email);
             setUserCards(collectionData);
-            
         } catch (error) {
-            console.error('Error removing card:', error);
+            const errorMessage = error.response?.data?.message || 'An error occurred while adding the card';
+            alert(errorMessage);
+        }
+    }, [user?.email, toastId, toastCount]);
+
+    const handleRemoveCardFromCollection = useCallback(async (cardId, variant, count) => {
+        if (!user?.email) {
+            alert('You must be logged in to do this');
+            return;
+        }
+
+        try {
+            await removeCardFromCollection(user.email, cardId, variant, count);
+            
+            setCardCounts(prevCounts => ({
+                ...prevCounts,
+                [cardId]: {
+                    ...prevCounts[cardId],
+                    [variant]: Math.max(0, (prevCounts[cardId]?.[variant] || 0) - count)
+                }
+            }));
+
+            // Refresh collection
+            const collectionData = await fetchUserCollection(user.email);
+            setUserCards(collectionData);
+        } catch (error) {
             const errorMessage = error.response?.data?.message || 'An error occurred while removing the card';
             alert(errorMessage);
-            
-            //refresh collection to ensure proper state
-            const collectionData = await fetchUserCollection(user.email);
-            setUserCards(collectionData);
         }
     }, [user?.email]);
 
- 
-    //increment for addcard function
-    const handleIncrement = useCallback(async (index) => {
-        const cardId = cards[index].id;
-        const newCount = (cardCounts[cardId] || 0) + 1;
-    
-        setCardCounts((prev) => ({
-            ...prev,
-            [cardId]: newCount,
-        }));
-    
-        await handleCardToCollection(cardId, newCount);
-    }, [cards, cardCounts, handleCardToCollection]);
-    
-    //decrement for remove card function
-    const handleDecrement = useCallback(async (index) => {
-        const cardId = cards[index].id;
-        const currentCount = cardCounts[cardId] || 0; 
-      
-        setCardCounts((prev) => ({
-          ...prev,
-          [cardId]: currentCount - 1, 
-        }));
-      
-        await handleRemoveCardFromCollection(cardId, 1); 
-        //check if last card 1 to 0 succeeded
-        if (currentCount === 1) {
-          alert("Last card removed from your collection.");
-        }
-      }, [cards, cardCounts, handleRemoveCardFromCollection]);
+    const handleIncrement = useCallback(async (cardId, variant) => {
+        const currentCount = cardCounts[cardId]?.[variant] || 0;
+        const newCount = currentCount + 1;
+        await handleCardToCollection(cardId, variant, newCount);
+    }, [cardCounts, handleCardToCollection]);
 
-      
+    const handleDecrement = useCallback(async (cardId, variant) => {
+        const currentCount = cardCounts[cardId]?.[variant] || 0;
+        if (currentCount > 0) {
+            await handleRemoveCardFromCollection(cardId, variant, 1);
+        }
+    }, [handleRemoveCardFromCollection]);
+
     useEffect(() => {
         const fetchCollection = async () => {
-            if (!user || !user.email) {
-                console.error('User is not logged in, cannot fetch their collection');
-                return; 
-            }
+            if (!user?.email) return;
 
             try {
                 const data = await fetchUserCollection(user.email);
-                setUserCards(data); 
+                setUserCards(data);
             } catch (error) {
                 console.error('Error fetching user collection:', error);
             }
         };
 
         fetchCollection();
-    }, [user]); 
+    }, [user]);
 
     useEffect(() => {
         const initialCounts = {};
-    
+        
         if (Array.isArray(userCards)) {
             userCards.forEach(card => {
-                initialCounts[card.card_id] = card.count;
+                initialCounts[card.card_id] = {
+                    normal: card.normal_count,
+                    holofoil: card.holo_count,
+                    reverseHolofoil: card.reverse_holo_count,
+                };
             });
         }
-    
-        setCardCounts(prevCounts => {
-            const hasDifferentCounts = Object.keys(initialCounts).some(id => initialCounts[id] !== prevCounts[id]);
-            return hasDifferentCounts ? initialCounts : prevCounts;
-        });
+        
+        setCardCounts(initialCounts);
     }, [userCards]);
 
- 
-    // const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
     const handleCardClick = (card) => {
         setSelectedCard(card);
     };
@@ -194,62 +143,94 @@ const CardList = ({ cards }) => {
     const handleCloseCardDisplay = () => {
         setSelectedCard(null);
     };
+
     return (
         <div>
-            {/* <Typography variant="h4" gutterBottom className="card-list-title">
-  {setTitle}
-</Typography> */}
-
             <Grid container spacing={2}>
-                {cards.map((card, index) => (
+                {cards.map((card) => (
                     <Grid 
                         item 
                         key={card.id} 
                         xs={12} 
                         sm={6} 
                         md={4} 
-                        className="card-item" 
-                        data-index={index} 
+                        className="card-item"
                     >
-                        <div style={{ 
-                            display: 'flex', 
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '4px'
-                        }}>
+                        <div className="flex flex-col items-center gap-1">
                             <CardDisplay card={card} onClick={() => handleCardClick(card)} />
                             
-                            <div style={{ 
-                                display: 'flex', 
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '100%',
-                                marginTop: '-30px'
-                            }}>
-                                <IconButton 
-                                    onClick={() => handleDecrement(index)} 
-                                    size="small" 
-                                    disabled={cardCounts[card.id] === 0}
-                                >
-                                    <Remove />
-                                </IconButton>
+                            <div className="flex flex-col items-center w-full mt-4 gap-2">
+                                {/* Normal variant controls */}
+                                {card.price_data?.tcgplayer?.normal && (
+                                <div className="flex items-center gap-2">
+                                    <IconButton 
+                                        onClick={() => handleDecrement(card.normal_count, 'normal')} 
+                                        size="small" 
+                                        disabled={(cardCounts[card.card_id]?.normal || 0) === 0}
+                                    >
+                                        <Remove />
+                                    </IconButton>
 
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox 
-                                            checked={!!cardCounts[card.id]} 
-                                            color="primary" 
-                                        />
-                                    }
-                                    label={cardCounts[card.id] || 0} 
-                                />
+                                    <Typography>
+                                        Normal: {cardCounts[card.card_id]?.normal || 0}
+                                    </Typography>
 
-                                <IconButton 
-                                    onClick={() => handleIncrement(index)} 
-                                    size="small"
-                                >
-                                    <Add />
-                                </IconButton>
+                                    <IconButton 
+                                        onClick={() => handleIncrement(card.card_id, 'normal')} 
+                                        size="small"
+                                    >
+                                        <Add />
+                                    </IconButton>
+                                </div>
+                                 )}
+
+                                {/* Holofoil variant controls */}
+                                {card.price_data?.tcgplayer?.holofoil && (
+                                    <div className="flex items-center gap-2">
+                                        <IconButton 
+                                            onClick={() => handleDecrement(card.card_id, 'holofoil')} 
+                                            size="small" 
+                                            disabled={(cardCounts[card.card_id]?.holofoil || 0) === 0}
+                                        >
+                                            <Remove />
+                                        </IconButton>
+
+                                        <Typography>
+                                            Holofoil: {cardCounts[card.card_id]?.holofoil || 0}
+                                        </Typography>
+
+                                        <IconButton 
+                                            onClick={() => handleIncrement(card.card_id, 'holofoil')} 
+                                            size="small"
+                                        >
+                                            <Add />
+                                        </IconButton>
+                                    </div>
+                                )}
+
+                                {/* Reverse Holofoil variant controls */}
+                                {card.price_data?.tcgplayer?.reverseHolofoil && (
+                                    <div className="flex items-center gap-2">
+                                        <IconButton 
+                                            onClick={() => handleDecrement(card.card_id, 'reverseHolofoil')} 
+                                            size="small" 
+                                            disabled={(cardCounts[card.card_id]?.reverseHolofoil || 0) === 0}
+                                        >
+                                            <Remove />
+                                        </IconButton>
+
+                                        <Typography>
+                                            Reverse Holo: {cardCounts[card.card_id]?.reverseHolofoil || 0}
+                                        </Typography>
+
+                                        <IconButton 
+                                            onClick={() => handleIncrement(card.card_id, 'reverseHolofoil')} 
+                                            size="small"
+                                        >
+                                            <Add />
+                                        </IconButton>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </Grid>

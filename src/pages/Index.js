@@ -24,14 +24,14 @@ const Index = () => {
     const [loading, setLoading] = useState(false); 
     const { user, userLoading } = useUser(); 
 
-    const handleAddCard = async (cardId, count) => {
+    const handleAddCard = async (cardId, count, variant) => {
         if (!user) {
             console.warn('User must be logged in to handle their collection');
             return; 
         }
 
         try {
-            const response = await addCardToCollection(user.email, cardId, count);
+            const response = await addCardToCollection(user.email, cardId, count, variant);
             console.log('Card added to collection:', response);
         } catch (error) {
             console.error('Failed to add card to collection:', error);

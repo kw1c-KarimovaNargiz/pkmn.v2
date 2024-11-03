@@ -108,6 +108,7 @@ export const fetchSeries = async () => {
           const response = await axios.post('http://127.0.0.1:8000/api/collections/add', {
               email: payload.email,
               card_id: payload.card_id.toString(),
+              variant: payload.variant,
               count: parseInt(payload.count), 
           }, {
               headers: {
