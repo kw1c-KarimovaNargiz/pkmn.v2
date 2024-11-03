@@ -166,7 +166,11 @@ border-color: transparent !important;
 
 }
 
-
+.custom-checkbox {
+  &.Mui-checked {
+      color: yellow; /* Change the check color to yellow */
+  }
+}
 
 .MuiSelect-select:focus {
   outline: none; 

@@ -24,28 +24,28 @@ const Index = () => {
     const [loading, setLoading] = useState(false); 
     const { user, userLoading } = useUser(); 
 
-    const handleAddCard = async (cardId, count, variant) => {
+    const handleAddCard = async (card_id, count, variant) => {
         if (!user) {
             console.warn('User must be logged in to handle their collection');
             return; 
         }
 
         try {
-            const response = await addCardToCollection(user.email, cardId, count, variant);
+            const response = await addCardToCollection(user.email, card_id, count, variant);
             console.log('Card added to collection:', response);
         } catch (error) {
             console.error('Failed to add card to collection:', error);
         }
     };
 
-    const handleRemoveCard = async (cardId, count) => {
+    const handleRemoveCard = async (card_id, count) => {
         if (!user) {
             console.warn('User must be logged in to handle their collection');
             return; 
         }
 
         try {
-            const response = await removeCardFromCollection(user.email, cardId, count);
+            const response = await removeCardFromCollection(user.email, card_id, count);
             console.log('Card removed from collection:', response);
         } catch (error) {
             console.error('Failed to remove card from collection:', error);

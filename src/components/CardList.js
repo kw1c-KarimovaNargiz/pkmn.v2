@@ -71,16 +71,22 @@ const CardList = ({ cards }) => {
             alert('You must be logged in to do this');
             return;
         }
+        if (count <= 0) {
+            alert('You must select at least one card to update to your collection.');
+            return;
+        }
 
+     
         try {
-            await removeCardFromCollection(user.email, cardId, variant, count);
+            const response = await removeCardFromCollection(user.email, cardId, count, variant);
             
             setCardCounts(prevCounts => ({
                 ...prevCounts,
-                [cardId]: {
-                    ...prevCounts[cardId],
-                    [variant]: Math.max(0, (prevCounts[cardId]?.[variant] || 0) - count)
-                }
+               
+                    ...prevCounts,
+                    [variant]: response.count,
+                  
+             
             }));
 
             // Refresh collection
@@ -95,15 +101,37 @@ const CardList = ({ cards }) => {
     const handleIncrement = useCallback(async (cardId, variant) => {
         const currentCount = cardCounts[cardId]?.[variant] || 0;
         const newCount = currentCount + 1;
+    
+        // Update the state first
+        setCardCounts(prevCounts => ({
+            ...prevCounts,
+            [cardId]: {
+                ...prevCounts[cardId],
+                [variant]: newCount
+            }
+        }));
+    
+        // Call the API to add the card to the collection
         await handleCardToCollection(cardId, variant, newCount);
     }, [cardCounts, handleCardToCollection]);
 
+    
     const handleDecrement = useCallback(async (cardId, variant) => {
         const currentCount = cardCounts[cardId]?.[variant] || 0;
-        if (currentCount > 0) {
-            await handleRemoveCardFromCollection(cardId, variant, 1);
-        }
-    }, [handleRemoveCardFromCollection]);
+        const newCount = currentCount - 1;
+    
+                // Optimistically update the count first
+                setCardCounts(prevCounts => ({
+                    ...prevCounts,
+                    [cardId]: {
+                        ...prevCounts[cardId],
+                        [variant]: newCount
+                    }
+                }));
+    
+                await handleRemoveCardFromCollection( cardId , variant,  newCount); // Pass email, count, and variant
+
+    }, [cardCounts, handleRemoveCardFromCollection]);
 
     useEffect(() => {
         const fetchCollection = async () => {
@@ -144,6 +172,7 @@ const CardList = ({ cards }) => {
         setSelectedCard(null);
     };
 
+
     return (
         <div>
             <Grid container spacing={2}>
@@ -159,21 +188,32 @@ const CardList = ({ cards }) => {
                         <div className="flex flex-col items-center gap-1">
                             <CardDisplay card={card} onClick={() => handleCardClick(card)} />
                             
-                            <div className="flex flex-col items-center w-full mt-4 gap-2">
+                            <div className="flex flex-col items-center w-full mt-2 gap-2">
                                 {/* Normal variant controls */}
                                 {card.price_data?.tcgplayer?.normal && (
                                 <div className="flex items-center gap-2">
+                                     <FormControlLabel
+                                    control={
+                                        <Checkbox 
+                                        checked={!!cardCounts[card.card_id]?.normal} 
+                                        sx={{
+                                            '&.Mui-checked': {
+                                                color: 'yellow', 
+                                            },
+                                          
+                                        }} 
+                                    />
+                                    }
+                                    label={cardCounts[card.card_id]?.normal || 0} 
+                                />
                                     <IconButton 
-                                        onClick={() => handleDecrement(card.normal_count, 'normal')} 
+                                        onClick={() => handleDecrement(card.card_id, 'normal')} 
                                         size="small" 
                                         disabled={(cardCounts[card.card_id]?.normal || 0) === 0}
                                     >
                                         <Remove />
                                     </IconButton>
-
-                                    <Typography>
-                                        Normal: {cardCounts[card.card_id]?.normal || 0}
-                                    </Typography>
+                                 
 
                                     <IconButton 
                                         onClick={() => handleIncrement(card.card_id, 'normal')} 
@@ -187,6 +227,21 @@ const CardList = ({ cards }) => {
                                 {/* Holofoil variant controls */}
                                 {card.price_data?.tcgplayer?.holofoil && (
                                     <div className="flex items-center gap-2">
+
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox 
+                                        checked={!!cardCounts[card.card_id]?.holofoil} 
+                                        sx={{
+                                            '&.Mui-checked': {
+                                                color: 'purple', 
+                                            },
+                                          
+                                        }} 
+                                    />
+                                    }
+                                    label={cardCounts[card.card_id]?.holofoil || 0} 
+                                />
                                         <IconButton 
                                             onClick={() => handleDecrement(card.card_id, 'holofoil')} 
                                             size="small" 
@@ -195,9 +250,7 @@ const CardList = ({ cards }) => {
                                             <Remove />
                                         </IconButton>
 
-                                        <Typography>
-                                            Holofoil: {cardCounts[card.card_id]?.holofoil || 0}
-                                        </Typography>
+                                 
 
                                         <IconButton 
                                             onClick={() => handleIncrement(card.card_id, 'holofoil')} 
@@ -211,6 +264,20 @@ const CardList = ({ cards }) => {
                                 {/* Reverse Holofoil variant controls */}
                                 {card.price_data?.tcgplayer?.reverseHolofoil && (
                                     <div className="flex items-center gap-2">
+                                    <FormControlLabel
+                                    control={
+                                        <Checkbox 
+                                        checked={!!cardCounts[card.card_id]?.reverseHolofoil} 
+                                        sx={{
+                                            '&.Mui-checked': {
+                                                color: 'blue', 
+                                            },
+                                          
+                                        }} 
+                                    />
+                                    }
+                                    label={cardCounts[card.card_id]?.reverseHolofoil || 0} 
+                                />
                                         <IconButton 
                                             onClick={() => handleDecrement(card.card_id, 'reverseHolofoil')} 
                                             size="small" 
@@ -218,10 +285,6 @@ const CardList = ({ cards }) => {
                                         >
                                             <Remove />
                                         </IconButton>
-
-                                        <Typography>
-                                            Reverse Holo: {cardCounts[card.card_id]?.reverseHolofoil || 0}
-                                        </Typography>
 
                                         <IconButton 
                                             onClick={() => handleIncrement(card.card_id, 'reverseHolofoil')} 

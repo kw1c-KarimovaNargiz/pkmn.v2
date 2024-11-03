@@ -136,13 +136,16 @@ export const fetchUserCollection = async (email) => {
   }
 };
 
-export const removeCardFromCollection = async (email, cardId, count) => {
+export const removeCardFromCollection = async (email, cardId, count, variant) => {
     try {
         const response = await axios.delete('http://127.0.0.1:8000/api/collections/remove', {
             data: {
                 email,
                 card_id: cardId,
-                count
+                count,
+                variant,
+                count : parseInt(count),
+
             }
         });
         return response.data;
