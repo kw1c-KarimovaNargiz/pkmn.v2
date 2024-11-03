@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Box, Chip, FormControlLabel, Checkbox, Autocomplete, TextField, Drawer } from '@mui/material';
+import React from 'react';
+import { Box, Chip, FormControlLabel, Checkbox, Autocomplete, TextField, Typography } from '@mui/material';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
@@ -9,20 +9,15 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 const CombinedSearchFilterBar = ({
   availableTypes,
   availableSubTypes,
-  onFilter,
-
-  selectedTypes = [],
+  selectedTypes,
   setSelectedTypes,
-  selectedSubTypes = [],
+  selectedSubTypes,
   setSelectedSubTypes,
-  onSortByEvo,
-
-
-  setTitle,
+  isSortedByEvo,
+  setIsSortedByEvo,
+  onFilter,
 }) => {
-  const [isSortedByEvo, setIsSortedByEvo] = useState(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
+  
   const handleTypeChange = (event, newValue) => {
     setSelectedTypes(newValue);
     onFilter(newValue, selectedSubTypes, isSortedByEvo);
@@ -39,12 +34,9 @@ const CombinedSearchFilterBar = ({
     onFilter(selectedTypes, selectedSubTypes, checked);
   };
 
-  const handleDrawerToggle = () => {
-    setIsDrawerOpen(!isDrawerOpen);
-  };
-
-  const FilterContent = () => (
+  return (
     <Box sx={{ width: 300, padding: 2 }}>
+      <Typography variant="h6" sx={{ mb: 2 }}>Filter Options</Typography>
       <Box sx={{ display: 'flex', flexWrap: 'wrap', mb: 2 }}>
         {selectedTypes.map((type) => (
           <Chip
@@ -119,21 +111,8 @@ const CombinedSearchFilterBar = ({
             color="primary"
           />
         }
-        label="Evo-sort"
+        label="Sort by Evolution"
       />
-    </Box>
-  );
-
-  return (
-    <Box sx={{ width: '100%' }}>
-   
-      <Drawer
-        anchor="right"
-        open={isDrawerOpen}
-        onClose={handleDrawerToggle}
-      >
-        <FilterContent />
-      </Drawer>
     </Box>
   );
 };

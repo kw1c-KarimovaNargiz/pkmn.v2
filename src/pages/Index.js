@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Typography } from '@mui/material';
 import CardList from '../components/CardList';
-import SetsSidebar from '../components/SetsSideBar'; 
+import SetsSidebar from '../components/SetsSideBar';
 import CombinedSearchFilterBar from '../components/CombinedSearchFilterBar'; 
+import Navbar from '../components/Navbar';
 import { useUser } from '../pages/UserContext';
 import { fetchSeries, fetchCardsForSet, searchCard, fetchSortedEvolutionCards, fetchSubTypes, addCardToCollection, removeCardFromCollection } from '../services/api';
 import '../styling/Index.css'; 
@@ -21,7 +22,9 @@ const Index = () => {
     const [subTypes, setSubTypes] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false); 
-    const { user, userLoading  } = useUser(); 
+    const { user, userLoading } = useUser(); 
+    const [cardCache, setCardCache] = useState({});
+    const [subTypeCache, setSubTypeCache] = useState({});
 
     const handleAddCard = async (cardId, count) => {
         if (!user) {
@@ -37,7 +40,6 @@ const Index = () => {
         }
     };
 
-    
     const handleRemoveCard = async (cardId, count) => {
         if (!user) {
             console.warn('User must be logged in to handle their collection');
@@ -57,7 +59,6 @@ const Index = () => {
             setLoading(true); 
             try {
                 setOriginalCards(cards);
-
                 const sortedCards = await fetchSortedEvolutionCards(selectedSetId);
                 const uniqueSortedCards = sortedCards.filter((card, index, self) => 
                     index === self.findIndex((c) => c.id === card.id)
@@ -92,7 +93,6 @@ const Index = () => {
         }
     };
 
-    
     useEffect(() => {
         const loadSeries = async () => {
             setLoading(true);
@@ -118,31 +118,52 @@ const Index = () => {
         };
         loadSeries(); 
     }, []);
-    
 
-    const handleSetSelect = async (setId) => {
-        setLoading(true);
-        setSelectedSetId(setId);
-        setSearchResults([]);
-        setSearchTerm('');
+   const handleSetSelect = useCallback(async (setId) => {
+    setLoading(true);
+    setSelectedSetId(setId);
+    setSearchResults([]);
 
-        try {
-            const cardData = await fetchCardsForSet(setId); 
-            setCards(cardData);
-            setOriginalCards(cardData); 
-            setFilteredCards(cardData);
+    try {
+        let cardData, subTypeData;
 
-            const subTypeData = await fetchSubTypes(setId); 
-            setSubTypes(subTypeData);
-        } catch (error) {
-            console.error("Error loading cards:", error);
-            setCards([]); 
-            setFilteredCards([]); 
-            setSubTypes([]);
-        } finally {
-            setLoading(false); 
+        // Check if we have cached data
+        if (cardCache[setId] && subTypeCache[setId]) {
+            cardData = cardCache[setId];
+            subTypeData = subTypeCache[setId];
+        } else {
+            // Fetch card data and subtype data in parallel
+            [cardData, subTypeData] = await Promise.all([
+                fetchCardsForSet(setId),
+                fetchSubTypes(setId)
+            ]);
+
+            // Cache the results
+            setCardCache(prev => ({ ...prev, [setId]: cardData }));
+            setSubTypeCache(prev => ({ ...prev, [setId]: subTypeData }));
         }
-    };
+
+        setCards(cardData);
+        setOriginalCards(cardData);
+        setFilteredCards(cardData);
+        setSubTypes(subTypeData);
+    } catch (error) {
+        console.error("Error loading cards:", error);
+        setCards([]);
+        setFilteredCards([]);
+        setSubTypes([]);
+    } finally {
+        setLoading(false);
+    }
+}, [cardCache, subTypeCache]);
+
+const uniqueTypes = useMemo(() => [...new Set(cards.flatMap((card) => card.types))], [cards]);
+const uniqueSubTypes = useMemo(() => [...new Set(cards.flatMap((card) => card.subtypes || []))], [cards]);
+
+useEffect(() => {
+    setAllTypes(uniqueTypes);
+    setSubTypes(uniqueSubTypes);
+}, [uniqueTypes, uniqueSubTypes]);
 
     const handleSearch = async (term) => {
         setLoading(true); 
@@ -171,11 +192,11 @@ const Index = () => {
                 subtypes.some((subtype) => card.subtypes.includes(subtype))
             );
         }
+
         if (isSortedByEvo) {
-            filtered = filtered.sort((a, b) => {
-                return a.evolutionStage - b.evolutionStage;
-            });
+            filtered = filtered.sort((a, b) => a.evolutionStage - b.evolutionStage);
         }
+
         setFilteredCards(filtered);
     };
     
@@ -190,51 +211,34 @@ const Index = () => {
         const uniqueSubTypes = [...new Set(cards.flatMap((card) => card.subtypes || []))];
         setSubTypes(uniqueSubTypes); 
     }, [cards]);
+
     console.log("user", userLoading);
-    if( userLoading ) return null;
+    if (userLoading) return null;
+    
     const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "No Title Available";
 
     return (
-      <div className="index-container">
-          <div className="sidebar">
-              <SetsSidebar
-                  sets={sets}
-                  series={series} 
-                  onSetSelect={handleSetSelect} 
-                  onSeriesSelect={handleSeriesSelect} 
-              />
-          </div>
-          <div className="search-filter-container">
-              <CombinedSearchFilterBar 
-                onSearch={handleSearch}
-                availableTypes={allTypes} 
-                availableSubTypes={subTypes}
-                onFilter={handleFilter}  
-                selectedTypes={selectedTypes}
-                setSelectedTypes={setSelectedTypes}
-                selectedSubTypes={selectedSubTypes}
-                setSelectedSubTypes={setSelectedSubTypes}
-                onSortByEvo={handleSortByEvo}
-                onRestoreOriginal={handleRestoreOriginal} 
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                setTitle={setTitle}
-              />
-          </div>
-          <div className="cards-display-area">
-              <CardList 
-                cards={searchResults.length > 0 ? searchResults : filteredCards} 
-                onAddCard={handleAddCard} 
-                onnRemoveCard={handleRemoveCard}
-              />
-
-              {/* {cards.length === 0 && (
-                  <Typography variant="h6" component="div" align="center">
-                      Select a set or search for a Pokémon to see the cards.
-                  </Typography>
-              )} */}
-          </div>
-      </div>
+        <div className="index-container">
+            <Navbar setSearchTerm={setSearchTerm} onSearch={handleSearch} />
+            <div className="sidebar">
+                <SetsSidebar
+                    series={series} 
+                    onSetSelect={handleSetSelect} 
+                    onSeriesSelect={handleSeriesSelect} 
+                    availableTypes={allTypes}
+                    availableSubTypes={subTypes}
+                    onFilter={handleFilter}  
+                />
+            </div>
+        
+            <div className="cards-display-area">
+                <CardList 
+                    cards={searchResults.length > 0 ? searchResults : filteredCards} 
+                    onAddCard={handleAddCard} 
+                    onRemoveCard={handleRemoveCard}
+                />
+            </div>
+        </div>
     );
 };
 

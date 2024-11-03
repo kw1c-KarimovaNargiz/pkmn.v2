@@ -1,9 +1,7 @@
-import React from 'react';
+import React, { useState, useRef } from 'react'; // Import useRef
 import { styled, alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
 import { Box } from '@mui/material';
 
 const Search = styled('div')(({ theme }) => ({
@@ -13,7 +11,6 @@ const Search = styled('div')(({ theme }) => ({
   '&:hover': {
     backgroundColor: alpha(theme.palette.common.white, 0.25),
   },
-  marginLeft: 0,
   width: '100%',
   [theme.breakpoints.up('sm')]: {
     marginLeft: theme.spacing(1),
@@ -24,6 +21,7 @@ const Search = styled('div')(({ theme }) => ({
 const SearchIconWrapper = styled('div')(({ theme }) => ({
   padding: theme.spacing(0, 2),
   height: '100%',
+  color: '#3c3c3c',
   position: 'absolute',
   pointerEvents: 'none',
   display: 'flex',
@@ -32,7 +30,7 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: 'inherit',
+  color: '#1f1f1f',
   width: '100%',
   '& .MuiInputBase-input': {
     padding: theme.spacing(1, 1, 1, 0),
@@ -47,7 +45,10 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const SearchBar = ({ searchTerm, setSearchTerm, onSearch, onDrawerOpen }) => {
+const SearchBar = ({ onSearch }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const inputRef = useRef(null); 
+
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
@@ -55,22 +56,14 @@ const SearchBar = ({ searchTerm, setSearchTerm, onSearch, onDrawerOpen }) => {
   const handleSearchSubmit = (event) => {
     event.preventDefault();
     onSearch(searchTerm);
+    if (inputRef.current) {
+      inputRef.current.blur(); 
+    }
   };
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-      <IconButton
-        size="large"
-        edge="start"
-        color="inherit"
-        aria-label="open drawer"
-        onClick={onDrawerOpen}
-        sx={{ mr: 2 }}
-      >
-        <MenuIcon />
-      </IconButton>
-      
-      <form onSubmit={handleSearchSubmit} style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+    <Box>
+      <form onSubmit={handleSearchSubmit} style={{ flex: 1, display: 'flex'}}>
         <Search sx={{ borderStyle: 'none', width: '100%' }}>
           <SearchIconWrapper>
             <SearchIcon />
@@ -80,6 +73,7 @@ const SearchBar = ({ searchTerm, setSearchTerm, onSearch, onDrawerOpen }) => {
             value={searchTerm}
             onChange={handleSearchChange}
             inputProps={{ 'aria-label': 'search' }}
+            inputRef={inputRef} 
           />
         </Search>
       </form>

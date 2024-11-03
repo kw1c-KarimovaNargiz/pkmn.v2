@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Grid, Typography, Checkbox, FormControlLabel, IconButton } from '@mui/material';
+import React, { useEffect, useState, useRef, useCallback, useMemo  } from 'react';
+import { Grid, Typography, Checkbox, FormControlLabel, IconButton, Skeleton } from '@mui/material';
 import { toast } from 'react-toastify';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
@@ -15,6 +15,17 @@ const CardList = ({ cards }) => {
     const [selectedCard, setSelectedCard] = useState(null);
     const [toastId, setToastId] = useState(null);
     const [toastCount, setToastCount] = useState(0);
+    const [page, setPage] = useState(0);
+    const [cardsPerPage] = useState(20)
+
+    const [imageLoadedStatus, setImageLoadedStatus] = useState({});
+
+    const handleImageLoaded = (cardId) => {
+        setImageLoadedStatus(prev => ({
+            ...prev,
+            [cardId]: true
+        }));
+    };
     //handle add card
     const handleCardToCollection = useCallback(async (cardId, count) => {
         if (count <= 0) {
@@ -152,6 +163,24 @@ const CardList = ({ cards }) => {
       }, [cards, cardCounts, handleRemoveCardFromCollection]);
 
       
+      const paginatedCards = useMemo(() => {
+        const startIndex = page * cardsPerPage;
+        return cards.slice(startIndex, startIndex + cardsPerPage);
+    }, [cards, page, cardsPerPage]);
+
+    // Infinite scroll implementation
+    const observer = useRef();
+    const lastCardRef = useCallback(node => {
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && (page + 1) * cardsPerPage < cards.length) {
+                setPage(prev => prev + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [page, cardsPerPage, cards.length]);
+
+
     useEffect(() => {
         const fetchCollection = async () => {
             if (!user || !user.email) {
@@ -200,11 +229,12 @@ const CardList = ({ cards }) => {
   {setTitle}
 </Typography> */}
 
-            <Grid container spacing={2}>
-                {cards.map((card, index) => (
+<Grid container spacing={2}>
+                {paginatedCards.map((card, index) => (
                     <Grid 
                         item 
                         key={card.id} 
+                        ref={index === paginatedCards.length - 1 ? lastCardRef : null}
                         xs={12} 
                         sm={6} 
                         md={4} 
@@ -217,8 +247,8 @@ const CardList = ({ cards }) => {
                             alignItems: 'center',
                             gap: '4px'
                         }}>
+                          
                             <CardDisplay card={card} onClick={() => handleCardClick(card)} />
-                            
                             <div style={{ 
                                 display: 'flex', 
                                 alignItems: 'center',

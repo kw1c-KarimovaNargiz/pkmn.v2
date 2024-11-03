@@ -1,37 +1,28 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { AppBar, Toolbar, Button } from '@mui/material';
-import { useUser } from '../pages/UserContext'; 
+import { AppBar, Toolbar, Button, Box } from '@mui/material';
+import { useUser } from '../pages/UserContext';
+import SearchBar from './SearchBar';
+import AccountMenu from './AccountMenu'; // Import the new AccountMenu component
 
 const pages = [
   { name: 'Home', path: '/' },
   { name: 'Index', path: '/Index' },
-  { name: 'My Collection', path: '/Collection' },
-  { name: 'My decks', path: '/Decks' }
+  // { name: 'My Collection', path: '/Collection' },
+  // { name: 'My decks', path: '/Decks' }
 ];
 
-function Navbar() {
+function Navbar({ searchTerm, setSearchTerm, onSearch }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useUser();
 
-  const isLoggedIn = !!user; 
-  
+  const isLoggedIn = !!user;
+
   const handleClick = (path) => {
     if (location.pathname !== path) {
       navigate(path);
     }
-  };
-
-  const handleLoginClick = () => {
-    navigate('/login');
-  };
-
-  const handleLogoutClick = () => {
-    logout(); 
-    toast.success('You have been logged out');
-    navigate('/login');
   };
 
   return (
@@ -48,16 +39,12 @@ function Navbar() {
             </Button>
           ))}
         </div>
-
-        {isLoggedIn ? (
-          <Button color="inherit" onClick={handleLogoutClick}>
-            Logout
-          </Button>
-        ) : (
-          <Button color="inherit" onClick={handleLoginClick}>
-            Login
-          </Button>
-        )}
+        <Box sx={{ marginLeft: 130 }}>
+          <SearchBar searchTerm={setSearchTerm} onSearch={onSearch} />
+        </Box>
+        <Box sx={{ marginLeft: 0 }} />
+        
+        <AccountMenu isLoggedIn={isLoggedIn} logout={logout} />
       </Toolbar>
     </AppBar>
   );

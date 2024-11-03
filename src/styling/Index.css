@@ -16,7 +16,7 @@ body {
 
 .sidebar {
   position: fixed;
-  width: 17.5%;
+  width: 18%;
   left: 0;
 
   background-color: #3c3c3c;
@@ -26,12 +26,14 @@ body {
   overflow-y: auto;
   background-color: inherit;
   z-index: 1;
-  box-shadow: 5px 0 5px rgba(0, 0, 0, 0.1);
- 
-  
+  box-shadow: 5px 0 5px rgba(0, 0, 0, 0.1); 
 }
 
-.search-filter-container {
+#account-menu {
+  margin-left: 25px;
+  
+}
+/* .search-filter-container {
   position: fixed;
   top: 64px; 
   display: flex;
@@ -42,7 +44,7 @@ body {
    
      box-shadow: 10px 5px rgba(0, 0, 0, 0.1);
 
- }
+ } */
 .cards-display-area {
     margin-left: 20%;
     padding: 30px;
