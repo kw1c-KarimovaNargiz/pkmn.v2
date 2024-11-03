@@ -28,7 +28,8 @@ const CardDisplay = React.memo(({ card }) => {
             loading="lazy"
             style={{ width: '100%', height: 'auto' }}
         />
-       
+     
+
     </CardContent>
 </Card>
 

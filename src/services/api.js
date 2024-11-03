@@ -147,6 +147,11 @@ export const removeCardFromCollection = async (email, cardId, count, variant) =>
                 count : parseInt(count),
 
             }
+        }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            }
         });
         return response.data;
     } catch (error) {
