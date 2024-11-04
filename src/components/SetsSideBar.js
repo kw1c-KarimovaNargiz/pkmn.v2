@@ -4,12 +4,13 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import SortIcon from '@mui/icons-material/Sort';
 import CombinedSearchFilterBar from './CombinedSearchFilterBar';
 
-const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect, availableTypes, availableSubTypes, onFilter }) => {
+const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect, availableTypes, availableSubTypes, onFilter, isCollectionView }) => {
     const [expanded, setExpanded] = useState(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [selectedSubTypes, setSelectedSubTypes] = useState([]);
     const [isSortedByEvo, setIsSortedByEvo] = useState(false);
+    
 
     const handleChange = (seriesId) => (event, isExpanded) => {
         setExpanded(isExpanded ? seriesId : null);
@@ -22,6 +23,7 @@ const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect, availableTypes,
 
     return (
         <div className="sets-sidebar">
+            
             <Button
                 onClick={handleDrawerToggle}
                 startIcon={<SortIcon />} 
@@ -39,7 +41,18 @@ const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect, availableTypes,
             >
              
             </Button>
-            
+            {isCollectionView && (
+        <Button
+          onClick={() => onSetSelect('all')}
+          sx={{
+            color: 'white',
+            marginBottom: '10px',
+            width: '100%',
+          }}
+        >
+          View All Owned Cards
+        </Button>
+      )}
             {series.map((s) => (
                 <Accordion
                     key={s.id}

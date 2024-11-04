@@ -7,7 +7,7 @@ import { addCardToCollection, removeCardFromCollection, fetchUserCollection } fr
 import { useUser } from '../pages/UserContext';
 import useApi from '../hooks/useApi';
 
-const CardList = ({ cards }) => {
+const CardList = ({ cards, isCollectionView }) => {
     const { authToken } = useUser();
     const [loading, setLoading] = useState(true);
     const [cardCounts, setCardCounts] = useState({});
@@ -216,7 +216,7 @@ const CardList = ({ cards }) => {
     return (
         <div>
             <Grid container spacing={2}>
-                {cards.slice(0, displayCount).map((card, index) => (
+                {cards.slice(0, displayCount).map((card) => (
                     <Grid 
                         item 
                         key={card.id} 
@@ -235,6 +235,8 @@ const CardList = ({ cards }) => {
                             ) : (
                                 <CardDisplay 
                                     card={card} 
+                                    isOwned={isCollectionView ? card.owned : true}
+                                    ownedCount={card.ownedCount}
                                     onClick={() => handleCardClick(card)} 
                                 />
     )}
