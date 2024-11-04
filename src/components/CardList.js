@@ -5,28 +5,32 @@ import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
 import { addCardToCollection, removeCardFromCollection, fetchUserCollection } from '../services/api';
 import { useUser } from '../pages/UserContext';
+import useApi from '../hooks/useApi';
 
 const CardList = ({ cards }) => {
-    const { user } = useUser();
+    const { user, authToken } = useUser();
+    const [visibleCards, setVisibleCards] = useState([]);
     const [cardCounts, setCardCounts] = useState({});
-    const [userCards, setUserCards] = useState([]);
+    const [userCards, setUserCards] = useState({});
+    const observerRef = useRef(null);
     const [selectedCard, setSelectedCard] = useState(null);
     const [toastId, setToastId] = useState(null);
     const [toastCount, setToastCount] = useState(0);
 
+    const { data: collectionData, error: collectionError, isLoading: collectionLoading, triggerFetch: refetchCollection } = useApi('collections', {}, true, 'GET');
+
+    useEffect(() => {
+        setUserCards(collectionData);
+    }, [collectionData, collectionError, collectionLoading]);
+
     const handleCardToCollection = useCallback(async (cardId, variant, count) => {
-        if (!user?.email) {
-            alert('You must be logged in to do this');
-            return;
-        }
-        
         if (count <= 0) {
             alert('You must select at least one card to update to your collection.');
             return;
         }
 
         const payload = {
-            email: user.email,
+            authToken: authToken,
             card_id: cardId,
             variant,
             count: count,
@@ -35,39 +39,58 @@ const CardList = ({ cards }) => {
         try {
             const response = await addCardToCollection(payload);
             
+            console.log('Card updated:', response.data);
+
             setCardCounts(prevCounts => ({
                 ...prevCounts,
                
                     ...prevCounts,
                     [variant]: count,
-                  
-             
+
             }));
 
+            refetchCollection();
+            
             // Handle toast notification
             if (toast.isActive(toastId)) {
-                const newToastCount = toastCount + 1;
+                let newToastCount = toastCount + 1;
                 setToastCount(newToastCount);
                 toast.update(toastId, {
-                    render: `Card added successfully! (${newToastCount})`,
+                    render: `Card added successfully! (${++newToastCount})`,
                     type: 'success',
                     autoClose: 3000,
                 });
             } else {
-                setToastId(toast.success('Card added successfully!'));
+                setToastId(toast.success(toastCount ? `Card added successfully! (${toastCount})` : 'Card added successfully!'), {
+                    onClose: () => {
+                        setToastId(null);
+                    }
+                });
             }
-
-            // Refresh collection
-            const collectionData = await fetchUserCollection(user.email);
-            setUserCards(collectionData);
         } catch (error) {
-            const errorMessage = error.response?.data?.message || 'An error occurred while adding the card';
-            alert(errorMessage);
-        }
-    }, [user?.email, toastId, toastCount]);
+            console.error('Error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                message: error.message
+            });
 
+            if (error.response?.status === 422) {
+                const validationErrors = error.response.data.errors;
+                const errorMessage = Object.values(validationErrors).flat().join('\n');
+                alert(`Validation failed: ${errorMessage}`);
+            } else if (error.response?.status === 401) {
+                alert('You must be logged in to update cards to your collection.');
+            } else if (error.response?.status === 404) {
+                alert('The card was not found.');
+            } else {
+                alert('An error occurred while adding the card.');
+            }
+        }
+    }, [authToken]);
+
+    //handle remove card
     const handleRemoveCardFromCollection = useCallback(async (cardId, variant, count) => {
-        if (!user?.email) {
+        if (!authToken) {
             alert('You must be logged in to do this');
             return;
         }
@@ -78,31 +101,33 @@ const CardList = ({ cards }) => {
 
      
         try {
-            const response = await removeCardFromCollection(user.email, cardId, count, variant);
-            
+            const response = await removeCardFromCollection(authToken, cardId, count, variant);
+
             setCardCounts(prevCounts => ({
                 ...prevCounts,
-               
-                    ...prevCounts,
-                    [variant]: response.count,
-                  
-             
+                [variant]: response.count,
             }));
-
-            // Refresh collection
-            const collectionData = await fetchUserCollection(user.email);
+            
+            alert(response.message);
+            
+            //update/refresh collection
+          refetchCollection();
             setUserCards(collectionData);
+            
         } catch (error) {
             const errorMessage = error.response?.data?.message || 'An error occurred while removing the card';
             alert(errorMessage);
+
+            //refresh collection to ensure proper state
+            const collectionData = await fetchUserCollection(authToken);
+            setUserCards(collectionData);
         }
-    }, [user?.email]);
+    }, [authToken]);
 
     const handleIncrement = useCallback(async (cardId, variant) => {
         const currentCount = cardCounts[cardId]?.[variant] || 0;
         const newCount = currentCount + 1;
     
-        // Update the state first
         setCardCounts(prevCounts => ({
             ...prevCounts,
             [cardId]: {
@@ -111,7 +136,7 @@ const CardList = ({ cards }) => {
             }
         }));
     
-        // Call the API to add the card to the collection
+        
         await handleCardToCollection(cardId, variant, newCount);
     }, [cardCounts, handleCardToCollection]);
 
@@ -120,7 +145,6 @@ const CardList = ({ cards }) => {
         const currentCount = cardCounts[cardId]?.[variant] || 0;
         const newCount = currentCount - 1;
     
-                // Optimistically update the count first
                 setCardCounts(prevCounts => ({
                     ...prevCounts,
                     [cardId]: {
@@ -129,24 +153,9 @@ const CardList = ({ cards }) => {
                     }
                 }));
     
-                await handleRemoveCardFromCollection( cardId , variant,  newCount); // Pass email, count, and variant
+                await handleRemoveCardFromCollection( cardId , variant,  newCount);
 
     }, [cardCounts, handleRemoveCardFromCollection]);
-
-    useEffect(() => {
-        const fetchCollection = async () => {
-            if (!user?.email) return;
-
-            try {
-                const data = await fetchUserCollection(user.email);
-                setUserCards(data);
-            } catch (error) {
-                console.error('Error fetching user collection:', error);
-            }
-        };
-
-        fetchCollection();
-    }, [user]);
 
     useEffect(() => {
         const initialCounts = {};

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUser } from '../pages/UserContext';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';  
@@ -13,7 +13,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
-import { loginUser } from '../services/api';
+import useApi from '../hooks/useApi'; // Import the useApi hook
 
 const Copyright = () => (
     <Typography variant="body2" color="textSecondary" align="center">
@@ -54,6 +54,10 @@ export default function SignIn() {
     });
     const navigate = useNavigate();
     const { setUser } = useUser();
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false); // Track form submission
+
+    const { data, loading, error, triggerFetch } = useApi('login', {}, false);
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -62,38 +66,43 @@ export default function SignIn() {
             [name]: value,
         }));
     };
-    const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         setIsLoading(true);
-        try {
-            const response = await loginUser(formData);
-            console.log('Login response:', response);
+        setIsSubmitted(true); // Set form as submitted
+        triggerFetch(formData);
+    };
 
-            if (response.status === 'success' && response.data) {
-                const userData = {
-                    name: response.data.name,
-                    email: response.data.email,
-                };
+    useEffect(() => {
+        if (!isSubmitted) return; // Only show messages after form is submitted
 
-
-                setUser(userData);
-                console.log(response.data.email)
-                // todo, make this token
-                localStorage.setItem('authToken', response.data.email);
-                toast.success('Login successful!');
-                navigate('/Index');
-            } else {
-                toast.error('Invalid login credentials.');
-            }
-        } catch (error) {
+        if (loading) {
+            // toast.info('Logging in...', { toastId: 'loggingIn' });
+        } else if (error) {
+            toast.dismiss('loggingIn'); // Dismiss the logging in toast
             toast.error('Error logging in. Please check your credentials.');
             console.error('Login error:', error);
-        } finally {
+            setIsLoading(false);
+        } else if (data && data.status === 'success') {
+            toast.dismiss('loggingIn'); // Dismiss the logging in toast
+            const userData = {
+                name: data.data.name,
+                email: data.data.email,
+            };
+            // console.log('User data:', data.data.token);
+            setUser(userData);
+            localStorage.setItem('authToken', data.data.token);
+            localStorage.setItem('user', JSON.stringify(userData));
+            toast.success('Login successful!');
+            navigate('/Index');
+            setIsLoading(false);
+        } else if (data && data.status !== 'success') {
+            toast.dismiss('loggingIn'); // Dismiss the logging in toast
+            toast.error('Invalid login credentials.');
             setIsLoading(false);
         }
-    };
+    }, [data, loading, error, navigate, setUser, isSubmitted]);
 
     return (
         <Container component="main" maxWidth="xs">
@@ -140,8 +149,9 @@ export default function SignIn() {
                         fullWidth
                         variant="contained"
                         color="primary"
+                        disabled={isLoading}
                     >
-                        Sign In
+                        {isLoading ? 'Signing In...' : 'Sign In'}
                     </SubmitButton>
                     <Grid container justifyContent="flex-end">
                         <Grid item>

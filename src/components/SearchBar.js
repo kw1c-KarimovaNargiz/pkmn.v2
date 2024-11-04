@@ -45,7 +45,9 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const SearchBar = ({ onSearch }) => {
+const SearchBar = ({
+  onSearch = () => { }
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
   const inputRef = useRef(null); 
 
