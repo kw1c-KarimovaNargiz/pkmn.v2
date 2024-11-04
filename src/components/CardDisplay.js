@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, Typography, Dialog, DialogContent, Box, Checkbox } from '@mui/material';
 
-const CardDisplay = React.memo(({ card, isOwned, ownedCount, onClick, isNotInCollection  }) => {
+const CardDisplay = React.memo(({ card, isNotInCollection  }) => {
     const [open, setOpen] = useState(false);
 
     const handleCardClick = () => setOpen(true);

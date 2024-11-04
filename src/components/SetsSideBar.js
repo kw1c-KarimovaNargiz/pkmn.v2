@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
+
 import { Accordion, AccordionSummary, AccordionDetails, Typography, Drawer, Button } from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import SortIcon from '@mui/icons-material/Sort';
 import CombinedSearchFilterBar from './CombinedSearchFilterBar';
 
-const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect, availableTypes, availableSubTypes, onFilter, isCollectionView }) => {
+const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect, availableTypes, availableSubTypes, onFilter }) => {
     const [expanded, setExpanded] = useState(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [selectedSubTypes, setSelectedSubTypes] = useState([]);
     const [isSortedByEvo, setIsSortedByEvo] = useState(false);
-    
+    const location = useLocation();
+const isCollectionView = location.pathname === '/collection'; 
+
+
 
     const handleChange = (seriesId) => (event, isExpanded) => {
         setExpanded(isExpanded ? seriesId : null);
