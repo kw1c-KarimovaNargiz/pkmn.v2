@@ -143,7 +143,6 @@ export const removeCardFromCollection = async (token, cardId, count, variant) =>
             data: {
                 token,
                 card_id: cardId,
-                count,
                 variant,
                 count : parseInt(count),
 

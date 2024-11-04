@@ -1,26 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Typography } from '@mui/material';
 import CardList from '../components/CardList';
 import SetsSidebar from '../components/SetsSideBar';
-import CombinedSearchFilterBar from '../components/CombinedSearchFilterBar'; 
 import Navbar from '../components/Navbar';
 import { useUser } from '../pages/UserContext';
-import { fetchSeries, fetchCardsForSet, searchCard, fetchSortedEvolutionCards, fetchSubTypes, addCardToCollection, removeCardFromCollection } from '../services/api';
+import { fetchSeries, fetchCardsForSet, searchCard, fetchSubTypes, addCardToCollection, removeCardFromCollection } from '../services/api';
 import '../styling/Index.css'; 
 
 const Index = () => {
-    const [sets, setSets] = useState([]);
+    const [, setSets] = useState([]);
     const [series, setSeries] = useState([]);
-    const [selectedSetId, setSelectedSetId] = useState(null);
+    const [, setSelectedSetId] = useState(null);
     const [cards, setCards] = useState([]);
     const [filteredCards, setFilteredCards] = useState([]);
-    const [originalCards, setOriginalCards] = useState([]); 
+    const [, setOriginalCards] = useState([]); 
     const [searchResults, setSearchResults] = useState([]);
-    const [selectedTypes, setSelectedTypes] = useState([]);
-    const [selectedSubTypes, setSelectedSubTypes] = useState([]);
     const [allTypes, setAllTypes] = useState([]);
     const [subTypes, setSubTypes] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false); 
     const { user, userLoading } = useUser(); 
 
@@ -51,46 +47,6 @@ const Index = () => {
             console.error('Failed to remove card from collection:', error);
         }
     };
-
-    const handleSortByEvo = async () => {
-        if (selectedSetId) {
-            setLoading(true); 
-            try {
-                setOriginalCards(cards);
-                const sortedCards = await fetchSortedEvolutionCards(selectedSetId);
-                const uniqueSortedCards = sortedCards.filter((card, index, self) => 
-                    index === self.findIndex((c) => c.id === card.id)
-                );
-
-                const sortedFilteredCards = uniqueSortedCards.filter(card => 
-                    (selectedTypes.length === 0 || selectedTypes.some(type => card.types.includes(type))) &&
-                    (selectedSubTypes.length === 0 || selectedSubTypes.some(subtype => card.subtypes.includes(subtype)))
-                );
-
-                setCards(sortedFilteredCards);
-                setFilteredCards(sortedFilteredCards);
-            } catch (error) {
-                console.error("Error fetching sorted evolution cards:", error);
-                setCards([]);
-                setFilteredCards([]);
-            } finally { 
-                setLoading(false);
-            }
-        }
-    };
-
-    const handleRestoreOriginal = () => {
-        if (selectedTypes.length === 0 && selectedSubTypes.length === 0) {
-            setCards(originalCards);
-            setFilteredCards(originalCards);
-        } else {
-            setFilteredCards(originalCards.filter(card =>
-                (selectedTypes.length === 0 || selectedTypes.some(type => card.types.includes(type))) &&
-                (selectedSubTypes.length === 0 || selectedSubTypes.some(subtype => card.subtypes.includes(subtype)))
-            ));
-        }
-    };
-
     useEffect(() => {
         const loadSeries = async () => {
             setLoading(true);
@@ -188,7 +144,7 @@ const Index = () => {
     }, [cards]);
 
     if( userLoading ) return null;
-    const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "No Title Available";
+
 
     return (
         <div className="index-container">
@@ -206,6 +162,7 @@ const Index = () => {
         
             <div className="cards-display-area">
                 <CardList 
+                 
                     cards={searchResults.length > 0 ? searchResults : filteredCards} 
                     onAddCard={handleAddCard} 
                     onRemoveCard={handleRemoveCard}

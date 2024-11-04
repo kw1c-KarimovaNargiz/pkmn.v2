@@ -55,7 +55,7 @@ export default function SignIn() {
     const navigate = useNavigate();
     const { setUser } = useUser();
     const [isLoading, setIsLoading] = useState(false);
-    const [isSubmitted, setIsSubmitted] = useState(false); // Track form submission
+    const [isSubmitted, setIsSubmitted] = useState(false);
 
     const { data, loading, error, triggerFetch } = useApi('login', {}, false);
 
@@ -70,7 +70,7 @@ export default function SignIn() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         setIsLoading(true);
-        setIsSubmitted(true); // Set form as submitted
+        setIsSubmitted(true);
         triggerFetch(formData);
     };
 

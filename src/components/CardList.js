@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Grid, Typography, Checkbox, FormControlLabel, IconButton, Button } from '@mui/material';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Grid, Checkbox, FormControlLabel, IconButton} from '@mui/material';
 import { toast } from 'react-toastify';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
@@ -8,11 +8,10 @@ import { useUser } from '../pages/UserContext';
 import useApi from '../hooks/useApi';
 
 const CardList = ({ cards }) => {
-    const { user, authToken } = useUser();
-    const [visibleCards, setVisibleCards] = useState([]);
+    const { authToken } = useUser();
+    const [loading, setLoading] = useState(true);
     const [cardCounts, setCardCounts] = useState({});
     const [userCards, setUserCards] = useState({});
-    const observerRef = useRef(null);
     const [selectedCard, setSelectedCard] = useState(null);
     const [toastId, setToastId] = useState(null);
     const [toastCount, setToastCount] = useState(0);
@@ -22,7 +21,14 @@ const CardList = ({ cards }) => {
     useEffect(() => {
         setUserCards(collectionData);
     }, [collectionData, collectionError, collectionLoading]);
+    useEffect(() => {
 
+        setLoading(true);
+        if (cards.length > 0) {
+            setLoading(false);
+        }
+    }, [cards]);
+    
     const handleCardToCollection = useCallback(async (cardId, variant, count) => {
         if (count <= 0) {
             alert('You must select at least one card to update to your collection.');
@@ -195,7 +201,7 @@ const CardList = ({ cards }) => {
                         className="card-item"
                     >
                         <div className="flex flex-col items-center gap-1">
-                            <CardDisplay card={card} onClick={() => handleCardClick(card)} />
+                            <CardDisplay loading={loading} card={card} onClick={() => handleCardClick(card)} />
                             
                             <div className="flex flex-col items-center w-full mt-2 gap-2">
                                 {/* Normal variant controls */}
@@ -308,10 +314,12 @@ const CardList = ({ cards }) => {
                     </Grid>
                 ))}
             </Grid>
-
+ 
             {selectedCard && (
                 <CardDisplay card={selectedCard} onClose={handleCloseCardDisplay} />
+                
             )}
+            
         </div>
     );
 };

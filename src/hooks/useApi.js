@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import useFetch from './useFetch'; // Adjust the path as necessary
 import { useUser } from '../pages/UserContext';
 
@@ -27,7 +27,6 @@ const useApi = (url, params, fetchImmediate = true, method = 'POST') => {
 
   useEffect(() => {
     if (fetchImmediate && !userLoading) {
-      console.log(authToken);
       setShouldFetch(true);
     }
   }, [fetchImmediate, userLoading]);
