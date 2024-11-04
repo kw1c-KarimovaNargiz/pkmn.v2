@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Card, CardContent, Typography, Dialog, DialogContent, Box, Checkbox } from '@mui/material';
 
-const CardDisplay = React.memo(({ card }) => {
+const CardDisplay = React.memo(({ card, isOwned, ownedCount, onClick, isNotInCollection  }) => {
     const [open, setOpen] = useState(false);
 
     const handleCardClick = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
     return (
+        
         <>
             <Card 
     sx={{ backgroundColor: 'transparent', boxShadow: 'none' }}
@@ -28,7 +29,11 @@ const CardDisplay = React.memo(({ card }) => {
             loading="lazy"
             style={{ width: '100%', height: 'auto' }}
         />
-     
+     <div style={{
+            filter: isNotInCollection ? 'grayscale(100%)' : 'none',
+            opacity: isNotInCollection ? '0.7' : '1',
+            transition: 'filter 0.3s ease, opacity 0.3s ease'
+        }}></div>
 
     </CardContent>
 </Card>

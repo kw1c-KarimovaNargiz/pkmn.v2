@@ -1,5 +1,5 @@
-import React, { useEffect,useRef, useState, useCallback } from 'react';
-import { Grid, Checkbox, FormControlLabel, IconButton, Skeleton} from '@mui/material';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { Grid, Checkbox, FormControlLabel, IconButton, Skeleton } from '@mui/material';
 import { toast } from 'react-toastify';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
@@ -7,7 +7,7 @@ import { addCardToCollection, removeCardFromCollection, fetchUserCollection } fr
 import { useUser } from '../pages/UserContext';
 import useApi from '../hooks/useApi';
 
-const CardList = ({ cards, isCollectionView }) => {
+const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
     const { authToken } = useUser();
     const [loading, setLoading] = useState(true);
     const [cardCounts, setCardCounts] = useState({});
@@ -15,16 +15,15 @@ const CardList = ({ cards, isCollectionView }) => {
     const [selectedCard, setSelectedCard] = useState(null);
     const [toastId, setToastId] = useState(null);
     const [toastCount, setToastCount] = useState(0);
-    const [displayCount, setDisplayCount] = useState(12); 
+    const [displayCount, setDisplayCount] = useState(12);
     const loadingRef = useRef(null);
     const { data: collectionData, error: collectionError, isLoading: collectionLoading, triggerFetch: refetchCollection } = useApi('collections', {}, true, 'GET');
-
     const [loadingImages, setLoadingImages] = useState({});
+
     useEffect(() => {
         const observer = new IntersectionObserver((entries) => {
             if (entries[0].isIntersecting) {
-                // Load more cards when the loadingRef is in view
-                setDisplayCount((prevCount) => prevCount + 12); // Load 12 more cards
+                setDisplayCount((prevCount) => prevCount + 12);
             }
         });
 
@@ -39,19 +38,19 @@ const CardList = ({ cards, isCollectionView }) => {
         };
     }, [loadingRef]);
 
-
     useEffect(() => {
         setLoading(cards.length === 0 && collectionLoading);
     }, [cards, collectionLoading]);
-    useEffect(() => {
 
+    useEffect(() => {
         setLoading(true);
         if (cards.length > 0) {
             setLoading(false);
         }
     }, [cards]);
+
     const handleImageLoad = (cardId) => {
-        setLoadingImages((prev) => ({ ...prev, [cardId]: false })); // Set loading to false when image is loaded
+        setLoadingImages((prev) => ({ ...prev, [cardId]: false }));
     };
 
     const handleCardToCollection = useCallback(async (cardId, variant, count) => {
@@ -69,25 +68,23 @@ const CardList = ({ cards, isCollectionView }) => {
 
         try {
             const response = await addCardToCollection(payload);
-            
             console.log('Card updated:', response.data);
 
             setCardCounts(prevCounts => ({
                 ...prevCounts,
-               
-                    ...prevCounts,
-                    [variant]: count,
-
+                [cardId]: {
+                    ...prevCounts[cardId],
+                    [variant]: count
+                }
             }));
 
             refetchCollection();
-            
-            // Handle toast notification
+
             if (toast.isActive(toastId)) {
                 let newToastCount = toastCount + 1;
                 setToastCount(newToastCount);
                 toast.update(toastId, {
-                    render: `Card added successfully! (${++newToastCount})`,
+                    render: `Card added successfully! (${newToastCount})`,
                     type: 'success',
                     autoClose: 3000,
                 });
@@ -117,9 +114,8 @@ const CardList = ({ cards, isCollectionView }) => {
                 alert('An error occurred while adding the card.');
             }
         }
-    }, [authToken]);
+    }, [authToken, toastId, toastCount, refetchCollection]);
 
-    //handle remove card
     const handleRemoveCardFromCollection = useCallback(async (cardId, variant, count) => {
         if (!authToken) {
             alert('You must be logged in to do this');
@@ -130,35 +126,34 @@ const CardList = ({ cards, isCollectionView }) => {
             return;
         }
 
-     
         try {
             const response = await removeCardFromCollection(authToken, cardId, count, variant);
 
             setCardCounts(prevCounts => ({
                 ...prevCounts,
-                [variant]: response.count,
+                [cardId]: {
+                    ...prevCounts[cardId],
+                    [variant]: response.count
+                }
             }));
-            
+
             alert(response.message);
-            
-            //update/refresh collection
-          refetchCollection();
+            refetchCollection();
             setUserCards(collectionData);
-            
+
         } catch (error) {
             const errorMessage = error.response?.data?.message || 'An error occurred while removing the card';
             alert(errorMessage);
 
-            //refresh collection to ensure proper state
             const collectionData = await fetchUserCollection(authToken);
             setUserCards(collectionData);
         }
-    }, [authToken]);
+    }, [authToken, collectionData]);
 
     const handleIncrement = useCallback(async (cardId, variant) => {
         const currentCount = cardCounts[cardId]?.[variant] || 0;
         const newCount = currentCount + 1;
-    
+
         setCardCounts(prevCounts => ({
             ...prevCounts,
             [cardId]: {
@@ -166,31 +161,27 @@ const CardList = ({ cards, isCollectionView }) => {
                 [variant]: newCount
             }
         }));
-    
-        
+
         await handleCardToCollection(cardId, variant, newCount);
     }, [cardCounts, handleCardToCollection]);
 
-    
     const handleDecrement = useCallback(async (cardId, variant) => {
         const currentCount = cardCounts[cardId]?.[variant] || 0;
         const newCount = currentCount - 1;
-    
-                setCardCounts(prevCounts => ({
-                    ...prevCounts,
-                    [cardId]: {
-                        ...prevCounts[cardId],
-                        [variant]: newCount
-                    }
-                }));
-    
-                await handleRemoveCardFromCollection( cardId , variant,  newCount);
 
+        setCardCounts(prevCounts => ({
+            ...prevCounts,
+            [cardId]: {
+                ...prevCounts[cardId],
+                [variant]: newCount
+            }
+        }));
+
+        await handleRemoveCardFromCollection(cardId, variant, newCount);
     }, [cardCounts, handleRemoveCardFromCollection]);
 
     useEffect(() => {
         const initialCounts = {};
-        
         if (Array.isArray(userCards)) {
             userCards.forEach(card => {
                 initialCounts[card.card_id] = {
@@ -200,7 +191,6 @@ const CardList = ({ cards, isCollectionView }) => {
                 };
             });
         }
-        
         setCardCounts(initialCounts);
     }, [userCards]);
 
@@ -212,100 +202,65 @@ const CardList = ({ cards, isCollectionView }) => {
         setSelectedCard(null);
     };
 
-
     return (
         <div>
             <Grid container spacing={2}>
                 {cards.slice(0, displayCount).map((card) => (
-                    <Grid 
-                        item 
-                        key={card.id} 
-                        xs={12} 
-                        sm={6} 
-                        md={4} 
-                        className="card-item"
-                    >
-                         <div style={{ position: 'relative', width: '100%' }}>
-                            {loading ? (
-                                <Skeleton 
-                                    variant="rectangular" 
-                                    width="100%" 
-                                    sx={{ paddingTop: '139%', borderRadius: '10px', backgroundColor: 'rgba(255, 255, 255, 0.1)' }} 
+                    <Grid item key={card.id} xs={12} sm={6} md={4} className="card-item">
+                        <div style={{ position: 'relative', width: '100%' }}>
+                            {/*not in collection, grey hue */}
+                            {isCollectionView && !isCardInCollection(card.id) && (
+                                <div
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        backgroundColor: 'rgba(128, 128, 128, 0.5)',
+                                        pointerEvents: 'none',
+                                    }}
                                 />
-                            ) : (
-                                <CardDisplay 
-                                    card={card} 
+                            )}
+
+                            {/* render carddisplay only if in collection view and card is not in collection */}
+                            {(!isCollectionView || (isCollectionView && !isCardInCollection(card.id))) && (
+                                <CardDisplay
+                                    card={card}
                                     isOwned={isCollectionView ? card.owned : true}
                                     ownedCount={card.ownedCount}
-                                    onClick={() => handleCardClick(card)} 
+                                    onClick={() => handleCardClick(card)}
+                                    isNotInCollection={isCollectionView && !isCardInCollection(card.id)}
                                 />
-    )}
+                            )}
+
                             <div className="flex flex-col items-center w-full mt-2 gap-2">
-                                {/* Normal variant controls */}
+                                {/*normal variant*/}
                                 {card.price_data?.tcgplayer?.normal && (
-                                <div className="flex items-center gap-2">
-                                     <FormControlLabel
-                                    control={
-                                        <Checkbox 
-                                        checked={!!cardCounts[card.card_id]?.normal} 
-                                        sx={{
-                                            '&.Mui-checked': {
-                                                color: 'yellow', 
-                                            },
-                                          
-                                        }} 
-                                    />
-                                    }
-                                    label={cardCounts[card.card_id]?.normal || 0} 
-                                />
-                                    <IconButton 
-                                        onClick={() => handleDecrement(card.card_id, 'normal')} 
-                                        size="small" 
-                                        disabled={(cardCounts[card.card_id]?.normal || 0) === 0}
-                                    >
-                                        <Remove />
-                                    </IconButton>
-                                 
-
-                                    <IconButton 
-                                        onClick={() => handleIncrement(card.card_id, 'normal')} 
-                                        size="small"
-                                    >
-                                        <Add />
-                                    </IconButton>
-                                </div>
-                                 )}
-
-                                {/* Holofoil variant controls */}
-                                {card.price_data?.tcgplayer?.holofoil && (
                                     <div className="flex items-center gap-2">
-
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox 
-                                        checked={!!cardCounts[card.card_id]?.holofoil} 
-                                        sx={{
-                                            '&.Mui-checked': {
-                                                color: 'purple', 
-                                            },
-                                          
-                                        }} 
-                                    />
-                                    }
-                                    label={cardCounts[card.card_id]?.holofoil || 0} 
-                                />
-                                        <IconButton 
-                                            onClick={() => handleDecrement(card.card_id, 'holofoil')} 
-                                            size="small" 
-                                            disabled={(cardCounts[card.card_id]?.holofoil || 0) === 0}
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={!!cardCounts[card.card_id]?.normal}
+                                                    sx={{
+                                                        '&.Mui-checked': {
+                                                            color: 'yellow',
+                                                        },
+                                                    }}
+                                                />
+                                            }
+                                            label={cardCounts[card.card_id]?.normal || 0}
+                                        />
+                                        <IconButton
+                                            onClick={() => handleDecrement(card.card_id, 'normal')}
+                                            size="small"
+                                            disabled={(cardCounts[card.card_id]?.normal || 0) === 0}
                                         >
                                             <Remove />
                                         </IconButton>
 
-                                 
-
-                                        <IconButton 
-                                            onClick={() => handleIncrement(card.card_id, 'holofoil')} 
+                                        <IconButton
+                                            onClick={() => handleIncrement(card.card_id, 'normal')}
                                             size="small"
                                         >
                                             <Add />
@@ -313,33 +268,65 @@ const CardList = ({ cards, isCollectionView }) => {
                                     </div>
                                 )}
 
-                                {/* Reverse Holofoil variant controls */}
+                                {/* holo variant */}
+                                {card.price_data?.tcgplayer?.holofoil && (
+                                    <div className="flex items-center gap-2">
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={!!cardCounts[card.card_id]?.holofoil}
+                                                    sx={{
+                                                        '&.Mui-checked': {
+                                                            color: 'yellow',
+                                                        },
+                                                    }}
+                                                />
+                                            }
+                                            label={cardCounts[card.card_id]?.holofoil || 0}
+                                        />
+                                        <IconButton
+                                            onClick={() => handleDecrement(card.card_id, 'holofoil')}
+                                            size="small"
+                                            disabled={(cardCounts[card.card_id]?.holofoil || 0) === 0}
+                                        >
+                                            <Remove />
+                                        </IconButton>
+
+                                        <IconButton
+                                            onClick={() => handleIncrement(card.card_id, 'holofoil')}
+                                            size="small"
+                                        >
+                                            <Add />
+                                        </IconButton>
+                                    </div>
+                                )}
+
+                                {/*reverse holo variant */}
                                 {card.price_data?.tcgplayer?.reverseHolofoil && (
                                     <div className="flex items-center gap-2">
-                                    <FormControlLabel
-                                    control={
-                                        <Checkbox 
-                                        checked={!!cardCounts[card.card_id]?.reverseHolofoil} 
-                                        sx={{
-                                            '&.Mui-checked': {
-                                                color: 'blue', 
-                                            },
-                                          
-                                        }} 
-                                    />
-                                    }
-                                    label={cardCounts[card.card_id]?.reverseHolofoil || 0} 
-                                />
-                                        <IconButton 
-                                            onClick={() => handleDecrement(card.card_id, 'reverseHolofoil')} 
-                                            size="small" 
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    checked={!!cardCounts[card.card_id]?.reverseHolofoil}
+                                                    sx={{
+                                                        '&.Mui-checked': {
+                                                            color: 'yellow',
+                                                        },
+                                                    }}
+                                                />
+                                            }
+                                            label={cardCounts[card.card_id]?.reverseHolofoil || 0}
+                                        />
+                                        <IconButton
+                                            onClick={() => handleDecrement(card.card_id, 'reverseHolofoil')}
+                                            size="small"
                                             disabled={(cardCounts[card.card_id]?.reverseHolofoil || 0) === 0}
                                         >
                                             <Remove />
                                         </IconButton>
 
-                                        <IconButton 
-                                            onClick={() => handleIncrement(card.card_id, 'reverseHolofoil')} 
+                                        <IconButton
+                                            onClick={() => handleIncrement(card.card_id, 'reverseHolofoil')}
                                             size="small"
                                         >
                                             <Add />
@@ -350,17 +337,13 @@ const CardList = ({ cards, isCollectionView }) => {
                         </div>
                     </Grid>
                 ))}
+                {loading && Array.from(new Array(6)).map((_, index) => (
+                    <Grid item key={index} xs={12} sm={6} md={4}>
+                        <Skeleton variant="rectangular" height={250} />
+                    </Grid>
+                ))}
             </Grid>
- 
-            <div ref={loadingRef} style={{ height: '20px', margin: '20px 0' }}>
-                {loading && <Skeleton variant="rectangular" width="100%" height={50} />}
-            </div>
-
-            {selectedCard && (
-                <CardDisplay card={selectedCard} onClose={handleCloseCardDisplay} />
-            )}
-   
-            
+            <div ref={loadingRef} />
         </div>
     );
 };
