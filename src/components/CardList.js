@@ -224,15 +224,12 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
                             )}
 
                             {/* render carddisplay only if in collection view and card is not in collection */}
-                            {(!isCollectionView || (isCollectionView && !isCardInCollection(card.id))) && (
-                                <CardDisplay
-                                    card={card}
-                                    isOwned={isCollectionView ? card.owned : true}
-                                    ownedCount={card.ownedCount}
-                                    onClick={() => handleCardClick(card)}
-                                    isNotInCollection={isCollectionView && !isCardInCollection(card.id)}
-                                />
-                            )}
+                            <CardDisplay
+                                card={card}
+                                isOwned={isCollectionView ? isCardInCollection(card.id) : true}
+                                ownedCount={cardCounts[card.card_id]?.normal || 0}
+                                onClick={() => handleCardClick(card)}
+                            />
 
                             <div className="flex flex-col items-center w-full mt-2 gap-2">
                                 {/*normal variant*/}

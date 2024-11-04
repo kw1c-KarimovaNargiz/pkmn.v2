@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, Chip, FormControlLabel, Checkbox, Autocomplete, TextField, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Chip, FormControlLabel, Checkbox, Autocomplete, TextField, Typography, Button } from '@mui/material';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
@@ -16,22 +16,30 @@ const CombinedSearchFilterBar = ({
   isSortedByEvo,
   setIsSortedByEvo,
   onFilter,
+  selectedSet, // New prop for the selected set
+  setSelectedSet, // New prop for setting the selected set
+  ownedCards, // New prop for owned cards
 }) => {
   
   const handleTypeChange = (event, newValue) => {
     setSelectedTypes(newValue);
-    onFilter(newValue, selectedSubTypes, isSortedByEvo);
+    onFilter(newValue, selectedSubTypes, isSortedByEvo, selectedSet);
   };
 
   const handleSubTypeChange = (event, newValue) => {
     setSelectedSubTypes(newValue);
-    onFilter(selectedTypes, newValue, isSortedByEvo);
+    onFilter(selectedTypes, newValue, isSortedByEvo, selectedSet);
   };
 
   const handleSortByEvoChange = (event) => {
     const checked = event.target.checked;
     setIsSortedByEvo(checked);
-    onFilter(selectedTypes, selectedSubTypes, checked);
+    onFilter(selectedTypes, selectedSubTypes, checked, selectedSet);
+  };
+
+  const handleFilterOwnedCards = () => {
+    // Call the onFilter function with the selected set to filter the owned cards
+    onFilter(selectedTypes, selectedSubTypes, isSortedByEvo, selectedSet);
   };
 
   return (
@@ -45,7 +53,7 @@ const CombinedSearchFilterBar = ({
             onDelete={() => {
               const updatedTypes = selectedTypes.filter((t) => t !== type);
               setSelectedTypes(updatedTypes);
-              onFilter(updatedTypes, selectedSubTypes, isSortedByEvo);
+              onFilter(updatedTypes, selectedSubTypes, isSortedByEvo, selectedSet);
             }}
             sx={{ margin: '4px' }}
           />
@@ -113,6 +121,10 @@ const CombinedSearchFilterBar = ({
         }
         label="Sort by Evolution"
       />
+
+      <Button variant="contained" onClick={handleFilterOwnedCards}>
+        Filter Owned Cards
+      </Button>
     </Box>
   );
 };
