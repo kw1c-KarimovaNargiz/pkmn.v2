@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Grid, Checkbox, FormControlLabel, IconButton} from '@mui/material';
+import { Grid, Checkbox, FormControlLabel, IconButton, Skeleton} from '@mui/material';
 import { toast } from 'react-toastify';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
@@ -19,8 +19,8 @@ const CardList = ({ cards }) => {
     const { data: collectionData, error: collectionError, isLoading: collectionLoading, triggerFetch: refetchCollection } = useApi('collections', {}, true, 'GET');
 
     useEffect(() => {
-        setUserCards(collectionData);
-    }, [collectionData, collectionError, collectionLoading]);
+        setLoading(cards.length === 0 && collectionLoading);
+    }, [cards, collectionLoading]);
     useEffect(() => {
 
         setLoading(true);
@@ -201,8 +201,19 @@ const CardList = ({ cards }) => {
                         className="card-item"
                     >
                         <div className="flex flex-col items-center gap-1">
-                            <CardDisplay loading={loading} card={card} onClick={() => handleCardClick(card)} />
-                            
+                            {/* Pass only the necessary props to CardDisplay */}
+                            {loading ? (
+        <Skeleton 
+            variant="rectangular" 
+            width="100%" 
+            sx={{ paddingTop: '139%', borderRadius: '10px', backgroundColor: 'rgba(255, 255, 255, 0.1)' }} 
+        />
+    ) : (
+        <CardDisplay 
+            card={card} 
+            onClick={() => handleCardClick(card)} 
+        />
+    )}
                             <div className="flex flex-col items-center w-full mt-2 gap-2">
                                 {/* Normal variant controls */}
                                 {card.price_data?.tcgplayer?.normal && (
