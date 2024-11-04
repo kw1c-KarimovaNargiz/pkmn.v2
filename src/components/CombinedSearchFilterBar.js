@@ -16,30 +16,32 @@ const CombinedSearchFilterBar = ({
   isSortedByEvo,
   setIsSortedByEvo,
   onFilter,
-  selectedSet, // New prop for the selected set
-  setSelectedSet, // New prop for setting the selected set
-  ownedCards, // New prop for owned cards
+  selectedSet, 
+  setSelectedSet, 
+  ownedCards, 
 }) => {
-  
+  const [isOwnedFilterActive, setIsOwnedFilterActive] = useState(false); // State for owned cards filter
+  const [filterOwnedCards, setFilterOwnedCards] = useState(false);
   const handleTypeChange = (event, newValue) => {
     setSelectedTypes(newValue);
-    onFilter(newValue, selectedSubTypes, isSortedByEvo, selectedSet);
+    onFilter(newValue, selectedSubTypes, isSortedByEvo, selectedSet, isOwnedFilterActive);
   };
 
   const handleSubTypeChange = (event, newValue) => {
     setSelectedSubTypes(newValue);
-    onFilter(selectedTypes, newValue, isSortedByEvo, selectedSet);
+    onFilter(selectedTypes, newValue, isSortedByEvo, selectedSet, isOwnedFilterActive);
   };
 
   const handleSortByEvoChange = (event) => {
     const checked = event.target.checked;
     setIsSortedByEvo(checked);
-    onFilter(selectedTypes, selectedSubTypes, checked, selectedSet);
+    onFilter(selectedTypes, selectedSubTypes, checked, selectedSet, isOwnedFilterActive);
   };
 
-  const handleFilterOwnedCards = () => {
-    // Call the onFilter function with the selected set to filter the owned cards
-    onFilter(selectedTypes, selectedSubTypes, isSortedByEvo, selectedSet);
+  const handleFilterOwnedCards = (event) => {
+    const checked = event.target.checked;
+    setIsOwnedFilterActive(checked);
+    onFilter(selectedTypes, selectedSubTypes, isSortedByEvo, selectedSet, filterOwnedCards, checked);
   };
 
   return (
@@ -53,7 +55,7 @@ const CombinedSearchFilterBar = ({
             onDelete={() => {
               const updatedTypes = selectedTypes.filter((t) => t !== type);
               setSelectedTypes(updatedTypes);
-              onFilter(updatedTypes, selectedSubTypes, isSortedByEvo, selectedSet);
+              onFilter(updatedTypes, selectedSubTypes, isSortedByEvo, selectedSet, isOwnedFilterActive);
             }}
             sx={{ margin: '4px' }}
           />
@@ -122,9 +124,21 @@ const CombinedSearchFilterBar = ({
         label="Sort by Evolution"
       />
 
-      <Button variant="contained" onClick={handleFilterOwnedCards}>
-        Filter Owned Cards
-      </Button>
+      <FormControlLabel
+        control={
+          <Checkbox
+          checked={filterOwnedCards}
+          onChange={(event) => {
+              setFilterOwnedCards(event.target.checked);
+              onFilter(selectedTypes, selectedSubTypes, isSortedByEvo, event.target.checked);
+          }}
+            color="primary"
+          />
+        }
+        label="Show Owned Cards Only"
+      />
+
+
     </Box>
   );
 };

@@ -18,6 +18,7 @@ const CollectionPage = () => {
     const [allTypes, setAllTypes] = useState([]);
     const [subTypes, setSubTypes] = useState([]);
     const [cards, setCards] = useState([]);
+    const [isOwnedFilterActive, setIsOwnedFilterActive] = useState(false);
 
 
     const { data: collectionData, error: collectionError, isLoading: collectionLoading, triggerFetch: refetchCollection } = useApi('collections', {}, false, 'GET');
@@ -39,11 +40,10 @@ const CollectionPage = () => {
         }
     }, [collectionData, collectionError, collectionLoading]);
 
-   
     useEffect(() => {
         const loadSeries = async () => {
             if (!authToken || userLoading) return;
-            
+
             setLoading(true);
             try {
                 const seriesData = await fetchSeries();
@@ -92,31 +92,39 @@ const CollectionPage = () => {
         setSets(selectedSeries.sets || []);
     }, []);
 
-    const handleFilter = useCallback((types, subtypes, isSortedByEvo) => {
+    const isCardInCollection = useCallback((cardId) => {
+        return userCollection.some(item => item.card.id === cardId);
+    }, [userCollection]);
+
+    const handleFilter = useCallback((types, subtypes, isSortedByEvo, filterOwned) => {
         let filtered = [...cards];
-      
+
+        // Filter by types
         if (types.length > 0) {
             filtered = filtered.filter((card) =>
                 types.some((type) => card.types?.includes(type))
             );
         }
-      
+
+        // Filter by subtypes
         if (subtypes.length > 0) {
             filtered = filtered.filter((card) =>
                 subtypes.some((subtype) => card.subtypes?.includes(subtype))
             );
         }
 
+        // Filter by owned cards
+        if (filterOwned) {
+            filtered = filtered.filter(card => isCardInCollection(card.id)); // Adjust based on your card ID structure
+        }
+
+        // Sort by evolution stage if needed
         if (isSortedByEvo) {
             filtered.sort((a, b) => (a.evolutionStage || 0) - (b.evolutionStage || 0));
         }
 
         setFilteredCards(filtered);
-    }, [cards]);
-
-    const isCardInCollection = useCallback((cardId) => {
-        return userCollection.some(item => item.card.id === cardId);
-    }, [userCollection]);
+    }, [cards, isCardInCollection]);
 
     if (userLoading || loading) return <div>Loading...</div>;
     if (error) return <div>{error}</div>;
@@ -132,6 +140,8 @@ const CollectionPage = () => {
                     availableSubTypes={subTypes}
                     onFilter={handleFilter}
                     isCollectionView={true}
+                    isOwnedFilterActive={isOwnedFilterActive} 
+    setIsOwnedFilterActive={setIsOwnedFilterActive}
                 />
             </div>
             <div className="cards-display-area">
