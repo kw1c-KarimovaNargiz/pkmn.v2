@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect,useRef, useState, useCallback } from 'react';
 import { Grid, Checkbox, FormControlLabel, IconButton, Skeleton} from '@mui/material';
 import { toast } from 'react-toastify';
 import { Add, Remove } from '@mui/icons-material';
@@ -15,8 +15,30 @@ const CardList = ({ cards }) => {
     const [selectedCard, setSelectedCard] = useState(null);
     const [toastId, setToastId] = useState(null);
     const [toastCount, setToastCount] = useState(0);
-
+    const [displayCount, setDisplayCount] = useState(12); 
+    const loadingRef = useRef(null);
     const { data: collectionData, error: collectionError, isLoading: collectionLoading, triggerFetch: refetchCollection } = useApi('collections', {}, true, 'GET');
+
+    const [loadingImages, setLoadingImages] = useState({});
+    useEffect(() => {
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                // Load more cards when the loadingRef is in view
+                setDisplayCount((prevCount) => prevCount + 12); // Load 12 more cards
+            }
+        });
+
+        if (loadingRef.current) {
+            observer.observe(loadingRef.current);
+        }
+
+        return () => {
+            if (loadingRef.current) {
+                observer.unobserve(loadingRef.current);
+            }
+        };
+    }, [loadingRef]);
+
 
     useEffect(() => {
         setLoading(cards.length === 0 && collectionLoading);
@@ -28,7 +50,10 @@ const CardList = ({ cards }) => {
             setLoading(false);
         }
     }, [cards]);
-    
+    const handleImageLoad = (cardId) => {
+        setLoadingImages((prev) => ({ ...prev, [cardId]: false })); // Set loading to false when image is loaded
+    };
+
     const handleCardToCollection = useCallback(async (cardId, variant, count) => {
         if (count <= 0) {
             alert('You must select at least one card to update to your collection.');
@@ -191,7 +216,7 @@ const CardList = ({ cards }) => {
     return (
         <div>
             <Grid container spacing={2}>
-                {cards.map((card) => (
+                {cards.slice(0, displayCount).map((card, index) => (
                     <Grid 
                         item 
                         key={card.id} 
@@ -200,19 +225,18 @@ const CardList = ({ cards }) => {
                         md={4} 
                         className="card-item"
                     >
-                        <div className="flex flex-col items-center gap-1">
-                            {/* Pass only the necessary props to CardDisplay */}
+                         <div style={{ position: 'relative', width: '100%' }}>
                             {loading ? (
-        <Skeleton 
-            variant="rectangular" 
-            width="100%" 
-            sx={{ paddingTop: '139%', borderRadius: '10px', backgroundColor: 'rgba(255, 255, 255, 0.1)' }} 
-        />
-    ) : (
-        <CardDisplay 
-            card={card} 
-            onClick={() => handleCardClick(card)} 
-        />
+                                <Skeleton 
+                                    variant="rectangular" 
+                                    width="100%" 
+                                    sx={{ paddingTop: '139%', borderRadius: '10px', backgroundColor: 'rgba(255, 255, 255, 0.1)' }} 
+                                />
+                            ) : (
+                                <CardDisplay 
+                                    card={card} 
+                                    onClick={() => handleCardClick(card)} 
+                                />
     )}
                             <div className="flex flex-col items-center w-full mt-2 gap-2">
                                 {/* Normal variant controls */}
@@ -326,10 +350,14 @@ const CardList = ({ cards }) => {
                 ))}
             </Grid>
  
+            <div ref={loadingRef} style={{ height: '20px', margin: '20px 0' }}>
+                {loading && <Skeleton variant="rectangular" width="100%" height={50} />}
+            </div>
+
             {selectedCard && (
                 <CardDisplay card={selectedCard} onClose={handleCloseCardDisplay} />
-                
             )}
+   
             
         </div>
     );
