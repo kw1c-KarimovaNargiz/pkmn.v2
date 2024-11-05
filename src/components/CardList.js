@@ -54,10 +54,10 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
     };
 
     const handleCardToCollection = useCallback(async (cardId, variant, count) => {
-        if (count <= 0) {
-            alert('You must select at least one card to update to your collection.');
-            return;
-        }
+        // if (count <= 0) {
+        //     alert('You must select at least one card to update to your collection.');
+        //     return;
+        // }
 
         const payload = {
             authToken: authToken,
@@ -72,12 +72,12 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
 
             setCardCounts(prevCounts => ({
                 ...prevCounts,
-                [cardId]: {
-                    ...prevCounts[cardId],
-                    [variant]: count
-                }
+               
+                    ...prevCounts,
+                    [variant]: count,
+                  
+             
             }));
-
             refetchCollection();
 
             if (toast.isActive(toastId)) {
@@ -131,10 +131,11 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
 
             setCardCounts(prevCounts => ({
                 ...prevCounts,
-                [cardId]: {
-                    ...prevCounts[cardId],
-                    [variant]: response.count
-                }
+               
+                    ...prevCounts,
+                    [variant]: count,
+                  
+             
             }));
 
             alert(response.message);
@@ -182,8 +183,8 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
 
     useEffect(() => {
         const initialCounts = {};
-        if (Array.isArray(userCards)) {
-            userCards.forEach(card => {
+        if (Array.isArray(collectionData) ){
+            collectionData.forEach(card => {
                 initialCounts[card.card_id] = {
                     normal: card.normal_count,
                     holofoil: card.holo_count,
@@ -192,19 +193,15 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
             });
         }
         setCardCounts(initialCounts);
-    }, [userCards]);
+    }, [collectionData]);
 
     const handleCardClick = (card) => {
         setSelectedCard(card);
     };
-
-    const handleCloseCardDisplay = () => {
-        setSelectedCard(null);
-    };
-
     return (
         <div>
             <Grid container spacing={2}>
+                
                 {cards.slice(0, displayCount).map((card) => (
                     <Grid item key={card.id} xs={12} sm={6} md={4} className="card-item">
                         <div style={{ position: 'relative', width: '100%' }}>
@@ -235,6 +232,10 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
                                 {card.price_data?.tcgplayer?.normal && (
                                     <div className="flex items-center gap-2">
                                         <FormControlLabel
+                                            sx={{
+                                                color: 'white',
+                                                
+                                            }}
                                             control={
                                                 <Checkbox
                                                     checked={!!cardCounts[card.card_id]?.normal}
@@ -258,6 +259,7 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
                                         <IconButton
                                             onClick={() => handleIncrement(card.card_id, 'normal')}
                                             size="small"
+                                        
                                         >
                                             <Add />
                                         </IconButton>
@@ -273,7 +275,7 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
                                                     checked={!!cardCounts[card.card_id]?.holofoil}
                                                     sx={{
                                                         '&.Mui-checked': {
-                                                            color: 'yellow',
+                                                            color: 'purple',
                                                         },
                                                     }}
                                                 />
@@ -306,7 +308,7 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
                                                     checked={!!cardCounts[card.card_id]?.reverseHolofoil}
                                                     sx={{
                                                         '&.Mui-checked': {
-                                                            color: 'yellow',
+                                                            color: 'blue',
                                                         },
                                                     }}
                                                 />
