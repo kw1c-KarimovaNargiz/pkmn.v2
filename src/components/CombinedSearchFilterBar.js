@@ -129,7 +129,8 @@ const CombinedSearchFilterBar = ({
           <Checkbox
           checked={filterOwnedCards}
           onChange={(event) => {
-              setFilterOwnedCards(event.target.checked);
+            const checked = event.target.checked;
+              setFilterOwnedCards(checked);
               onFilter(selectedTypes, selectedSubTypes, isSortedByEvo, event.target.checked);
           }}
             color="primary"
