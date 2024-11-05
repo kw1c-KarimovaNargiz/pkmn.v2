@@ -46,18 +46,7 @@ const isCollectionView = location.pathname === '/collection';
             >
              
             </Button>
-            {isCollectionView && (
-        <Button
-          onClick={() => onSetSelect('all')}
-          sx={{
-            color: 'white',
-            marginBottom: '10px',
-            width: '100%',
-          }}
-        >
-          View All Owned Cards
-        </Button>
-      )}
+
             {series.map((s) => (
                 <Accordion
                     key={s.id}

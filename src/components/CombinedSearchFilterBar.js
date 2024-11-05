@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Box, Chip, FormControlLabel, Checkbox, Autocomplete, TextField, Typography, Button } from '@mui/material';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
@@ -26,7 +27,9 @@ const CombinedSearchFilterBar = ({
     setSelectedTypes(newValue);
     onFilter(newValue, selectedSubTypes, isSortedByEvo, selectedSet, isOwnedFilterActive);
   };
-
+  const location = useLocation();
+  const isCollectionView = location.pathname === '/collection'; 
+  
   const handleSubTypeChange = (event, newValue) => {
     setSelectedSubTypes(newValue);
     onFilter(selectedTypes, newValue, isSortedByEvo, selectedSet, isOwnedFilterActive);
@@ -123,7 +126,7 @@ const CombinedSearchFilterBar = ({
         }
         label="Sort by Evolution"
       />
-
+  {isCollectionView && 
       <FormControlLabel
         control={
           <Checkbox
@@ -138,7 +141,20 @@ const CombinedSearchFilterBar = ({
         }
         label="Show Owned Cards Only"
       />
+    }
 
+            {/* {isCollectionView && (
+        <Button
+          onClick={() => onSetSelect('all')}
+          sx={{
+            color: 'white',
+            marginBottom: '10px',
+            width: '100%',
+          }}
+        >
+          View All Owned Cards
+        </Button>
+      )} */}
 
     </Box>
   );
