@@ -8,7 +8,7 @@ import { useUser } from '../pages/UserContext';
 import useApi from '../hooks/useApi';
 
 const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
-    const { authToken } = useUser();
+    const { user, authToken } = useUser();
     const [loading, setLoading] = useState(true);
     const [cardCounts, setCardCounts] = useState({});
     const [userCards, setUserCards] = useState({});
@@ -52,6 +52,9 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
     const handleImageLoad = (cardId) => {
         setLoadingImages((prev) => ({ ...prev, [cardId]: false }));
     };
+    useEffect(() => {
+        setUserCards(collectionData);
+    }, [collectionData, collectionError, collectionLoading]);
 
     const handleCardToCollection = useCallback(async (cardId, variant, count) => {
         // if (count <= 0) {
@@ -118,39 +121,29 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
 
     const handleRemoveCardFromCollection = useCallback(async (cardId, variant, count) => {
         if (!authToken) {
-            alert('You must be logged in to do this');
+            alert('You must be logged in to remove cards from your collection');
             return;
         }
-        if (count <= 0) {
-            alert('You must select at least one card to update to your collection.');
-            return;
-        }
-
+    
+        const payload = {
+            token: authToken,
+            authToken: authToken,
+            card_id: cardId,
+            variant: variant,
+            count: count
+        };
+    
         try {
-            const response = await removeCardFromCollection(authToken, cardId, count, variant);
-
-            setCardCounts(prevCounts => ({
-                ...prevCounts,
-               
-                    ...prevCounts,
-                    [variant]: count,
-                  
-             
-            }));
-
-            alert(response.message);
+            const response = await removeCardFromCollection(payload);
+            console.log('Card removed:', response);
             refetchCollection();
-            setUserCards(collectionData);
-
         } catch (error) {
+            console.error('Error removing card:', error);
             const errorMessage = error.response?.data?.message || 'An error occurred while removing the card';
             alert(errorMessage);
-
-            const collectionData = await fetchUserCollection(authToken);
-            setUserCards(collectionData);
         }
-    }, [authToken, collectionData]);
-
+    }, [authToken, refetchCollection]);
+    
     const handleIncrement = useCallback(async (cardId, variant) => {
         const currentCount = cardCounts[cardId]?.[variant] || 0;
         const newCount = currentCount + 1;

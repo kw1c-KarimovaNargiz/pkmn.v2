@@ -124,33 +124,22 @@ export const fetchSeries = async () => {
   };
   
 
-//user's collection of cards
-export const fetchUserCollection = async (token) => {
-  try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/collections`, {
-          params: { token: token }
-      });
-      return response.data;
-  } catch (error) {
-      console.error('Error fetching user collection:', error);
-      throw error; 
-  }
-};
 
-export const removeCardFromCollection = async (token, cardId, count, variant) => {
+
+// In api.js
+export const removeCardFromCollection = async (payload) => {
     try {
         const response = await axios.delete('http://127.0.0.1:8000/api/collections/remove', {
             data: {
-                token,
-                card_id: cardId,
-                variant,
-                count : parseInt(count),
-
-            }
-        }, {
+                token: payload.token,
+                card_id: payload.card_id.toString(),
+                variant: payload.variant,
+                count: parseInt(payload.count),
+            },
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
+                'Authorization': `Bearer ${payload.authToken}`
             }
         });
         return response.data;
@@ -158,8 +147,17 @@ export const removeCardFromCollection = async (token, cardId, count, variant) =>
         throw error;
     }
 };
-
-
+export const fetchUserCollection = async (token) => {
+    try {
+        const response = await axios.get(`http://127.0.0.1:8000/api/collections`, {
+            params: { token: token }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching user collection:', error);
+        throw error; 
+    }
+  };
 // export const removeCardFromCollection = async (token, cardId) => {
 //   try {
 //       const response = await fetch('http://127.0.0.1:8000/api/collections/remove', {
