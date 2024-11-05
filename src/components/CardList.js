@@ -236,33 +236,39 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
                                 {['normal', 'holofoil', 'reverseHolofoil'].map((variant) => (
                                 card.price_data?.tcgplayer?.[variant] && (
                                     <div key={variant} className="flex items-center gap-2">
-                        <Badge 
-                        badgeContent={cardCounts[card.card_id]?.[variant] || 0}
-                    
-                         >
-                        <Checkbox
-                            checked={!!cardCounts[card.card_id]?.[variant]}
-                            sx={{
-                                '&.Mui-checked': {
-                                    color: getVariantColor(variant),
-                                },
-                            }}
-                        />
-                        </Badge>
-                        <IconButton
-                            onClick={() => handleDecrement(card.card_id, variant)}
-                            size="small"
-                            disabled={(cardCounts[card.card_id]?.[variant] || 0) === 0}
-                        >
-                            <Remove />
-                        </IconButton>
-                        <IconButton
-                            onClick={() => handleIncrement(card.card_id, variant)}
-                            size="small"
-                        >
-                            <Add />
-                        </IconButton>
-                    </div>
+                                        <div 
+                                            style={{
+                                                width: '24px',
+                                                height: '24px',
+                                                border: '2px solid',
+                                                borderColor: getVariantColor(variant),
+                                                borderRadius: '4px',
+                                                backgroundColor: getVariantColor(variant),
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                color: '#1f1f1f',  // White text color for better visibility
+                                                fontSize: '14px',
+                                                fontWeight: 'bold'
+                                            }}
+                                        >
+                {cardCounts[card.card_id]?.[variant] || 0}
+            </div>
+            <IconButton
+                onClick={() => handleDecrement(card.card_id, variant)}
+                size="small"
+                disabled={(cardCounts[card.card_id]?.[variant] || 0) === 0}
+            >
+                <Remove />
+            </IconButton>
+            <IconButton
+                onClick={() => handleIncrement(card.card_id, variant)}
+                size="small"
+            >
+                <Add />
+            </IconButton>
+        </div>
+
                                 )
                                 ))}
                             </div>
