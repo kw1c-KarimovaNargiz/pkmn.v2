@@ -234,35 +234,35 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
 
                                 <div className="flex flex-col items-center w-full mt-2 gap-2">
                                 {['normal', 'holofoil', 'reverseHolofoil'].map((variant) => (
-                                    card.price_data?.tcgplayer?.[variant] && (
-                                        <div key={variant} className="flex items-center gap-2">
-                                            <FormControlLabel
-                                                control={
-                                                    <Checkbox
-                                                        checked={!!cardCounts[card.card_id]?.[variant]}
-                                                        sx={{
-                                                            '&.Mui-checked': {
-                                                                color: getVariantColor(variant),
-                                                            },
-                                                        }}
-                                                    />
-                                                }
-                                                label={cardCounts[card.card_id]?.[variant] || 0}
-                                            />
-                                            <IconButton
-                                                onClick={() => handleDecrement(card.card_id, variant)}
-                                                size="small"
-                                                disabled={(cardCounts[card.card_id]?.[variant] || 0) === 0}
-                                            >
-                                                <Remove />
-                                            </IconButton>
-                                            <IconButton
-                                                onClick={() => handleIncrement(card.card_id, variant)}
-                                                size="small"
-                                            >
-                                                <Add />
-                                            </IconButton>
-                                    </div>
+                                card.price_data?.tcgplayer?.[variant] && (
+                                    <div key={variant} className="flex items-center gap-2">
+                        <Badge 
+                        badgeContent={cardCounts[card.card_id]?.[variant] || 0}
+                    
+                         >
+                        <Checkbox
+                            checked={!!cardCounts[card.card_id]?.[variant]}
+                            sx={{
+                                '&.Mui-checked': {
+                                    color: getVariantColor(variant),
+                                },
+                            }}
+                        />
+                        </Badge>
+                        <IconButton
+                            onClick={() => handleDecrement(card.card_id, variant)}
+                            size="small"
+                            disabled={(cardCounts[card.card_id]?.[variant] || 0) === 0}
+                        >
+                            <Remove />
+                        </IconButton>
+                        <IconButton
+                            onClick={() => handleIncrement(card.card_id, variant)}
+                            size="small"
+                        >
+                            <Add />
+                        </IconButton>
+                    </div>
                                 )
                                 ))}
                             </div>
