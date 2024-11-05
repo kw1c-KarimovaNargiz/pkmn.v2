@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+
 
 import { Accordion, AccordionSummary, AccordionDetails, Typography, Drawer, Button } from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
@@ -12,8 +12,8 @@ const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect, availableTypes,
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [selectedSubTypes, setSelectedSubTypes] = useState([]);
     const [isSortedByEvo, setIsSortedByEvo] = useState(false);
-    const location = useLocation();
-const isCollectionView = location.pathname === '/collection'; 
+//     const location = useLocation();
+// const isCollectionView = location.pathname === '/collection'; 
 
 
 
@@ -27,25 +27,27 @@ const isCollectionView = location.pathname === '/collection';
     };
 
     return (
+
+        
         <div className="sets-sidebar">
-            
-            <Button
+            <div className="filter-sidebar">
+              <Button
                 onClick={handleDrawerToggle}
-                startIcon={<SortIcon />} 
+                startIcon={<SortIcon  />} 
                 
                 sx={{
-                    marginLeft: '-100px',
-                    color: 'white',
-                    top: 20,
-                    width: '200%',
-                    transition: 'width 0.3s ease', 
-                    '&:hover': {
-                        width: '110%',
-                    },
+                    
+           
+                 margin: 0,
+                 zIndex: 1,
+                 color: 'white',
+                 top: 20,
+                 width: '100%',
+                  
                 }}
             >
-             
             </Button>
+            </div>
 
             {series.map((s) => (
                 <Accordion
