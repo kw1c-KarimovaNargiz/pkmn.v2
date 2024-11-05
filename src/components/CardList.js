@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Grid, Checkbox, FormControlLabel, IconButton, Skeleton } from '@mui/material';
+import { Grid, Badge, Checkbox, FormControlLabel, IconButton, Skeleton } from '@mui/material';
 import { toast } from 'react-toastify';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
@@ -55,7 +55,19 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
     useEffect(() => {
         setUserCards(collectionData);
     }, [collectionData, collectionError, collectionLoading]);
-
+    
+    const getVariantColor = (variant) => {
+        switch (variant) {
+            case 'normal':
+                return 'yellow';
+            case 'holofoil':
+                return 'purple';
+            case 'reverseHolofoil':
+                return 'blue';
+            default:
+                return 'white';
+        }
+    };
     const handleCardToCollection = useCallback(async (cardId, variant, count) => {
         // if (count <= 0) {
         //     alert('You must select at least one card to update to your collection.');
@@ -220,110 +232,39 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
                                 onClick={() => handleCardClick(card)}
                             />
 
-                            <div className="flex flex-col items-center w-full mt-2 gap-2">
-                                {/*normal variant*/}
-                                {card.price_data?.tcgplayer?.normal && (
-                                    <div className="flex items-center gap-2">
-                                        <FormControlLabel
-                                            sx={{
-                                                color: 'white',
-                                                
-                                            }}
-                                            control={
-                                                <Checkbox
-                                                    checked={!!cardCounts[card.card_id]?.normal}
-                                                    sx={{
-                                                        '&.Mui-checked': {
-                                                            color: 'yellow',
-                                                        },
-                                                    }}
-                                                />
-                                            }
-                                            label={cardCounts[card.card_id]?.normal || 0}
-                                        />
-                                        <IconButton
-                                            onClick={() => handleDecrement(card.card_id, 'normal')}
-                                            size="small"
-                                            disabled={(cardCounts[card.card_id]?.normal || 0) === 0}
-                                        >
-                                            <Remove />
-                                        </IconButton>
-
-                                        <IconButton
-                                            onClick={() => handleIncrement(card.card_id, 'normal')}
-                                            size="small"
-                                        
-                                        >
-                                            <Add />
-                                        </IconButton>
+                                <div className="flex flex-col items-center w-full mt-2 gap-2">
+                                {['normal', 'holofoil', 'reverseHolofoil'].map((variant) => (
+                                    card.price_data?.tcgplayer?.[variant] && (
+                                        <div key={variant} className="flex items-center gap-2">
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={!!cardCounts[card.card_id]?.[variant]}
+                                                        sx={{
+                                                            '&.Mui-checked': {
+                                                                color: getVariantColor(variant),
+                                                            },
+                                                        }}
+                                                    />
+                                                }
+                                                label={cardCounts[card.card_id]?.[variant] || 0}
+                                            />
+                                            <IconButton
+                                                onClick={() => handleDecrement(card.card_id, variant)}
+                                                size="small"
+                                                disabled={(cardCounts[card.card_id]?.[variant] || 0) === 0}
+                                            >
+                                                <Remove />
+                                            </IconButton>
+                                            <IconButton
+                                                onClick={() => handleIncrement(card.card_id, variant)}
+                                                size="small"
+                                            >
+                                                <Add />
+                                            </IconButton>
                                     </div>
-                                )}
-
-                                {/* holo variant */}
-                                {card.price_data?.tcgplayer?.holofoil && (
-                                    <div className="flex items-center gap-2">
-                                        <FormControlLabel
-                                            control={
-                                                <Checkbox
-                                                    checked={!!cardCounts[card.card_id]?.holofoil}
-                                                    sx={{
-                                                        '&.Mui-checked': {
-                                                            color: 'purple',
-                                                        },
-                                                    }}
-                                                />
-                                            }
-                                            label={cardCounts[card.card_id]?.holofoil || 0}
-                                        />
-                                        <IconButton
-                                            onClick={() => handleDecrement(card.card_id, 'holofoil')}
-                                            size="small"
-                                            disabled={(cardCounts[card.card_id]?.holofoil || 0) === 0}
-                                        >
-                                            <Remove />
-                                        </IconButton>
-
-                                        <IconButton
-                                            onClick={() => handleIncrement(card.card_id, 'holofoil')}
-                                            size="small"
-                                        >
-                                            <Add />
-                                        </IconButton>
-                                    </div>
-                                )}
-
-                                {/*reverse holo variant */}
-                                {card.price_data?.tcgplayer?.reverseHolofoil && (
-                                    <div className="flex items-center gap-2">
-                                        <FormControlLabel
-                                            control={
-                                                <Checkbox
-                                                    checked={!!cardCounts[card.card_id]?.reverseHolofoil}
-                                                    sx={{
-                                                        '&.Mui-checked': {
-                                                            color: 'blue',
-                                                        },
-                                                    }}
-                                                />
-                                            }
-                                            label={cardCounts[card.card_id]?.reverseHolofoil || 0}
-                                        />
-                                        <IconButton
-                                            onClick={() => handleDecrement(card.card_id, 'reverseHolofoil')}
-                                            size="small"
-                                            disabled={(cardCounts[card.card_id]?.reverseHolofoil || 0) === 0}
-                                        >
-                                            <Remove />
-                                        </IconButton>
-
-                                        <IconButton
-                                            onClick={() => handleIncrement(card.card_id, 'reverseHolofoil')}
-                                            size="small"
-                                        >
-                                            <Add />
-                                        </IconButton>
-                                    </div>
-                                )}
+                                )
+                                ))}
                             </div>
                         </div>
                     </Grid>
