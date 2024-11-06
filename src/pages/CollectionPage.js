@@ -63,7 +63,7 @@ const CollectionPage = () => {
     }, [authToken, userLoading]);
 
     const handleSetSelect = useCallback(async (setId) => {
-        setLoading(true);
+        setLoading(false);
         setSelectedSetId(setId);
 
         try {
