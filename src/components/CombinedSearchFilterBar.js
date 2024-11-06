@@ -140,6 +140,7 @@ const CombinedSearchFilterBar = ({
           />
         }
         label="Show Owned Cards Only"
+      
       />
     }
 

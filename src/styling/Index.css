@@ -14,7 +14,7 @@ body {
   top: 10px;
 }
 .MuiFormControlLabel-label {
-  color: white !important;
+
   transform: 'translateY(-50%)';
   display: 'flex';
         align-items: 'center';
