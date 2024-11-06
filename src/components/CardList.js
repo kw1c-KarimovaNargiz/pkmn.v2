@@ -69,10 +69,6 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
         }
     };
     const handleCardToCollection = useCallback(async (cardId, variant, count) => {
-        // if (count <= 0) {
-        //     alert('You must select at least one card to update to your collection.');
-        //     return;
-        // }
 
         const payload = {
             authToken: authToken,
@@ -205,32 +201,16 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
     };
     return (
         <div>
-            <Grid container spacing={2}>
-                
+         <Grid container spacing={2}>
                 {cards.slice(0, displayCount).map((card) => (
                     <Grid item key={card.id} xs={12} sm={6} md={4} className="card-item">
                         <div style={{ position: 'relative', width: '100%' }}>
-                            {/*not in collection, grey hue */}
-                            {isCollectionView && !isCardInCollection(card.id) && (
-                                <div
-                                    style={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                    
-                                        backgroundColor: 'rgba(128, 128, 128, 0.5)',
-                                        pointerEvents: 'none',
-                                    }}
-                                />
-                            )}
-
-                            {/* render carddisplay only if in collection view and card is not in collection */}
                             <CardDisplay
                                 card={card}
-                                isOwned={isCollectionView ? isCardInCollection(card.id) : true}
-                                ownedCount={cardCounts[card.card_id]?.normal || 0}
+                                isNotInCollection={isCollectionView && !isCardInCollection(card.id)}
                                 onClick={() => handleCardClick(card)}
                             />
+
 
                                 <div className="flex flex-col items-center w-full mt-2 gap-2">
                                 {['normal', 'holofoil', 'reverseHolofoil'].map((variant) => (
@@ -247,7 +227,7 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
                                                 display: 'flex',
                                                 justifyContent: 'center',
                                                 alignItems: 'center',
-                                                color: '#1f1f1f',  // White text color for better visibility
+                                                color: '#1f1f1f',  
                                                 fontSize: '14px',
                                                 fontWeight: 'bold'
                                             }}

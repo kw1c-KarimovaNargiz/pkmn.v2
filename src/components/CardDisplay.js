@@ -23,19 +23,19 @@ const CardDisplay = React.memo(({ card, isNotInCollection  }) => {
         {card.name}
     </Typography>
     <CardContent sx={{ background: 'none', backgroundColor: 'transparent' }}>
-        <img
-            src={card.images.large}
-            alt={card.name}
-            loading="lazy"
-            style={{ width: '100%', height: 'auto' }}
-        />
-     <div style={{
-            filter: isNotInCollection ? 'grayscale(100%)' : 'none',
-            opacity: isNotInCollection ? '0.7' : '1',
-            transition: 'filter 0.3s ease, opacity 0.3s ease'
-        }}></div>
-
-    </CardContent>
+                    <div style={{
+                        filter: isNotInCollection ? 'grayscale(100%)' : 'none',
+                        opacity: isNotInCollection ? '0.7' : '1',
+                        transition: 'filter 0.3s ease, opacity 0.3s ease'
+                    }}>
+                        <img
+                            src={card.images.large}
+                            alt={card.name}
+                            loading="lazy"
+                            style={{ width: '100%', height: 'auto' }}
+                        />
+                    </div>
+                </CardContent>
 </Card>
 
         {/*card deets*/}
