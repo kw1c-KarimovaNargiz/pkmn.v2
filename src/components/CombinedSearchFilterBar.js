@@ -50,7 +50,7 @@ const CombinedSearchFilterBar = ({
   return (
     <Box sx={{ width: 300, padding: 2 }}>
       <Typography variant="h6" sx={{ mb: 2 }}>Filter Options</Typography>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', mb: 2 }}>
+      <Box sx={{mb: 2 }}>
         {selectedTypes.map((type) => (
           <Chip
             key={type}

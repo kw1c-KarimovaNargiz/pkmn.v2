@@ -2,12 +2,17 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
+  overflow-x: hidden;
 }
 
 .index-container {
-  position: static;
-  margin: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; 
   z-index: 1000;
+
 }
 
 .sets-sidebar {
@@ -47,38 +52,49 @@ body {
   margin-left: 25px;
   
 }
-/* .search-filter-container {
-  position: fixed;
-  top: 64px; 
-  display: flex;
-  left: 0;
-     width: 100%; 
-   background-color: #363636;
-   z-index: 1000; 
-   
-     box-shadow: 10px 5px rgba(0, 0, 0, 0.1);
 
- } */
 .cards-display-area {
-    margin-left: 20%;
-    padding: 30px;
-    margin-top: 100px; 
-    margin-top: calc(100px + 64px); 
-    overflow-y: auto; 
-
+    width: 80%;
 }
-.card-list-title {
-  font-size:20px !important; 
-  color: #999;
-    text-transform:uppercase; 
+
+.main-content {
+  flex-direction: column;
+  display: flex;
+
+  margin-top: calc(100px + 1px); 
+  margin-left: 280px;
+  
+  align-items: center; 
+  justify-content: center;
+  width: 100%; 
+}
+
+  .variant-container{
+  display: flex;
+  gap: 50px;
+  width: 100%;
+  justify-content: center;
+}
+.variant-boxes {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.variant-buttons {
+  color:#999 !important;
+  position: absolute; /* Position buttons over the box */
+  top: 50%; /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Adjust for centering */
+  display: none; /* Hide by default */
+  gap: 30px;
+}
+
+.variant-boxes:hover .variant-buttons {
+  display: flex; /* Show buttons on hover */
  
-   margin-right: 100px;
-
-  
-  
 }
-
-
 
 /* .card-title {
   font-size: 24px;

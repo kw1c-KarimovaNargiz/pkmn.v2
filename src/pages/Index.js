@@ -148,27 +148,27 @@ const Index = () => {
 
     return (
         <div className="index-container">
-            <Navbar setSearchTerm={setSearchTerm} onSearch={handleSearch} />
-            <div className="sidebar">
-                <SetsSidebar
-                    series={series} 
-                    onSetSelect={handleSetSelect} 
-                    onSeriesSelect={handleSeriesSelect} 
-                    availableTypes={allTypes}
-                    availableSubTypes={subTypes}
-                    onFilter={handleFilter}  
-                />
-            </div>
-        
-            <div className="cards-display-area">
-                <CardList 
-                 
-                    cards={searchResults.length > 0 ? searchResults : filteredCards} 
-                    onAddCard={handleAddCard} 
-                    onRemoveCard={handleRemoveCard}
-                />
-            </div>
+    <Navbar setSearchTerm={setSearchTerm} onSearch={handleSearch} />
+    <div className="sidebar">
+        <SetsSidebar
+            series={series} 
+            onSetSelect={handleSetSelect} 
+            onSeriesSelect={handleSeriesSelect} 
+            availableTypes={allTypes}
+            availableSubTypes={subTypes}
+            onFilter={handleFilter}  
+        />
+    </div>
+    <div className='main-content'>
+        <div className="cards-display-area">
+            <CardList 
+                cards={searchResults.length > 0 ? searchResults : filteredCards} 
+                onAddCard={handleAddCard} 
+                onRemoveCard={handleRemoveCard}
+            />
         </div>
+    </div>
+</div>
     );
 };
 

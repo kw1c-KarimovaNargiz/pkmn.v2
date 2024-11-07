@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Grid, Badge, Checkbox, FormControlLabel, IconButton, Skeleton } from '@mui/material';
+import { Grid, Typography, Badge, Checkbox, FormControlLabel, IconButton, Skeleton } from '@mui/material';
 import { toast } from 'react-toastify';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
@@ -199,56 +199,66 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
     const handleCardClick = (card) => {
         setSelectedCard(card);
     };
+    const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
+
     return (
-        <div>
-         <Grid container spacing={2}>
-                {cards.slice(0, displayCount).map((card) => (
-                    <Grid item key={card.id} xs={12} sm={6} md={4} className="card-item">
-                        <div style={{ position: 'relative', width: '100%' }}>
-                            <CardDisplay
-                                card={card}
-                                isNotInCollection={isCollectionView && !isCardInCollection(card.id)}
-                                onClick={() => handleCardClick(card)}
-                            />
+        <div clasName="card-container" >
+              <Typography style={{
+                textAlign: 'right'
 
+              }} variant="h4" gutterBottom>
+                {setTitle}
+            </Typography>
 
-                                <div className="flex flex-col items-center w-full mt-2 gap-2">
-                                {['normal', 'holofoil', 'reverseHolofoil'].map((variant) => (
-                                card.price_data?.tcgplayer?.[variant] && (
-                                    <div key={variant} className="flex items-center gap-2">
-                                        <div 
-                                            style={{
-                                                width: '24px',
-                                                height: '24px',
-                                                border: '2px solid',
-                                                borderColor: getVariantColor(variant),
-                                                borderRadius: '4px',
-                                                backgroundColor: getVariantColor(variant),
-                                                display: 'flex',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                color: '#1f1f1f',  
-                                                fontSize: '14px',
-                                                fontWeight: 'bold'
-                                            }}
+         <Grid container spacing={8}>
+         {cards.slice(0, displayCount).map((card) => (
+            <Grid item key={card.id} xs={12} sm={6} md={4} lg={4}className="card-item" >
+                <div style={{  }}>
+                    <CardDisplay
+                        card={card}
+                        isNotInCollection={isCollectionView && !isCardInCollection(card.id)}
+                        onClick={() => handleCardClick(card)}
+                    />
+                    <div className="variant-container">
+                        {['normal', 'holofoil', 'reverseHolofoil'].map((variant) => (
+                            card.price_data?.tcgplayer?.[variant] && (
+                                <div key={variant} className="variant-boxes">
+                                    <div
+                                        style={{
+                                            width: '24px',
+                                            height: '24px',
+                                            border: '2px solid',
+                                            borderColor: getVariantColor(variant),
+                                            borderRadius: '4px',
+                                            backgroundColor: getVariantColor(variant),
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            color: '#1f1f1f',  
+                                            fontSize: '14px',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        {cardCounts[card.card_id]?.[variant] || 0}
+                                   
+                                    <div className="variant-buttons">
+                                        
+                                        <IconButton sx={{ color: '#999'}}
+                                            onClick={() => handleIncrement(card.card_id, variant)}
+                                            size="small"
                                         >
-                {cardCounts[card.card_id]?.[variant] || 0}
-            </div>
-            <IconButton
-                onClick={() => handleDecrement(card.card_id, variant)}
-                size="small"
-                disabled={(cardCounts[card.card_id]?.[variant] || 0) === 0}
-            >
-                <Remove />
-            </IconButton>
-            <IconButton
-                onClick={() => handleIncrement(card.card_id, variant)}
-                size="small"
-            >
-                <Add />
-            </IconButton>
-        </div>
-
+                                            <Add />
+                                        </IconButton>
+                                        <IconButton sx={{color: '#999'}}
+                                            onClick={() => handleDecrement(card.card_id, variant)}
+                                            size="small"
+                                            disabled={(cardCounts[card.card_id]?.[variant] || 0) === 0}
+                                        >
+                                            <Remove />
+                                        </IconButton>
+                                     </div>
+                                     </div>
+                                     </div>
                                 )
                                 ))}
                             </div>
