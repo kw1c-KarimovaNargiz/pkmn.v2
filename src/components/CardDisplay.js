@@ -43,7 +43,7 @@ const CardDisplay = React.memo(({ card, isNotInCollection  }) => {
                         opacity: isNotInCollection ? '0.7' : '1',
                         transition: 'filter 0.3s ease, opacity 0.3s ease'
                     }}>
-                        <img sx={{}}
+                        <div className="shine-img">                        <img
                             src={card.images.large}
                             alt={card.name}
                             loading="lazy"
@@ -54,6 +54,7 @@ const CardDisplay = React.memo(({ card, isNotInCollection  }) => {
                              }}
                              
                         />
+                        </div>
                     </div>
                 </CardContent>
 </Card>
