@@ -1,14 +1,52 @@
 .img-container {
-    margin-right: 850px;
-   margin-top: -500px;
-   
+    margin-right: 500px; /* Adjust as necessary */
+    margin-top: -0px;
+    
 }
 
-.img-container:hover {
-    --i: -1;
-  mask-position: 0 0;
+.shine {
+    overflow: hidden; /* This will hide overflow, but we need to manage z-index */
+    position: relative; /* This is necessary for the shine effect */
+
+    img {
+        
+        width: 100%; /* Make sure the image takes full width of the container */
+        height: auto; /* Maintain aspect ratio */
+    }
+
+    &::before {
+        background: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.3) 100%
+        );
+        content: "";
+        display: block;
+        height: 98%;
+        left: -75%;
+        position: absolute;
+        top: 0;
+        transform: skewX(-25deg);
+        width: 40%;
+  border-radius: 100px;
+        z-index: 2; /* Ensure the shine is above the image */
+    }
+
+    &:hover,
+    &:focus {
+        &::before {
+            border-radius: 100px;
+            animation: shine 0.85s forwards; /* Added 'forwards' to maintain end state */
+        }
+    }
 }
 
+@keyframes shine {
+    100% {
+        
+        left: 125%;
+    }
+}
 .card-set-name {
     font-size: 24px;
 margin-top: 40px;

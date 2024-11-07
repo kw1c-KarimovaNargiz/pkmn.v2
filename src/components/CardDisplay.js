@@ -116,12 +116,12 @@ const CardDisplay = React.memo(({ card, isNotInCollection  }) => {
                          </div>
                          </div>
                          <div className="parent-container">
-                        <div className= "img-container">
-                            <img className="img shine"
+                        <div className= "img-container shine">
+                            <img className="shine"
                                 src={card.images.large}
                                 alt={card.name} 
                                 loading="lazy" 
-                                style={{flex: '1', width: '40%', position: 'absolute'}}
+                                style={{flex: '1', width: '300px'}}
                             />
                         </div>
 
