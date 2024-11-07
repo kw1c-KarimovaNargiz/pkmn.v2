@@ -5,82 +5,76 @@
 }
 
 
+
 .shine-img {
     position: relative; /* Make sure the container is positioned */
-    overflow: hidden; /* Ensure the shine effect is contained within the image */
+    overflow: hidden; 
+    width: 100%;
+    border-radius: 10px; /* Rounded corners for the image container */
 
     &::before {
         content: ""; /* Create the pseudo-element */
         position: absolute;
         top: 0;
-        left: -75%; /* Start position of the shine */
-        height: 100%; /* Cover the image height */
+        left: -50%; /* Start position of the shine */
+        height: 99%; /* Cover the image height */
         width: 50%; /* Shine width */
+       
+        transform: skewX(30deg); /* Angle of the shine */
+        z-index: 2; /* Ensure it appears above the image */
+
+        border-radius: 35%;
+    }
+
+    &:hover::before {
+   /* Shine color */
         background: linear-gradient(
             to right,
             rgba(255, 255, 255, 0) 0%,
             rgba(255, 255, 255, 0.3) 50%,
             rgba(255, 255, 255, 0) 100%
         );
-        transform: skewX(-25deg); /* Angle of the shine */
-        z-index: 2; /* Ensure it appears above the image */
-        transition: none; /* No transition by default */
-    }
-
-    &:hover::before {
-        display: hidden;
+        	
+            border-radius: 30%;
         animation: shine 0.9s forwards; /* Trigger the animation on hover */
     }
 }
 
-@keyframes shine {
-    0% {
-        left: -75%; /* Start position */
-    }
-    100% {
-        left: 125%; /* End position */
-    }
-}
+
+
 
 
 
 .shine {
     overflow: hidden; /* This will hide overflow, but we need to manage z-index */
     position: relative; /* This is necessary for the shine effect */
-
-    img {
-
-        /* Make sure the image takes full width of the container */
-        height: auto; /* Maintain aspect ratio */
-    }
+    border-radius: 10px; /* Rounded corners for the image container */
 
     &::before {
+        content: ""; /* Create the pseudo-element */
+        position: absolute;
+        top: 0;
+        left: -50%; /* Start position of the shine */
+        height: 99%; /* Cover the image height */
+        width: 50%; /* Shine width */
+       
+        transform: skewX(30deg); /* Angle of the shine */
+        z-index: 2; /* Ensure it appears above the image */
+
+    }
+
+    &:hover::before {
+   /* Shine color */
         background: linear-gradient(
             to right,
             rgba(255, 255, 255, 0) 0%,
-            rgba(255, 255, 255, 0.3) 100%
+            rgba(255, 255, 255, 0.3) 50%,
+            rgba(255, 255, 255, 0) 100%
         );
-        content: "";
-        display: block;
-        height: 100%;
-        left: -75%;
-        position: absolute;
-        top: 0;
-        transform: skewX(-25deg);
-        width: 35.5%;
-        border-top-left-radius: 300px;
-        border-bottom-right-radius: 20px;
-        z-index: 2; /* Ensure the shine is above the image */
-    }
-
-    &:hover,
-    &:focus {
-        &::before {
-           
-            animation: shine 0.9s  forwards;
-            display: hidden;
-
-        }
+        
+        	 border-top-right-radius: 30%;
+            border-radius: 30% 35%;
+        animation: shine 0.9s forwards; /* Trigger the animation on hover */
     }
 }
 
@@ -89,9 +83,9 @@
         
         left: 125%;
         border: transparent;
-        border-radius: 50px;
-        width: 90%;
-        height: 98%;
+        border-top-left-radius: 35% ;
+width: 0;
+opacity: 0;
     }
 }
 .card-set-name {
