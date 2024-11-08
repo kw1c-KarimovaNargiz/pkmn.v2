@@ -144,7 +144,9 @@ const CollectionPage = () => {
     setIsOwnedFilterActive={setIsOwnedFilterActive}
                 />
             </div>
-            <div className="cards-display-area">
+
+            <div className="main-content">
+            <div className="cards-display-area" sx={{top: '10',}}>
                 {selectedSetId === 'all' ? (
                     userCollection.length > 0 ? (
                         <CardList cards={userCollection.map(item => item.card)} />
@@ -158,6 +160,7 @@ const CollectionPage = () => {
                         isCardInCollection={isCardInCollection}
                     />
                 )}
+            </div>
             </div>
         </div>
     );

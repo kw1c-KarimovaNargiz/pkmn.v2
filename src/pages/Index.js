@@ -9,7 +9,7 @@ import '../styling/Index.css';
 const Index = () => {
     const [, setSets] = useState([]);
     const [series, setSeries] = useState([]);
-    const [, setSelectedSetId] = useState(null);
+    const [selectedSetId, setSelectedSetId] = useState(null)
     const [cards, setCards] = useState([]);
     const [filteredCards, setFilteredCards] = useState([]);
     const [, setOriginalCards] = useState([]); 
@@ -165,6 +165,7 @@ const Index = () => {
                 cards={searchResults.length > 0 ? searchResults : filteredCards} 
                 onAddCard={handleAddCard} 
                 onRemoveCard={handleRemoveCard}
+                selectedSetId={selectedSetId}
             />
         </div>
     </div>

@@ -7,7 +7,7 @@ import { addCardToCollection, removeCardFromCollection, fetchUserCollection } fr
 import { useUser } from '../pages/UserContext';
 import useApi from '../hooks/useApi';
 
-const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
+const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId }) => {
     const { user, authToken } = useUser();
     const [loading, setLoading] = useState(true);
     const [cardCounts, setCardCounts] = useState({});
@@ -19,7 +19,7 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
     const loadingRef = useRef(null);
     const { data: collectionData, error: collectionError, isLoading: collectionLoading, triggerFetch: refetchCollection } = useApi('collections', {}, true, 'GET');
     const [loadingImages, setLoadingImages] = useState({});
-
+    const showSetTitle = !!selectedSetId;
     useEffect(() => {
         const observer = new IntersectionObserver((entries) => {
             if (entries[0].isIntersecting) {
@@ -202,13 +202,14 @@ const CardList = ({ cards, isCollectionView, isCardInCollection }) => {
     const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
 
     return (
-        <div clasName="card-container" >
-              <Typography style={{
-                textAlign: 'right'
-
-              }} variant="h4" gutterBottom>
-                {setTitle}
-            </Typography>
+        <div className="card-container">
+ 
+            {showSetTitle && (
+                <Typography style={{ textAlign: 'right' }} variant="h4" gutterBottom>
+                    {`${setTitle}`} {/* Replace with the actual set name or title */}
+                </Typography>
+            )}    
+       
 
          <Grid container spacing={8}>
          {cards.slice(0, displayCount).map((card) => (
