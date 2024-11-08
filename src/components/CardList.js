@@ -203,13 +203,13 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
 
     return (
         <div className="card-container">
- 
+          <div className= "card-set-name-index">
             {showSetTitle && (
-                <Typography style={{ textAlign: 'right' }} variant="h4" gutterBottom>
-                    {`${setTitle}`} {/* Replace with the actual set name or title */}
+                <Typography  variant="h4" >
+                    {`${setTitle}`} 
                 </Typography>
             )}    
-       
+       </div>
 
          <Grid container spacing={8}>
          {cards.slice(0, displayCount).map((card) => (
@@ -244,13 +244,13 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
                                    
                                     <div className="variant-buttons">
                                         
-                                        <IconButton sx={{ color: '#999'}}
+                                        <IconButton sx={{ color: '#999', '& .MuiSvgIcon-root': { fontSize: 18 } }}
                                             onClick={() => handleIncrement(card.card_id, variant)}
                                             size="small"
                                         >
                                             <Add />
                                         </IconButton>
-                                        <IconButton sx={{color: '#999'}}
+                                        <IconButton sx={{color: '#999', '& .MuiSvgIcon-root': { fontSize: 18 } }}
                                             onClick={() => handleDecrement(card.card_id, variant)}
                                             size="small"
                                             disabled={(cardCounts[card.card_id]?.[variant] || 0) === 0}

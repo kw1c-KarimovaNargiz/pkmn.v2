@@ -24,21 +24,25 @@ const CardDisplay = React.memo(({ card, isNotInCollection  }) => {
     return (
         
         <>
+        
             <Card 
     sx={{ backgroundColor: 'transparent', boxShadow: 'none' }}
     onClick={handleCardClick}
     style={{}}
 >
+    <div className="card-content-list">
+        <div className="card-title-list">
     <Typography
         variant="h5"
-        component="div"
-        sx={{ textAlign: 'center', color: '#999', textTransform: 'uppercase', fontSize: '16px'}}
+       
+        sx={{  color: '#999', textTransform: 'uppercase', fontSize: '16px', opacity: '0.6' }}
 
     >
         {card.name}
     </Typography>
+    </div>
     <CardContent sx={{ background: 'none', backgroundColor: 'transparent' }}>
-                    <div style={{
+                    <div className="collection-view" style={{
                         filter: isNotInCollection ? 'grayscale(100%)' : 'none',
                         opacity: isNotInCollection ? '0.7' : '1',
                         transition: 'filter 0.3s ease, opacity 0.3s ease'
@@ -57,7 +61,9 @@ const CardDisplay = React.memo(({ card, isNotInCollection  }) => {
                         />
                         </div>
                     </div>
+                    
                 </CardContent>
+                </div>
 </Card>
 
         {/*card deets*/}
