@@ -99,7 +99,8 @@ const CardDisplay = React.memo(({ card, isNotInCollection, cards, currentIndex, 
                     sx={{ 
                         background: 'rgba(26, 26, 26, 0.90)', 
                         borderRadius: '40px',
-                        position: 'relative'
+                        position: 'relative',
+                        overflow: 'hidden',
                     }}
                 >
                     <div style={{ 
