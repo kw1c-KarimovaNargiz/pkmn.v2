@@ -9,7 +9,7 @@ import '../styling/Index.css';
 const Index = () => {
     const [, setSets] = useState([]);
     const [series, setSeries] = useState([]);
-    const [selectedSetId, setSelectedSetId] = useState(null)
+    const [selectedSetId, setSelectedSetId] = useState([]);
     const [cards, setCards] = useState([]);
     const [filteredCards, setFilteredCards] = useState([]);
     const [, setOriginalCards] = useState([]); 
