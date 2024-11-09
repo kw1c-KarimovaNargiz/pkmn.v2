@@ -20,7 +20,7 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
     const { data: collectionData, error: collectionError, isLoading: collectionLoading, triggerFetch: refetchCollection } = useApi('collections', {}, true, 'GET');
     const [loadingImages, setLoadingImages] = useState({});
     const showSetTitle = !!selectedSetId;
-    const [currentIndex, setCurrentIndex] = useState(null);
+    const [currentIndex, setCurrentIndex] = useState({});
     useEffect(() => {
         const observer = new IntersectionObserver((entries) => {
             if (entries[0].isIntersecting) {
@@ -170,7 +170,7 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
 
     const handleDecrement = useCallback(async (cardId, variant) => {
         const currentCount = cardCounts[cardId]?.[variant] || 0;
-        const newCount = currentCount - 1;
+        const newCount = currentCount;
 
         setCardCounts(prevCounts => ({
             ...prevCounts,
