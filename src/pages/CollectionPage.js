@@ -5,8 +5,9 @@ import SetsSidebar from '../components/SetsSideBar';
 import '../styling/Index.css';
 import { fetchSeries, fetchCardsForSet, fetchSubTypes } from '../services/api';
 import useApi from '../hooks/useApi';
+import { Typography } from '@mui/material';
 
-const CollectionPage = () => {
+const CollectionPage = (isCollectionView) => {
     const { authToken, userLoading } = useUser();
     const [userCollection, setUserCollection] = useState([]);
     const [sets, setSets] = useState([]);
@@ -128,9 +129,10 @@ const CollectionPage = () => {
 
     if (userLoading || loading) return <div>Loading...</div>;
     if (error) return <div>{error}</div>;
-
+ const showCollectionTitle = isCollectionView && selectedSetId === 'all';
     return (
         <div className='index-container'>
+            
             <div className="sidebar">
                 <SetsSidebar
                     series={series}
@@ -147,6 +149,11 @@ const CollectionPage = () => {
 
             <div className="main-content">
             <div className="cards-display-area" sx={{top: '10',}}>
+                <div className= "card-set-name-index">
+            {showCollectionTitle && (
+                        <Typography variant="h4">Your Collection</Typography>
+                    )}
+                    </div>
                 {selectedSetId === 'all' ? (
                     userCollection.length > 0 ? (
                         <CardList cards={userCollection.map(item => item.card)} />
@@ -157,6 +164,7 @@ const CollectionPage = () => {
                     <CardList 
                         cards={filteredCards}
                         isCollectionView={true}
+                        selectedSetId={selectedSetId}
                         isCardInCollection={isCardInCollection}
                     />
                 )}

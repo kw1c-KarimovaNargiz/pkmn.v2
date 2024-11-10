@@ -20,6 +20,8 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
     const { data: collectionData, error: collectionError, isLoading: collectionLoading, triggerFetch: refetchCollection } = useApi('collections', {}, true, 'GET');
     const [loadingImages, setLoadingImages] = useState({});
     const showSetTitle = !!selectedSetId;
+   
+
     const [currentIndex, setCurrentIndex] = useState({});
     useEffect(() => {
         const observer = new IntersectionObserver((entries) => {
@@ -201,6 +203,7 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
         setSelectedCard(card);
         setCurrentIndex(cards.indexOf(card));
     };
+
     const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
 
     return (
@@ -208,6 +211,7 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
           <div className= "card-set-name-index">
             {showSetTitle && (
                 <Typography  variant="h4" >
+                    
                     {`${setTitle}`} 
                 </Typography>
             )}    
@@ -221,9 +225,9 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
                         card={card}
                         isNotInCollection={isCollectionView && !isCardInCollection(card.id)}
                         onClick={() => handleCardClick(card)}
-                        cards={cards} // Pass the entire array of cards
-                            currentIndex={currentIndex} // Pass the current index
-                            setCurrentIndex={setCurrentIndex} 
+                        cards={cards} 
+                        currentIndex={currentIndex}
+                        setCurrentIndex={setCurrentIndex} 
                     />
                     <div className="variant-container">
                         {['normal', 'holofoil', 'reverseHolofoil'].map((variant) => (
