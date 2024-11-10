@@ -20,6 +20,7 @@ const CollectionPage = (isCollectionView) => {
     const [subTypes, setSubTypes] = useState([]);
     const [cards, setCards] = useState([]);
     const [isOwnedFilterActive, setIsOwnedFilterActive] = useState(false);
+    const [totalCollectionValue, setTotalCollectionValue] = useState(0);
 
 
     const { data: collectionData, error: collectionError, isLoading: collectionLoading, triggerFetch: refetchCollection } = useApi('collections', {}, false, 'GET');
@@ -32,15 +33,23 @@ const CollectionPage = (isCollectionView) => {
 
     useEffect(() => {
         if (collectionData) {
-            setUserCollection(collectionData);
-            setLoading(false);
+          console.log('Collection data:', collectionData); // For debugging
+    
+          // Extract the array of collection items
+          const collectionItems = Object.values(collectionData).find(Array.isArray);
+          
+          // Extract the total collection value
+          const totalValue = collectionData.total_collection_value || 0;
+    
+          setUserCollection(collectionItems || []);
+          setTotalCollectionValue(totalValue);
+          setLoading(false);
         }
         if (collectionError) {
-            setError('Failed to fetch user collection');
-            setLoading(false);
+          setError('Failed to fetch user collection');
+          setLoading(false);
         }
-    }, [collectionData, collectionError, collectionLoading]);
-
+      }, [collectionData, collectionError, collectionLoading]);
     useEffect(() => {
         const loadSeries = async () => {
             if (!authToken || userLoading) return;
@@ -152,9 +161,13 @@ const CollectionPage = (isCollectionView) => {
             <div className="main-content">
               
             <div className= "card-set-name-index" style={{top: 240}}>
-            {showCollectionTitle && (
-                        <Typography variant="h4">YOUR COLLECTION</Typography>
-                    )}
+
+                          {showCollectionTitle && (
+                            <>
+                              <Typography variant="h4">YOUR COLLECTION</Typography>
+                              <Typography variant="h6">Total Value: ${totalCollectionValue.toFixed(2)}</Typography>
+                            </>
+                          )}
                     </div>
                     
             <div className="cards-display-area">
