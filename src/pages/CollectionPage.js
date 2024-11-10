@@ -131,8 +131,9 @@ const CollectionPage = (isCollectionView) => {
     if (error) return <div>{error}</div>;
  const showCollectionTitle = isCollectionView && selectedSetId === 'all';
     return (
+        
         <div className='index-container'>
-            
+        
             <div className="sidebar">
                 <SetsSidebar
                     series={series}
@@ -147,13 +148,17 @@ const CollectionPage = (isCollectionView) => {
                 />
             </div>
 
+        
             <div className="main-content">
-            <div className="cards-display-area" sx={{top: '10',}}>
-                <div className= "card-set-name-index">
+              
+            <div className= "card-set-name-index" style={{top: 240}}>
             {showCollectionTitle && (
-                        <Typography variant="h4">Your Collection</Typography>
+                        <Typography variant="h4">YOUR COLLECTION</Typography>
                     )}
                     </div>
+                    
+            <div className="cards-display-area">
+         
                 {selectedSetId === 'all' ? (
                     userCollection.length > 0 ? (
                         <CardList cards={userCollection.map(item => item.card)} />
