@@ -21,6 +21,7 @@ const CollectionPage = (isCollectionView) => {
     const [cards, setCards] = useState([]);
     const [isOwnedFilterActive, setIsOwnedFilterActive] = useState(false);
     const [totalCollectionValue, setTotalCollectionValue] = useState(0);
+    const [totalCardCount, setTotalCardCount] = useState(0);
 
 
     const { data: collectionData, error: collectionError, isLoading: collectionLoading, triggerFetch: refetchCollection } = useApi('collections', {}, false, 'GET');
@@ -35,14 +36,19 @@ const CollectionPage = (isCollectionView) => {
         if (collectionData) {
           console.log('Collection data:', collectionData); // For debugging
     
-          // Extract the array of collection items
+         //array items in collection - cards - value
           const collectionItems = Object.values(collectionData).find(Array.isArray);
           
-          // Extract the total collection value
           const totalValue = collectionData.total_collection_value || 0;
     
           setUserCollection(collectionItems || []);
           setTotalCollectionValue(totalValue);
+
+          //total card count
+          const totalCount = collectionItems.reduce((sum, item) => {
+            return sum + (item.normal_count || 0) + (item.holo_count || 0) + (item.reverse_holo_count || 0);
+          }, 0);
+          setTotalCardCount(totalCount);
           setLoading(false);
         }
         if (collectionError) {
@@ -166,6 +172,7 @@ const CollectionPage = (isCollectionView) => {
                             <>
                               <Typography variant="h4">YOUR COLLECTION</Typography>
                               <Typography variant="h6">Total Value: ${totalCollectionValue.toFixed(2)}</Typography>
+                              <Typography variant="h6">Total Cards: {totalCardCount}</Typography>
                             </>
                           )}
                     </div>
