@@ -7,47 +7,46 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-const CombinedSearchFilterBar = ({
-  availableTypes,
-  availableSubTypes,
-  selectedTypes,
-  setSelectedTypes,
-  selectedSubTypes,
-  setSelectedSubTypes,
-  isSortedByEvo,
-  setIsSortedByEvo,
-  onFilter,
-  selectedSet, 
-  setSelectedSet, 
-  ownedCards, 
-}) => {
+    const CombinedSearchFilterBar = ({
+      availableTypes,
+      availableSubTypes,
+      selectedTypes,
+      setSelectedTypes,
+      selectedSubTypes,
+      setSelectedSubTypes,
+      isSortedByEvo,
+      setIsSortedByEvo,
+      onFilter,
+      selectedSet, 
+        filterOwnedCards,
+      setFilterOwnedCards 
+    }) => {
 
-  //state for owned cards filter
-  const [isOwnedFilterActive, setIsOwnedFilterActive] = useState(false); 
-  const [filterOwnedCards, setFilterOwnedCards] = useState(false);
-  const handleTypeChange = (event, newValue) => {
-    setSelectedTypes(newValue);
-    onFilter(newValue, selectedSubTypes, isSortedByEvo, selectedSet, isOwnedFilterActive);
+    const location = useLocation();
+    const isCollectionView = location.pathname === '/collection';
+    const handleTypeChange = (event, newValue) => {
+      setSelectedTypes(newValue);
+      onFilter(newValue, selectedSubTypes, isSortedByEvo, selectedSet, filterOwnedCards);
   };
-  const location = useLocation();
-  const isCollectionView = location.pathname === '/collection'; 
-  
+
   const handleSubTypeChange = (event, newValue) => {
-    setSelectedSubTypes(newValue);
-    onFilter(selectedTypes, newValue, isSortedByEvo, selectedSet, isOwnedFilterActive);
+      setSelectedSubTypes(newValue);
+      onFilter(selectedTypes, newValue, isSortedByEvo, selectedSet, filterOwnedCards);
   };
 
   const handleSortByEvoChange = (event) => {
-    const checked = event.target.checked;
-    setIsSortedByEvo(checked);
-    onFilter(selectedTypes, selectedSubTypes, checked, selectedSet, isOwnedFilterActive);
+      const checked = event.target.checked;
+      setIsSortedByEvo(checked);
+      onFilter(selectedTypes, selectedSubTypes, checked, selectedSet, filterOwnedCards);
   };
+
 
   const handleFilterOwnedCards = (event) => {
     const checked = event.target.checked;
-    setIsOwnedFilterActive(checked);
-    onFilter(selectedTypes, selectedSubTypes, isSortedByEvo, selectedSet, filterOwnedCards, checked);
+    setFilterOwnedCards(checked); 
+    onFilter(selectedTypes, selectedSubTypes, isSortedByEvo, selectedSet, checked);
   };
+
 
   return (
     <Box sx={{ width: 300, padding: 2 }}>
@@ -60,7 +59,7 @@ const CombinedSearchFilterBar = ({
             onDelete={() => {
               const updatedTypes = selectedTypes.filter((t) => t !== type);
               setSelectedTypes(updatedTypes);
-              onFilter(updatedTypes, selectedSubTypes, isSortedByEvo, selectedSet, isOwnedFilterActive);
+              onFilter(updatedTypes, selectedSubTypes, isSortedByEvo, selectedSet);
             }}
             sx={{ margin: '4px' }}
           />
@@ -128,23 +127,21 @@ const CombinedSearchFilterBar = ({
         }
         label="Sort by Evolution"
       />
-  {isCollectionView && 
-      <FormControlLabel
-        control={
-          <Checkbox
-          checked={filterOwnedCards}
-          onChange={(event) => {
-            const checked = event.target.checked;
-              setFilterOwnedCards(checked);
-              onFilter(selectedTypes, selectedSubTypes, isSortedByEvo, event.target.checked);
-          }}
-            color="primary"
-          />
-        }
-        label="Show Owned Cards Only"
+{isCollectionView && 
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={filterOwnedCards}
+              onChange={handleFilterOwnedCards}
+              color="primary"
+            />
+          }
+          label="Show Owned Cards Only"
+        />
+      }
       
-      />
-    }
+      
+    
 
             {/* {isCollectionView && (
         <Button

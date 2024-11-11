@@ -6,13 +6,15 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import SortIcon from '@mui/icons-material/Sort';
 import CombinedSearchFilterBar from './CombinedSearchFilterBar';
 
-const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect, availableTypes, availableSubTypes, onFilter }) => {
+const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect, availableTypes, availableSubTypes, onFilter,     filterOwnedCards,
+    setFilterOwnedCards  }) => {
     const [expanded, setExpanded] = useState(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [selectedSubTypes, setSelectedSubTypes] = useState([]);
     const [isSortedByEvo, setIsSortedByEvo] = useState(false);
 //     const location = useLocation();
+
 // const isCollectionView = location.pathname === '/collection'; 
 
 
@@ -123,6 +125,9 @@ const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect, availableTypes,
                     isSortedByEvo={isSortedByEvo}
                     setIsSortedByEvo={setIsSortedByEvo}
                     onFilter={onFilter}
+                    filterOwnedCards={filterOwnedCards}
+                setFilterOwnedCards={setFilterOwnedCards}
+                    
                 />
             </Drawer>
         </div>

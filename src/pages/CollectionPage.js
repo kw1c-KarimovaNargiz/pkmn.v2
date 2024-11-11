@@ -19,7 +19,7 @@ const CollectionPage = (isCollectionView) => {
     const [allTypes, setAllTypes] = useState([]);
     const [subTypes, setSubTypes] = useState([]);
     const [cards, setCards] = useState([]);
-    const [isOwnedFilterActive, setIsOwnedFilterActive] = useState(false);
+    const [filterOwnedCards, setFilterOwnedCards] = useState(false);
     const [totalCollectionValue, setTotalCollectionValue] = useState(0);
     const [totalCardCount, setTotalCardCount] = useState(0);
 
@@ -113,34 +113,32 @@ const CollectionPage = (isCollectionView) => {
         return userCollection.some(item => item.card.id === cardId);
     }, [userCollection]);
 
-    const handleFilter = useCallback((types, subtypes, isSortedByEvo, filterOwned) => {
+    const handleFilter = useCallback((types, subtypes, isSortedByEvo, filterOwnedCards) => {
         let filtered = [...cards];
-        // Filter by types
+        
         if (types.length > 0) {
             filtered = filtered.filter((card) =>
                 types.some((type) => card.types?.includes(type))
             );
         }
-
-        // Filter by subtypes
+    
         if (subtypes.length > 0) {
             filtered = filtered.filter((card) =>
                 subtypes.some((subtype) => card.subtypes?.includes(subtype))
             );
         }
-
-        // Filter by owned cards
-        if (filterOwned) {
-            filtered = filtered.filter(card => isCardInCollection(card.id)); // Adjust based on your card ID structure
+     
+        if (filterOwnedCards) {
+            filtered = filtered.filter(card => isCardInCollection(card.id));
         }
-
-        // Sort by evolution stage if needed
+        
         if (isSortedByEvo) {
             filtered.sort((a, b) => (a.evolutionStage || 0) - (b.evolutionStage || 0));
         }
-
+    
         setFilteredCards(filtered);
     }, [cards, isCardInCollection]);
+    
 
     if (userLoading || loading) return <div>Loading...</div>;
     if (error) return <div>{error}</div>;
@@ -158,8 +156,8 @@ const CollectionPage = (isCollectionView) => {
                     availableSubTypes={subTypes}
                     onFilter={handleFilter}
                     isCollectionView={true}
-                    isOwnedFilterActive={isOwnedFilterActive} 
-    setIsOwnedFilterActive={setIsOwnedFilterActive}
+                    filterOwnedCards={filterOwnedCards}
+                    setFilterOwnedCards={setFilterOwnedCards}
                 />
             </div>
 
