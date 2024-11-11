@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback} from 'react';
 import { Card, CardContent, Typography, Dialog, DialogContent, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import '../styling/carddisplay.css';
 
-const CardDisplay = React.memo(({ card, isNotInCollection, cards, currentIndex, setCurrentIndex, instantlyAddedCards }) => {
+const CardDisplay = React.memo(({ card, isNotInCollection, cards, currentIndex, setCurrentIndex, instantlyAddedCards, instantlyRemovedCards, cardCounts }) => {
     const [open, setOpen] = useState(false);
     //visual feedback for added card in set through collectionpage
     const isCardInstantlyAdded = instantlyAddedCards?.has(card.card_id);
+    const isCardInstantlyRemoved = instantlyRemovedCards?.has(card.card_id);
 
     const handleCardClick = () => {
         setCurrentIndex(cards.findIndex(c => c.card_id === card.card_id));
@@ -44,6 +45,16 @@ const CardDisplay = React.memo(({ card, isNotInCollection, cards, currentIndex, 
         }
     };
 
+
+   
+    
+    // Check if card has any counts
+    const hasNoCounts = useCallback(() => {
+        const counts = cardCounts[card.card_id];
+        if (!counts) return true;
+        return Object.values(counts).every(count => !count || count === 0);
+    }, [cardCounts, card.card_id]);
+    
     return (
         <>
             <Card 
@@ -61,8 +72,8 @@ const CardDisplay = React.memo(({ card, isNotInCollection, cards, currentIndex, 
                     </div>
                     <CardContent sx={{ background: 'none', backgroundColor: 'transparent' }}>
                         <div className="collection-view" style={{
-                              filter: (isNotInCollection && !isCardInstantlyAdded) ? 'grayscale(100%)' : 'none',
-                            opacity: (isNotInCollection && !isCardInstantlyAdded) ? '0.7' : '1',
+                            filter: (isNotInCollection && !isCardInstantlyAdded) || isCardInstantlyRemoved || hasNoCounts() ? 'grayscale(100%)' : 'none',
+                            opacity: (isNotInCollection && !isCardInstantlyAdded) || isCardInstantlyRemoved || hasNoCounts() ? '0.7' : '1',
                             transition: 'filter 0.3s ease, opacity 0.3s ease'
                         }}>
                             <div className="shine-img">

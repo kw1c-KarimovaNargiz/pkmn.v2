@@ -22,7 +22,7 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
     const showSetTitle = !!selectedSetId;
     const [ownedCards, setOwnedCards] = useState(new Set());
     const [instantlyAddedCards, setInstantlyAddedCards] = useState(new Set());
-
+    const [instantlyRemovedCards, setInstantlyRemovedCards] = useState(new Set());
     const [currentIndex, setCurrentIndex] = useState({});
     useEffect(() => {
         const observer = new IntersectionObserver((entries) => {
@@ -51,9 +51,14 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
     }, [collectionData]);
 
     const isCardOwned = useCallback((cardId) => {
-        return ownedCards.has(cardId) || instantlyAddedCards.has(cardId);
-    }, [ownedCards, instantlyAddedCards]);
-
+        // Check if card has any non-zero count
+        const cardCounts = cardCounts[cardId] || {};
+        const hasNonZeroCount = Object.values(cardCounts).some(count => count > 0);
+        
+        return (ownedCards.has(cardId) || instantlyAddedCards.has(cardId)) 
+            && !instantlyRemovedCards.has(cardId)
+            && hasNonZeroCount;
+    }, [ownedCards, instantlyAddedCards, instantlyRemovedCards, cardCounts]);
 
     useEffect(() => {
         setLoading(cards.length === 0 && collectionLoading);
@@ -219,6 +224,18 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
             }
         }));
 
+        const updatedCounts = {
+            ...cardCounts[cardId],
+            [variant]: newCount
+        };
+        
+        const allCountsZero = Object.values(updatedCounts).every(count => count === 0);
+        
+        if (allCountsZero) {
+            // If all counts are 0, mark the card as instantly removed
+            setInstantlyRemovedCards(prev => new Set([...prev, cardId]));
+        }
+
         await handleRemoveCardFromCollection(cardId, variant, newCount);
     }, [cardCounts, handleRemoveCardFromCollection]);
 
@@ -279,7 +296,10 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
                         setCurrentIndex={setCurrentIndex} 
                         onCardAdded={handleCardToCollection}
                         instantlyAddedCards={instantlyAddedCards}
+                        instantlyRemovedCards={instantlyRemovedCards}
+                        cardCounts={cardCounts}
                     />
+                
                     <div className="variant-container">
                         {['normal', 'holofoil', 'reverseHolofoil'].map((variant) => (
                             card.price_data?.tcgplayer?.[variant] && (
