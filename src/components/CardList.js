@@ -20,7 +20,8 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
     const { data: collectionData, error: collectionError, isLoading: collectionLoading, triggerFetch: refetchCollection } = useApi('collections', {}, true, 'GET');
     const [loadingImages, setLoadingImages] = useState({});
     const showSetTitle = !!selectedSetId;
-   
+    const [ownedCards, setOwnedCards] = useState(new Set());
+    const [instantlyAddedCards, setInstantlyAddedCards] = useState(new Set());
 
     const [currentIndex, setCurrentIndex] = useState({});
     useEffect(() => {
@@ -41,6 +42,19 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
         };
     }, [loadingRef]);
 
+        
+    useEffect(() => {
+        if (collectionData && Array.isArray(collectionData[0])) {
+            const ownedCardIds = new Set(collectionData[0].map(card => card.card_id));
+            setOwnedCards(ownedCardIds);
+        }
+    }, [collectionData]);
+
+    const isCardOwned = useCallback((cardId) => {
+        return ownedCards.has(cardId) || instantlyAddedCards.has(cardId);
+    }, [ownedCards, instantlyAddedCards]);
+
+
     useEffect(() => {
         setLoading(cards.length === 0 && collectionLoading);
     }, [cards, collectionLoading]);
@@ -55,6 +69,13 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
     const handleImageLoad = (cardId) => {
         setLoadingImages((prev) => ({ ...prev, [cardId]: false }));
     };
+
+     const [cardStatus, setCardStatus] = useState(
+        cards.reduce((acc, card) => {
+            acc[card.id] = true; 
+            return acc;
+        }, {})
+    );
     useEffect(() => {
         setUserCards(collectionData);
     }, [collectionData, collectionError, collectionLoading]);
@@ -81,17 +102,30 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
         };
 
         try {
-            const response = await addCardToCollection(payload);
-            console.log('Card updated:', response.data);
 
+            setInstantlyAddedCards(prev => new Set([...prev, cardId]));
+
+            const response = await addCardToCollection(payload);
+            
+            console.log('Card updated:', response.data);
+            setOwnedCards(prev => new Set([...prev, cardId]));
             setCardCounts(prevCounts => ({
                 ...prevCounts,
-               
-                    ...prevCounts,
+                [cardId]: {
+                    ...prevCounts[cardId],
                     [variant]: count,
-                  
+                }
              
             }));
+
+            setCardStatus(prevStatus => ({
+                ...prevStatus,
+                [cardId]: false 
+
+            }));
+
+            setOwnedCards(prev => new Set([...prev, cardId]));
+         
             refetchCollection();
 
             if (toast.isActive(toastId)) {
@@ -167,9 +201,12 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
             }
         }));
 
+       
+
         await handleCardToCollection(cardId, variant, newCount);
     }, [cardCounts, handleCardToCollection]);
 
+    
     const handleDecrement = useCallback(async (cardId, variant) => {
         const currentCount = cardCounts[cardId]?.[variant] || 0;
         const newCount = currentCount;
@@ -185,17 +222,28 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
         await handleRemoveCardFromCollection(cardId, variant, newCount);
     }, [cardCounts, handleRemoveCardFromCollection]);
 
+ 
+
     useEffect(() => {
+        console.log('Collection Data:', collectionData);
         const initialCounts = {};
-        if (Array.isArray(collectionData) ){
-            collectionData.forEach(card => {
+    
+        //if collectionData is not null and has the expected structure
+        if (collectionData && typeof collectionData === 'object' && Array.isArray(collectionData[0])) {
+            const cardsArray = collectionData[0]; 
+    
+            cardsArray.forEach(card => {
                 initialCounts[card.card_id] = {
                     normal: card.normal_count,
                     holofoil: card.holo_count,
                     reverseHolofoil: card.reverse_holo_count,
                 };
             });
+        } else {
+            console.warn('Null collection');
         }
+    
+        console.log('Initial Counts:', initialCounts);
         setCardCounts(initialCounts);
     }, [collectionData]);
 
@@ -203,6 +251,7 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
         setSelectedCard(card);
         setCurrentIndex(cards.indexOf(card));
     };
+
 
     const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
 
@@ -228,6 +277,8 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
                         cards={cards} 
                         currentIndex={currentIndex}
                         setCurrentIndex={setCurrentIndex} 
+                        onCardAdded={handleCardToCollection}
+                        instantlyAddedCards={instantlyAddedCards}
                     />
                     <div className="variant-container">
                         {['normal', 'holofoil', 'reverseHolofoil'].map((variant) => (

@@ -21,7 +21,9 @@ const CombinedSearchFilterBar = ({
   setSelectedSet, 
   ownedCards, 
 }) => {
-  const [isOwnedFilterActive, setIsOwnedFilterActive] = useState(false); // State for owned cards filter
+
+  //state for owned cards filter
+  const [isOwnedFilterActive, setIsOwnedFilterActive] = useState(false); 
   const [filterOwnedCards, setFilterOwnedCards] = useState(false);
   const handleTypeChange = (event, newValue) => {
     setSelectedTypes(newValue);

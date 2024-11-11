@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback} from 'react';
 import CardList from '../components/CardList';
 import SetsSidebar from '../components/SetsSideBar';
 import Navbar from '../components/Navbar';
@@ -73,28 +73,34 @@ const Index = () => {
         loadSeries(); 
     }, []);
 
-    const handleSetSelect = async (setId) => {
-        setLoading(true);
-        setSelectedSetId(setId);
-        setSearchResults([]);
+ const handleSetSelect = useCallback(async (setId) => {
+    setLoading(true); // Correct loading state
+    setSelectedSetId(setId);
+    setSearchResults([]); // If applicable
 
-        try {
-            const cardData = await fetchCardsForSet(setId); 
-            setCards(cardData);
-            setOriginalCards(cardData); 
-            setFilteredCards(cardData);
+    try {
+        const [cardData, subTypeData] = await Promise.all([ // Parallel fetching
+            fetchCardsForSet(setId),
+            fetchSubTypes(setId)
+        ]);
 
-            const subTypeData = await fetchSubTypes(setId); 
-            setSubTypes(subTypeData);
-        } catch (error) {
-            console.error("Error loading cards:", error);
-            setCards([]); 
-            setFilteredCards([]); 
-            setSubTypes([]);
-        } finally {
-            setLoading(false); 
-        }
-    };
+        setCards(cardData);
+        setOriginalCards(cardData); // Keep original data
+        setFilteredCards(cardData);
+        setSubTypes(subTypeData);
+
+        const uniqueTypes = [...new Set(cardData.flatMap(card => card.types || []))];
+        setAllTypes(uniqueTypes); // If needed
+    } catch (error) {
+        console.error("Error loading set data:", error);
+        setCards([]);
+        setFilteredCards([]);
+        setSubTypes([]);
+        // Handle other state as needed (allTypes, searchResults)
+    } finally {
+        setLoading(false); // Correct placement
+    }
+}, [fetchCardsForSet, fetchSubTypes]); 
 
     const handleSearch = async (term) => {
         setLoading(true); 

@@ -4,8 +4,10 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import '../styling/carddisplay.css';
 
-const CardDisplay = React.memo(({ card, isNotInCollection, cards, currentIndex, setCurrentIndex }) => {
+const CardDisplay = React.memo(({ card, isNotInCollection, cards, currentIndex, setCurrentIndex, instantlyAddedCards }) => {
     const [open, setOpen] = useState(false);
+    //visual feedback for added card in set through collectionpage
+    const isCardInstantlyAdded = instantlyAddedCards?.has(card.card_id);
 
     const handleCardClick = () => {
         setCurrentIndex(cards.findIndex(c => c.card_id === card.card_id));
@@ -59,8 +61,8 @@ const CardDisplay = React.memo(({ card, isNotInCollection, cards, currentIndex, 
                     </div>
                     <CardContent sx={{ background: 'none', backgroundColor: 'transparent' }}>
                         <div className="collection-view" style={{
-                            filter: isNotInCollection ? 'grayscale(100%)' : 'none',
-                            opacity: isNotInCollection ? '0.7' : '1',
+                              filter: (isNotInCollection && !isCardInstantlyAdded) ? 'grayscale(100%)' : 'none',
+                            opacity: (isNotInCollection && !isCardInstantlyAdded) ? '0.7' : '1',
                             transition: 'filter 0.3s ease, opacity 0.3s ease'
                         }}>
                             <div className="shine-img">

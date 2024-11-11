@@ -34,7 +34,7 @@ const CollectionPage = (isCollectionView) => {
 
     useEffect(() => {
         if (collectionData) {
-          console.log('Collection data:', collectionData); // For debugging
+          console.log('Collection data:', collectionData); 
     
          //array items in collection - cards - value
           const collectionItems = Object.values(collectionData).find(Array.isArray);
@@ -80,6 +80,7 @@ const CollectionPage = (isCollectionView) => {
 
     const handleSetSelect = useCallback(async (setId) => {
         setLoading(false);
+        //keep false to prevent rerendering index container 
         setSelectedSetId(setId);
 
         try {
@@ -114,7 +115,6 @@ const CollectionPage = (isCollectionView) => {
 
     const handleFilter = useCallback((types, subtypes, isSortedByEvo, filterOwned) => {
         let filtered = [...cards];
-
         // Filter by types
         if (types.length > 0) {
             filtered = filtered.filter((card) =>
