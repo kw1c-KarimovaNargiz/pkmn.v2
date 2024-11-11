@@ -288,14 +288,15 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
 
     const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
 
-    return (
-        <div className="card-container">
-            <div className="card-set-name-index">
-                {showSetTitle && (
-                    <>
-                        <Typography variant="h4">
-                            {`${setTitle}`}
-                        </Typography>
+return (
+    <div className="card-container">
+        <div className="card-set-name-index">
+            {showSetTitle && (
+                <>
+                    <Typography variant="h4">
+                        {`${setTitle}`}
+                    </Typography>
+                    {isCollectionView && (
                         <div style={{ 
                             marginTop: '10px', 
                             marginBottom: '20px',
@@ -328,26 +329,28 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
                                 }}
                             />
                         </div>
-                    </>
-                )}
-            </div>
+                    )}
+                </>
+            )}
+        </div>
 
-         <Grid container spacing={8}>
-         {cards.slice(0, displayCount).map((card) => (
-            <Grid item key={card.id} xs={12} sm={6} md={4} lg={4}className="card-item" >
-                <div style={{  }}>
-                    <CardDisplay
-                        card={card}
-                        isNotInCollection={isCollectionView && !isCardInCollection(card.id)}
-                        onClick={() => handleCardClick(card)}
-                        cards={cards} 
-                        currentIndex={currentIndex}
-                        setCurrentIndex={setCurrentIndex} 
-                        onCardAdded={handleCardToCollection}
-                        instantlyAddedCards={instantlyAddedCards}
-                        instantlyRemovedCards={instantlyRemovedCards}
-                        cardCounts={cardCounts}
-                    />
+        <Grid container spacing={8}>
+            {cards.slice(0, displayCount).map((card) => (
+                <Grid item key={card.id} xs={12} sm={6} md={4} lg={4} className="card-item">
+                    <div>
+                        <CardDisplay
+                            card={card}
+                            isNotInCollection={isCollectionView && !isCardInCollection(card.id)}
+                            isCollectionView={isCollectionView}
+                            onClick={() => handleCardClick(card)}
+                            cards={cards} 
+                            currentIndex={currentIndex}
+                            setCurrentIndex={setCurrentIndex} 
+                            onCardAdded={handleCardToCollection}
+                            instantlyAddedCards={instantlyAddedCards}
+                            instantlyRemovedCards={instantlyRemovedCards}
+                            cardCounts={cardCounts}
+                        />
                 
                     <div className="variant-container">
                         {['normal', 'holofoil', 'reverseHolofoil'].map((variant) => (
