@@ -26,14 +26,16 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
     const [instantlyRemovedCards, setInstantlyRemovedCards] = useState(new Set());
     const [currentIndex, setCurrentIndex] = useState({});
     const [totalSetCards, setTotalSetCards] = useState(0);
-
+    const [allSetCards, setAllSetCards] = useState([]);
 
     useEffect(() => {
         if (cards.length > 0 && cards[0].set) {
             setTotalSetCards(cards[0].set.printed_total);
+            if (allSetCards.length === 0) {
+                setAllSetCards(cards);
+            }
         }
-    }, [selectedSetId]); // Only update when selectedSetId changes, not when cards are filtered
-
+    }, [selectedSetId]);
 
 
     useEffect(() => {
@@ -63,7 +65,7 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
     }, [collectionData]);
 
     const isCardOwned = useCallback((cardId) => {
-        // Check if card has any non-zero count
+    
         const cardCounts = cardCounts[cardId] || {};
         const hasNonZeroCount = Object.values(cardCounts).some(count => count > 0);
         
@@ -282,10 +284,10 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
     };
 
 
-  const uniqueOwnedCardsCount = useCallback(() => {
-        if (!cards || !cardCounts) return 0;
+    const uniqueOwnedCardsCount = useCallback(() => {
+        if (!allSetCards || !cardCounts) return 0;
         
-        return cards.reduce((count, card) => {
+        return allSetCards.reduce((count, card) => {
             const cardCount = cardCounts[card.card_id];
             if (cardCount) {
                 const hasAnyCount = Object.values(cardCount).some(count => count > 0);
@@ -293,7 +295,7 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
             }
             return count;
         }, 0);
-    }, [cards, cardCounts]);
+    }, [allSetCards, cardCounts]);
 
     const progressPercentage = (uniqueOwnedCardsCount() / totalSetCards) * 100;
 
