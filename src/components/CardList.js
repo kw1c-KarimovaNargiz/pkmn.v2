@@ -6,6 +6,7 @@ import CardDisplay from './CardDisplay';
 import { addCardToCollection, removeCardFromCollection, fetchUserCollection } from '../services/api';
 import { useUser } from '../pages/UserContext';
 import useApi from '../hooks/useApi';
+import { LinearProgress } from '@mui/material'; // Add this import
 
 const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId }) => {
     const { user, authToken } = useUser();
@@ -231,8 +232,8 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
         
         const allCountsZero = Object.values(updatedCounts).every(count => count === 0);
         
+         //if all counts are 0, mark the card as instantly removed
         if (allCountsZero) {
-            // If all counts are 0, mark the card as instantly removed
             setInstantlyRemovedCards(prev => new Set([...prev, cardId]));
         }
 
@@ -269,19 +270,67 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
         setCurrentIndex(cards.indexOf(card));
     };
 
+    const totalSetCards = cards.length;
+    const uniqueOwnedCardsCount = useCallback(() => {
+        if (!cards || !cardCounts) return 0;
+        
+        return cards.reduce((count, card) => {
+            const cardCount = cardCounts[card.card_id];
+            if (cardCount) {
+                const hasAnyCount = Object.values(cardCount).some(count => count > 0);
+                return hasAnyCount ? count + 1 : count;
+            }
+            return count;
+        }, 0);
+    }, [cards, cardCounts]);
+
+    const progressPercentage = (uniqueOwnedCardsCount() / totalSetCards) * 100;
 
     const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
 
     return (
         <div className="card-container">
-          <div className= "card-set-name-index">
-            {showSetTitle && (
-                <Typography  variant="h4" >
-                    
-                    {`${setTitle}`} 
-                </Typography>
-            )}    
-       </div>
+            <div className="card-set-name-index">
+                {showSetTitle && (
+                    <>
+                        <Typography variant="h4">
+                            {`${setTitle}`}
+                        </Typography>
+                        <div style={{ 
+                            marginTop: '10px', 
+                            marginBottom: '20px',
+                            width: '100%',
+                            maxWidth: '300px' 
+                        }}>
+                            <div style={{ 
+                                display: 'flex', 
+                                justifyContent: 'space-between', 
+                                marginBottom: '5px' 
+                            }}>
+                                <Typography variant="body1" sx={{ color: '#999' }}>
+                                    Collection Progress
+                                </Typography>
+                                <Typography variant="body1" sx={{ color: '#999' }}>
+                                    {uniqueOwnedCardsCount()} / {totalSetCards}
+                                </Typography>
+                            </div>
+                            <LinearProgress 
+                                variant="determinate" 
+                                value={progressPercentage}
+                                sx={{
+                                    height: 10,
+                                    borderRadius: 5,
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    '& .MuiLinearProgress-bar': {
+                                        backgroundColor: '#4CAF50',
+                                        borderRadius: 5
+                                    }
+                                }}
+                            />
+                        </div>
+                    </>
+                )}
+            </div>
 
          <Grid container spacing={8}>
          {cards.slice(0, displayCount).map((card) => (
