@@ -25,6 +25,17 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
     const [instantlyAddedCards, setInstantlyAddedCards] = useState(new Set());
     const [instantlyRemovedCards, setInstantlyRemovedCards] = useState(new Set());
     const [currentIndex, setCurrentIndex] = useState({});
+    const [totalSetCards, setTotalSetCards] = useState(0);
+
+
+    useEffect(() => {
+        if (cards.length > 0 && cards[0].set) {
+            setTotalSetCards(cards[0].set.printed_total);
+        }
+    }, [selectedSetId]); // Only update when selectedSetId changes, not when cards are filtered
+
+
+
     useEffect(() => {
         const observer = new IntersectionObserver((entries) => {
             if (entries[0].isIntersecting) {
@@ -270,8 +281,8 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
         setCurrentIndex(cards.indexOf(card));
     };
 
-    const totalSetCards = cards.length;
-    const uniqueOwnedCardsCount = useCallback(() => {
+
+  const uniqueOwnedCardsCount = useCallback(() => {
         if (!cards || !cardCounts) return 0;
         
         return cards.reduce((count, card) => {
