@@ -42,10 +42,14 @@ export const fetchSeries = async () => {
       const response = await axios.get(`http://127.0.0.1:8000/api/sets/${setId}/cards`);
       return response.data;
     } catch (error) {
-      console.error("Error fetching cards for set:", error);
-      throw error;
-    }
-  };
+        console.error("Error fetching cards for set:", error);  // More detailed logging
+        if (error.response) {
+          console.error("Response data:", error.response.data);  // Log the response from the server
+          console.error("Response status:", error.response.status);
+        }
+        throw error; // Re-throw the error so the calling component can handle it
+      }
+    };
 
   //search for a card
   export const searchCard = async (searchTerm) => {

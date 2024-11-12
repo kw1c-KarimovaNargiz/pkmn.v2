@@ -169,8 +169,12 @@ const CollectionPage = (isCollectionView) => {
                           {showCollectionTitle && (
                             <>
                               <Typography variant="h4">YOUR COLLECTION</Typography>
+                              <div className="collection-value">
                               <Typography variant="h6">Total Value: ${totalCollectionValue.toFixed(2)}</Typography>
+                              </div>
+                              <div className="total-card-count">
                               <Typography variant="h6">Total Cards: {totalCardCount}</Typography>
+                              </div>
                             </>
                           )}
                     </div>

@@ -6,7 +6,8 @@ import CardDisplay from './CardDisplay';
 import { addCardToCollection, removeCardFromCollection, fetchUserCollection } from '../services/api';
 import { useUser } from '../pages/UserContext';
 import useApi from '../hooks/useApi';
-import { LinearProgress } from '@mui/material'; // Add this import
+import { LinearProgress } from '@mui/material';
+import '../styling/cardlist.css';
 
 const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId }) => {
     const { user, authToken } = useUser();
@@ -200,13 +201,45 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
         try {
             const response = await removeCardFromCollection(payload);
             console.log('Card removed:', response);
+            
             refetchCollection();
+
+            if (toast.isActive(toastId)) {
+                let newToastCount = toastCount - 1;
+                setToastCount(newToastCount);
+                toast.update(toastId, {
+                    render: `Card removed successfully! (${newToastCount})`,
+                    type: 'success',
+                    autoClose: 3000,
+                });
+            } else {
+                setToastId(toast.success(toastCount ? `Card removed successfully! (${toastCount})` : 'Card removed successfully!'), {
+                    onClose: () => {
+                        setToastId(null);
+                    }
+                });
+            }
         } catch (error) {
-            console.error('Error removing card:', error);
-            const errorMessage = error.response?.data?.message || 'An error occurred while removing the card';
-            alert(errorMessage);
+            console.error('Error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                message: error.message
+            });
+
+            if (error.response?.status === 422) {
+                const validationErrors = error.response.data.errors;
+                const errorMessage = Object.values(validationErrors).flat().join('\n');
+                alert(`Validation failed: ${errorMessage}`);
+            } else if (error.response?.status === 401) {
+                alert('You must be logged in to update cards to your collection.');
+            } else if (error.response?.status === 404) {
+                alert('The card was not found.');
+            } else {
+                alert('An error occurred while adding the card.');
+            }
         }
-    }, [authToken, refetchCollection]);
+    }, [authToken, toastId, toastCount, refetchCollection]);
+
     
     const handleIncrement = useCallback(async (cardId, variant) => {
         const currentCount = cardCounts[cardId]?.[variant] || 0;
@@ -303,7 +336,7 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
 
 return (
     <div className="card-container">
-        <div className="card-set-name-index">
+        <div className="card-set-name-index" style={{}}>
             {showSetTitle && (
                 <>
                     <Typography variant="h4">
@@ -321,13 +354,18 @@ return (
                                 justifyContent: 'space-between', 
                                 marginBottom: '5px' 
                             }}>
-                                <Typography variant="body1" sx={{ color: '#999' }}>
+                                  </div>
+                                
+                            <div className="collection-progress">
+                             
+                                {/* <Typography variant="body1" sx={{ color: '#999' }}>
                                     Collection Progress
-                                </Typography>
+                                </Typography> */}
                                 <Typography variant="body1" sx={{ color: '#999' }}>
                                     {uniqueOwnedCardsCount()} / {totalSetCards}
                                 </Typography>
-                            </div>
+                          
+                                <div className ="linear-progress">
                             <LinearProgress 
                                 variant="determinate" 
                                 value={progressPercentage}
@@ -340,7 +378,11 @@ return (
                                         borderRadius: 5
                                     }
                                 }}
+
                             />
+                                </div>
+                            </div>
+                            
                         </div>
                     )}
                 </>
