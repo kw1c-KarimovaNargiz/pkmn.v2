@@ -106,23 +106,9 @@ const Index = () => {
     }
 }, [fetchCardsForSet, fetchSubTypes]); 
 
-const handleSearch = useCallback(async (searchTerm) => {
-    console.log("Index handleSearch called with:", searchTerm); // Debug log
-    setLoading(true);
-    try {
-        const results = await searchCard(searchTerm);
-        console.log("Search results:", results);
-        setSearchResults(results);
-        setFilteredCards([]);
-    } catch (error) {
-        console.error("Error searching:", error);
-        setSearchResults([]);
-    } finally {
-        setLoading(false);
-    }
-}, [setLoading, setSearchResults, setFilteredCards]); // Add proper dependencies // Empty dependency array is fine if we don't use any state/props inside
-
-
+const handleSearchResults = (results) => {
+    setSearchResults(results); // Update the search results when Navbar triggers a search
+};
     const handleFilter = (types, subtypes, isSortedByEvo) => {
         let filtered = cards;
       
@@ -162,7 +148,7 @@ const handleSearch = useCallback(async (searchTerm) => {
 
     return (
         <div className="index-container">
-  <Navbar onSearch={handleSearch} /> 
+<Navbar onSearchResults={handleSearchResults} />
     <div className="sidebar">
         <SetsSidebar
             series={series} 

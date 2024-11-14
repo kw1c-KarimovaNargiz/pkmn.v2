@@ -1,4 +1,5 @@
-import {useCallback} from 'react';
+import {useCallback,} from 'react';
+import {searchCard} from '../services/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AppBar, Toolbar, Button, Box } from '@mui/material';
 import { useUser } from '../pages/UserContext';
@@ -10,24 +11,22 @@ const pages = [
     { name: 'Index', path: '/Index' },
 ];
 
-const Navbar = ({ onSearch }) => {
+const Navbar = ({ onSearchResults }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const { user, logout } = useUser();
     const isLoggedIn = !!user;
 
-    // Add validation and wrapping of the search function
-    const handleSearch = useCallback((term) => {
-      console.log("Navbar handling search for term:", term);
-      if (typeof onSearch === 'function') {
-          onSearch(term);
-      } else {
-          console.error("Search function not properly passed to Navbar", {
-              onSearchType: typeof onSearch,
-              onSearch
-          });
+
+    const handleSearch = useCallback(async (searchTerm) => {
+      try {
+          const results = await searchCard(searchTerm);
+          console.log("Search results:", results);
+          onSearchResults(results); // Pass results back up to Index.js
+      } catch (error) {
+          console.error("Error searching:", error);
       }
-  }, [onSearch]);
+  }, [onSearchResults]);
 
     const handleClick = (path) => {
         if (location.pathname !== path) {
