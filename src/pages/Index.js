@@ -1,10 +1,14 @@
 import React, { useEffect, useState, useCallback} from 'react';
 import CardList from '../components/CardList';
 import SetsSidebar from '../components/SetsSideBar';
+// import SearchBar from '../components/SearchBar';
 import Navbar from '../components/Navbar';
+
+
 import { useUser } from '../pages/UserContext';
 import { fetchSeries, fetchCardsForSet, searchCard, fetchSubTypes, addCardToCollection, removeCardFromCollection } from '../services/api';
 import '../styling/Index.css'; 
+import { Search } from 'lucide-react';
 
 const Index = () => {
     const [, setSets] = useState([]);
@@ -16,7 +20,7 @@ const Index = () => {
     const [searchResults, setSearchResults] = useState([]);
     const [allTypes, setAllTypes] = useState([]);
     const [subTypes, setSubTypes] = useState([]);
-    const [, setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false); 
     const { user, userLoading } = useUser(); 
 
@@ -102,18 +106,22 @@ const Index = () => {
     }
 }, [fetchCardsForSet, fetchSubTypes]); 
 
-    const handleSearch = async (term) => {
-        setLoading(true); 
-        try {
-            const results = await searchCard(term); 
-            setSearchResults(results);
-        } catch (error) {
-            console.error("Error searching Pokémon:", error);
-            setSearchResults([]);
-        } finally {
-            setLoading(false);
-        }
-    };
+const handleSearch = useCallback(async (searchTerm) => {
+    console.log("Index handleSearch called with:", searchTerm); // Debug log
+    setLoading(true);
+    try {
+        const results = await searchCard(searchTerm);
+        console.log("Search results:", results);
+        setSearchResults(results);
+        setFilteredCards([]);
+    } catch (error) {
+        console.error("Error searching:", error);
+        setSearchResults([]);
+    } finally {
+        setLoading(false);
+    }
+}, [setLoading, setSearchResults, setFilteredCards]); // Add proper dependencies // Empty dependency array is fine if we don't use any state/props inside
+
 
     const handleFilter = (types, subtypes, isSortedByEvo) => {
         let filtered = cards;
@@ -154,7 +162,7 @@ const Index = () => {
 
     return (
         <div className="index-container">
-    <Navbar setSearchTerm={setSearchTerm} onSearch={handleSearch} />
+  <Navbar onSearch={handleSearch} /> 
     <div className="sidebar">
         <SetsSidebar
             series={series} 
