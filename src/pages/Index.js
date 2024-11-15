@@ -148,7 +148,10 @@ const handleSearchResults = (results) => {
 
     return (
         <div className="index-container">
-<Navbar onSearchResults={handleSearchResults} />
+<div>
+            <Navbar onSearchResults={handleSearchResults} />
+            <CardList cards={searchResults} />
+        </div>
     <div className="sidebar">
         <SetsSidebar
             series={series} 

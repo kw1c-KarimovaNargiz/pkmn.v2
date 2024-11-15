@@ -10,8 +10,7 @@ const pages = [
     { name: 'Home', path: '/' },
     { name: 'Index', path: '/Index' },
 ];
-
-const Navbar = ({ onSearchResults }) => {
+const Navbar = ({ onSearchResults = () => {} }) => {
     const location = useLocation();
     const navigate = useNavigate();
     const { user, logout } = useUser();
