@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react'; // Import useRef
+import React, { useState, useRef } from 'react'; // Import useRef
 import { styled, alpha } from '@mui/material/styles';
 import InputBase from '@mui/material/InputBase';
 import SearchIcon from '@mui/icons-material/Search';
@@ -45,59 +45,44 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const SearchBar = ({ onSearch }) => {
+const SearchBar = ({
+  onSearch
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const inputRef = useRef(null);
-
-  // Add explicit prop validation
-  const isSearchFunction = typeof onSearch === 'function';
-  console.log("SearchBar validation:", { 
-      onSearchType: typeof onSearch, 
-      isFunction: isSearchFunction 
-  });
+  const inputRef = useRef(null); 
 
   const handleSearchChange = (event) => {
-      setSearchTerm(event.target.value);
+    setSearchTerm(event.target.value);
   };
-  console.log("SearchBar received onSearch type:", typeof onSearch);
-  const handleSearchSubmit = useCallback((event) => {
+  console.log('searchbar onsearch', onSearch)
+  const handleSearchSubmit = (event) => {
     event.preventDefault();
-    console.log("Attempting search with term:", searchTerm);
-    
-    if (typeof onSearch === 'function' && searchTerm.trim()) {
-        onSearch(searchTerm.trim());
-        console.log("Search function called successfully");
-    } else {
-        console.error("Search validation failed:", {
-            hasSearchFunction: typeof onSearch === 'function',
-            searchTerm: searchTerm,
-            onSearchType: typeof onSearch
-        });
-    }
-    
+    console.log('Submitted:', searchTerm)
+    console.log(typeof onSearch)
+    console.log('', onSearch)
+    onSearch(searchTerm);
     if (inputRef.current) {
-        inputRef.current.blur();
+      inputRef.current.blur(); 
     }
-}, [searchTerm, onSearch]); 
+  };
 
   return (
-      <Box sx={{ width: '100%' }}>
-          <form onSubmit={handleSearchSubmit} style={{ width: '100%' }}>
-              <Search>
-                  <SearchIconWrapper>
-                      <SearchIcon />
-                  </SearchIconWrapper>
-                  <StyledInputBase
-                      placeholder="Search…"
-                      value={searchTerm}
-                      onChange={handleSearchChange}
-                      inputProps={{ 'aria-label': 'search' }}
-                      inputRef={inputRef}
-                      fullWidth
-                  />
-              </Search>
-          </form>
-      </Box>
+    <Box>
+      <form onSubmit={handleSearchSubmit} style={{ flex: 1, display: 'flex'}}>
+        <Search sx={{ borderStyle: 'none', width: '100%' }}>
+          <SearchIconWrapper>
+            <SearchIcon />
+          </SearchIconWrapper>
+          <StyledInputBase
+            placeholder="Search…"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            inputProps={{ 'aria-label': 'search' }}
+            inputRef={inputRef} 
+          />
+        </Search>
+      </form>
+    </Box>
   );
 };
 

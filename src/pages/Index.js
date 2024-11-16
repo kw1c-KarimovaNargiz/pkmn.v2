@@ -1,26 +1,21 @@
-import React, { useEffect, useState, useCallback} from 'react';
+import React, { useEffect, useState } from 'react';
 import CardList from '../components/CardList';
 import SetsSidebar from '../components/SetsSideBar';
-// import SearchBar from '../components/SearchBar';
 import Navbar from '../components/Navbar';
-
-
 import { useUser } from '../pages/UserContext';
 import { fetchSeries, fetchCardsForSet, searchCard, fetchSubTypes, addCardToCollection, removeCardFromCollection } from '../services/api';
 import '../styling/Index.css'; 
-import { Search } from 'lucide-react';
 
-const Index = () => {
+const Index = ({searchResults}) => {
     const [, setSets] = useState([]);
     const [series, setSeries] = useState([]);
     const [selectedSetId, setSelectedSetId] = useState([]);
     const [cards, setCards] = useState([]);
     const [filteredCards, setFilteredCards] = useState([]);
     const [, setOriginalCards] = useState([]); 
-    const [searchResults, setSearchResults] = useState([]);
+    // const [searchResults, setSearchResults] = useState([]);
     const [allTypes, setAllTypes] = useState([]);
     const [subTypes, setSubTypes] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false); 
     const { user, userLoading } = useUser(); 
 
@@ -77,38 +72,44 @@ const Index = () => {
         loadSeries(); 
     }, []);
 
- const handleSetSelect = useCallback(async (setId) => {
-    setLoading(true); // Correct loading state
-    setSelectedSetId(setId);
-    setSearchResults([]); // If applicable
+    const handleSetSelect = async (setId) => {
+        setLoading(true);
+        setSelectedSetId(setId);
+        // setSearchResults([]);
 
-    try {
-        const [cardData, subTypeData] = await Promise.all([ // Parallel fetching
-            fetchCardsForSet(setId),
-            fetchSubTypes(setId)
-        ]);
+        try {
+            const cardData = await fetchCardsForSet(setId); 
+            setCards(cardData);
+            setOriginalCards(cardData); 
+            setFilteredCards(cardData);
 
-        setCards(cardData);
-        setOriginalCards(cardData); // Keep original data
-        setFilteredCards(cardData);
-        setSubTypes(subTypeData);
+            const subTypeData = await fetchSubTypes(setId); 
+            setSubTypes(subTypeData);
+        } catch (error) {
+            console.error("Error loading cards:", error);
+            setCards([]); 
+            setFilteredCards([]); 
+            setSubTypes([]);
+        } finally {
+            setLoading(false); 
+        }
+    };
 
-        const uniqueTypes = [...new Set(cardData.flatMap(card => card.types || []))];
-        setAllTypes(uniqueTypes); // If needed
-    } catch (error) {
-        console.error("Error loading set data:", error);
-        setCards([]);
-        setFilteredCards([]);
-        setSubTypes([]);
-        // Handle other state as needed (allTypes, searchResults)
-    } finally {
-        setLoading(false); // Correct placement
-    }
-}, [fetchCardsForSet, fetchSubTypes]); 
+    // const handleSearch = async (term) => {
+    //      console.log('handling search')
+    //     setLoading(true); 
+    //     try {
+    //         const results = await searchCard(term); 
+    //         setSearchResults(results);
+    //         console.log('setting search results', results);
+    //     } catch (error) {
+    //         console.error("Error searching Pokémon:", error);
+    //         setSearchResults([]);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
-const handleSearchResults = (results) => {
-    setSearchResults(results); // Update the search results when Navbar triggers a search
-};
     const handleFilter = (types, subtypes, isSortedByEvo) => {
         let filtered = cards;
       
@@ -145,34 +146,32 @@ const handleSearchResults = (results) => {
 
     if( userLoading ) return null;
 
-
+    // console.log('handleSearch', handleSearch.toString())
     return (
         <div className="index-container">
-<div>
-            <Navbar onSearchResults={handleSearchResults} />
-            <CardList cards={searchResults} />
+            {/* <Navbar setSearchTerm={setSearchTerm} onSearch={handleSearch} /> */}
+            <div className="sidebar">
+                <SetsSidebar
+                    series={series} 
+                    onSetSelect={handleSetSelect} 
+                    onSeriesSelect={handleSeriesSelect} 
+                    availableTypes={allTypes}
+                    availableSubTypes={subTypes}
+                    onFilter={handleFilter}  
+                />
+            </div>
+            <div className='main-content'>
+            <div className="cards-display-area">
+                <CardList 
+                 
+                    cards={searchResults.length > 0 ? searchResults : filteredCards} 
+                    onAddCard={handleAddCard} 
+                    onRemoveCard={handleRemoveCard}
+                    selectedSetId={selectedSetId}
+                />
+            </div>
         </div>
-    <div className="sidebar">
-        <SetsSidebar
-            series={series} 
-            onSetSelect={handleSetSelect} 
-            onSeriesSelect={handleSeriesSelect} 
-            availableTypes={allTypes}
-            availableSubTypes={subTypes}
-            onFilter={handleFilter}  
-        />
-    </div>
-    <div className='main-content'>
-        <div className="cards-display-area">
-            <CardList 
-                cards={searchResults.length > 0 ? searchResults : filteredCards} 
-                onAddCard={handleAddCard} 
-                onRemoveCard={handleRemoveCard}
-                selectedSetId={selectedSetId}
-            />
         </div>
-    </div>
-</div>
     );
 };
 

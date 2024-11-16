@@ -14,12 +14,33 @@ import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 import CollectionPage from './pages/CollectionPage';
 
+import { fetchSeries, fetchCardsForSet, searchCard, fetchSubTypes, addCardToCollection, removeCardFromCollection } from './services/api';
+
+
 function App() {
+    const [searchResults, setSearchResults] = React.useState([])
+    const [loading, setLoading] = React.useState(false)
+
+    const handleSearch = async (term) => {
+        console.log('handling search', term)
+       setLoading(true); 
+       try {
+           const results = await searchCard(term); 
+           setSearchResults(results);
+           console.log('setting search results', results);
+       } catch (error) {
+           console.error("Error searching Pokémon:", error);
+           setSearchResults([]);
+       } finally {
+           setLoading(false);
+       }
+   };
+
     return (
         <UserProvider>
             <Router>
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-                    <Navbar />
+                    <Navbar onSearch={handleSearch} />
                     <Box sx={{ flexGrow: 1 }}>
                         <Container>
                             <Routes>
@@ -28,7 +49,7 @@ function App() {
                                 <Route path="*" element={<Navigate to="/login" replace />} /> 
                                 <Route path="/" element={<Home />} />
                                 <Route path="/Decks" element={<Decks />} />
-                                <Route path="/Index" element={<Index />} />
+                                <Route path="/Index" element={<Index searchResults={searchResults}/>} />
                                 <Route path="/collection" element={<CollectionPage />} />
                                
                             </Routes>

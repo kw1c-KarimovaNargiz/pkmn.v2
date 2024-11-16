@@ -174,7 +174,7 @@ const CardDisplay = React.memo(({ card,   isCollectionView, isNotInCollection, c
                             
                             <div className="card-numberTotal">
                                 <Typography variant="h6">
-                                    {cardNumber} / {displayCard.set.printed_total}
+                                    {cardNumber} / {displayCard?.set?.printed_total}
                                 </Typography>
                             </div>
                           
