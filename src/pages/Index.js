@@ -6,14 +6,13 @@ import { useUser } from '../pages/UserContext';
 import { fetchSeries, fetchCardsForSet, searchCard, fetchSubTypes, addCardToCollection, removeCardFromCollection } from '../services/api';
 import '../styling/Index.css'; 
 
-const Index = ({searchResults}) => {
-    const [, setSets] = useState([]);
+const Index = ({searchResults, setSearchResults}) => {
+    const [set, setSets] = useState([]);
     const [series, setSeries] = useState([]);
     const [selectedSetId, setSelectedSetId] = useState([]);
     const [cards, setCards] = useState([]);
     const [filteredCards, setFilteredCards] = useState([]);
-    const [, setOriginalCards] = useState([]); 
-    // const [searchResults, setSearchResults] = useState([]);
+    const [originalCards, setOriginalCards] = useState([]); 
     const [allTypes, setAllTypes] = useState([]);
     const [subTypes, setSubTypes] = useState([]);
     const [loading, setLoading] = useState(false); 
@@ -75,7 +74,7 @@ const Index = ({searchResults}) => {
     const handleSetSelect = async (setId) => {
         setLoading(true);
         setSelectedSetId(setId);
-        // setSearchResults([]);
+        setSearchResults([]);
 
         try {
             const cardData = await fetchCardsForSet(setId); 
@@ -94,21 +93,6 @@ const Index = ({searchResults}) => {
             setLoading(false); 
         }
     };
-
-    // const handleSearch = async (term) => {
-    //      console.log('handling search')
-    //     setLoading(true); 
-    //     try {
-    //         const results = await searchCard(term); 
-    //         setSearchResults(results);
-    //         console.log('setting search results', results);
-    //     } catch (error) {
-    //         console.error("Error searching Pokémon:", error);
-    //         setSearchResults([]);
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
 
     const handleFilter = (types, subtypes, isSortedByEvo) => {
         let filtered = cards;
@@ -146,10 +130,9 @@ const Index = ({searchResults}) => {
 
     if( userLoading ) return null;
 
-    // console.log('handleSearch', handleSearch.toString())
     return (
         <div className="index-container">
-            {/* <Navbar setSearchTerm={setSearchTerm} onSearch={handleSearch} /> */}
+       
             <div className="sidebar">
                 <SetsSidebar
                     series={series} 
@@ -163,7 +146,6 @@ const Index = ({searchResults}) => {
             <div className='main-content'>
             <div className="cards-display-area">
                 <CardList 
-                 
                     cards={searchResults.length > 0 ? searchResults : filteredCards} 
                     onAddCard={handleAddCard} 
                     onRemoveCard={handleRemoveCard}

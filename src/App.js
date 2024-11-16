@@ -27,6 +27,7 @@ function App() {
        try {
            const results = await searchCard(term); 
            setSearchResults(results);
+           
            console.log('setting search results', results);
        } catch (error) {
            console.error("Error searching Pokémon:", error);
@@ -49,7 +50,7 @@ function App() {
                                 <Route path="*" element={<Navigate to="/login" replace />} /> 
                                 <Route path="/" element={<Home />} />
                                 <Route path="/Decks" element={<Decks />} />
-                                <Route path="/Index" element={<Index searchResults={searchResults}/>} />
+                                <Route path="/Index" element={<Index searchResults={searchResults} setSearchResults={setSearchResults} />} />
                                 <Route path="/collection" element={<CollectionPage />} />
                                
                             </Routes>

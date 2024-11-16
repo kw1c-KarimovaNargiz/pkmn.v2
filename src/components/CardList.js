@@ -405,6 +405,8 @@ return (
                             instantlyAddedCards={instantlyAddedCards}
                             instantlyRemovedCards={instantlyRemovedCards}
                             cardCounts={cardCounts}
+                            selectedSetId={selectedSetId}
+
                         />
                 
                     <div className="variant-container">
