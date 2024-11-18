@@ -16,15 +16,15 @@ export const loginUser = async (formData) => {
   }
 };
 
-export const fetchCardPrices = async (cardId) => {
-    try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/card-prices/${cardId}`);
-        return response.data; 
-    } catch (error) {
-        console.error("Er is een fout opgetreden bij het ophalen van de kaartprijzen:", error);
-        throw error;
-    }
-};
+// export const fetchCardPrices = async (cardId) => {
+//     try {
+//         const response = await axios.get(`http://127.0.0.1:8000/api/card-prices/${cardId}`);
+//         return response.data; 
+//     } catch (error) {
+//         console.error("Er is een fout opgetreden bij het ophalen van de kaartprijzen:", error);
+//         throw error;
+//     }
+// };
 //fetch all series and their according sets
 export const fetchSeries = async () => {
     try {
@@ -42,12 +42,12 @@ export const fetchSeries = async () => {
       const response = await axios.get(`http://127.0.0.1:8000/api/sets/${setId}/cards`);
       return response.data;
     } catch (error) {
-        console.error("Error fetching cards for set:", error);  // More detailed logging
+        console.error("Error fetching cards for set:", error);  
         if (error.response) {
-          console.error("Response data:", error.response.data);  // Log the response from the server
+          console.error("Response data:", error.response.data); 
           console.error("Response status:", error.response.status);
         }
-        throw error; // Re-throw the error so the calling component can handle it
+        throw error;
       }
     };
 
@@ -63,26 +63,26 @@ export const fetchSeries = async () => {
         };
 
         //loading cards per page ??? nog niet in gebruik
-        export const loadMoreCards = async (page) => {
-            try {
-                const response = await axios.get(`http://127.0.0.1:8000/api/cards?page=${page}`);
-                return response.data;
-            } catch (error) {
-                console.error("Error loading more cards:", error);
-                throw error;
-            }
-        };
+        // export const loadMoreCards = async (page) => {
+        //     try {
+        //         const response = await axios.get(`http://127.0.0.1:8000/api/cards?page=${page}`);
+        //         return response.data;
+        //     } catch (error) {
+        //         console.error("Error loading more cards:", error);
+        //         throw error;
+        //     }
+        // };
 
         //filtering
-    export const handleFilter = async (type) => {
-        try {
-            const response = await axios.get(`http://127.0.0.1:8000/api/cards/filter?type=${type}`);
-            return response.data;
-            } catch (error) {
-                console.error("Error searching card with type", error);
-                throw error;
+        export const handleFilter = async (type) => {
+            try {
+                const response = await axios.get(`http://127.0.0.1:8000/api/cards/filter?type=${type}`);
+                return response.data;
+                } catch (error) {
+                    console.error("Error searching card with type", error);
+                    throw error;
+            }
         }
-    }
 
       //evo's per set for now
       export const fetchSortedEvolutionCards = async (setId) => {
@@ -130,7 +130,7 @@ export const fetchSeries = async () => {
 
 
 
-// In api.js
+
 export const removeCardFromCollection = async (payload) => {
     try {
         const response = await axios.delete('http://127.0.0.1:8000/api/collections/remove', {
@@ -151,6 +151,8 @@ export const removeCardFromCollection = async (payload) => {
         throw error;
     }
 };
+
+
 export const fetchUserCollection = async (token) => {
     try {
         const response = await axios.get(`http://127.0.0.1:8000/api/collections`, {

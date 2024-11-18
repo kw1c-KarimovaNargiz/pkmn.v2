@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Grid, Typography, Badge, Checkbox, FormControlLabel, IconButton, Skeleton } from '@mui/material';
+import { Grid, Typography, Badge, Checkbox, FormControlLabel, IconButton } from '@mui/material';
 import { toast } from 'react-toastify';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
@@ -39,23 +39,23 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
     }, [selectedSetId]);
 
 
-    useEffect(() => {
-        const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) {
-                setDisplayCount((prevCount) => prevCount + 12);
-            }
-        });
+    // useEffect(() => {
+    //     const observer = new IntersectionObserver((entries) => {
+    //         if (entries[0].isIntersecting) {
+    //             setDisplayCount((prevCount) => prevCount + 12);
+    //         }
+    //     });
 
-        if (loadingRef.current) {
-            observer.observe(loadingRef.current);
-        }
+    //     if (loadingRef.current) {
+    //         observer.observe(loadingRef.current);
+    //     }
 
-        return () => {
-            if (loadingRef.current) {
-                observer.unobserve(loadingRef.current);
-            }
-        };
-    }, [loadingRef]);
+    //     return () => {
+    //         if (loadingRef.current) {
+    //             observer.unobserve(loadingRef.current);
+    //         }
+    //     };
+    // }, [loadingRef]);
 
         
     useEffect(() => {
@@ -390,7 +390,7 @@ return (
         </div>
 
         <Grid container spacing={8}>
-            {cards.slice(0, displayCount).map((card) => (
+            {cards.slice(0).map((card) => (
                 <Grid item key={card.id} xs={12} sm={6} md={4} lg={4} className="card-item">
                     <div>
                         <CardDisplay
@@ -455,13 +455,9 @@ return (
                         </div>
                     </Grid>
                 ))}
-                {loading && Array.from(new Array(6)).map((_, index) => (
-                    <Grid item key={index} xs={12} sm={6} md={4}>
-                        <Skeleton variant="rectangular" height={250} />
-                    </Grid>
-                ))}
+                
             </Grid>
-            <div ref={loadingRef} />
+        
         </div>
     );
 };

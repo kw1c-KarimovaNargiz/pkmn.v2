@@ -23,7 +23,6 @@ const Index = ({searchResults, setSearchResults}) => {
             console.warn('User must be logged in to handle their collection');
             return; 
         }
-
         try {
             const response = await addCardToCollection(user.email, card_id, count, variant);
             console.log('Card added to collection:', response);

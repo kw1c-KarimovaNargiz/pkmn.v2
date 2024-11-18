@@ -1,14 +1,19 @@
 import React, { useState, useCallback} from 'react';
-import { Card, CardContent, Typography, Dialog, DialogContent, IconButton } from '@mui/material';
+import { Skeleton, Card, CardContent, Typography, Dialog, DialogContent, IconButton } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import '../styling/carddisplay.css';
 
 const CardDisplay = React.memo(({ card,   isCollectionView, isNotInCollection, cards, currentIndex, setCurrentIndex, instantlyAddedCards, instantlyRemovedCards, cardCounts }) => {
     const [open, setOpen] = useState(false);
+    const [isLoaded, setIsLoaded] = useState(false);
     //visual feedback for added card in set through collectionpage
     const isCardInstantlyAdded = instantlyAddedCards?.has(card.card_id);
     const isCardInstantlyRemoved = instantlyRemovedCards?.has(card.card_id);
+
+    const handleImageLoad = () => {
+        setIsLoaded(true);
+      };
 
     const handleCardClick = () => {
         setCurrentIndex(cards.findIndex(c => c.card_id === card.card_id));
@@ -45,10 +50,10 @@ const CardDisplay = React.memo(({ card,   isCollectionView, isNotInCollection, c
         }
     };
 
-
-   
+    //for local images 
+    const cardId = card.card_id;    
+    const setId = cardId.split('-')[0];
     
-    // Check if card has any counts
     const hasNoCounts = useCallback(() => {
         const counts = cardCounts[card.card_id];
         if (!counts) return true;
@@ -80,18 +85,22 @@ const CardDisplay = React.memo(({ card,   isCollectionView, isNotInCollection, c
                                 : 1,
                             transition: 'filter 0.3s ease, opacity 0.3s ease'
                         }}>
-                            <div className="shine-img">
-                                <img 
-                                    src={card.images.large}
-                                    alt={card.name}
-                                    loading="lazy"
-                                    style={{ 
-                                        boxShadow: '10px 10px #1a1a1a',
-                                        borderRadius: '5px',
-                                        width: '100%',
-                                        height: 'auto'
-                                    }}
-                                />
+                           <div className="shine-img">
+                                {card.card_id ? (
+                                    <img
+                                        src={`http://127.0.0.1:8000/card-images/${card.card_id.split('-')[0]}/${card.card_id}_hires.png`}
+                                        alt={card.name}
+                                        loading="lazy"
+                                        style={{ 
+                                            boxShadow: '10px 10px #1a1a1a',
+                                            borderRadius: '5px',
+                                            width: '100%',
+                                            height: 'auto'
+                                        }}
+                                    />
+                                ) : (
+                                    <Skeleton variant="rectangular" width="100%" height={118} style={{ borderRadius: '5px', boxShadow: '10px 10px #1a1a1a' }} />
+                                )}
                             </div>
                         </div>
                     </CardContent>
@@ -189,7 +198,7 @@ const CardDisplay = React.memo(({ card,   isCollectionView, isNotInCollection, c
                             <div className="img-container shine">
                                 <img 
                                     className="shine"
-                                    src={displayCard.images.large}
+                                    src={`http://127.0.0.1:8000/card-images/${card.card_id.split('-')[0]}/${card.card_id}_hires.png`}
                                     alt={displayCard.name} 
                                     loading="lazy" 
                                     style={{flex: '1', width: '300px'}}
