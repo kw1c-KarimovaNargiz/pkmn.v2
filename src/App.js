@@ -23,38 +23,35 @@ function App() {
 
     const handleSearch = async (term) => {
         console.log('handling search', term)
-       setLoading(true); 
-       try {
-           const results = await searchCard(term); 
-           setSearchResults(results);
-           
-           console.log('setting search results', results);
-       } catch (error) {
-           console.error("Error searching Pokémon:", error);
-           setSearchResults([]);
-       } finally {
-           setLoading(false);
-       }
-   };
+        setLoading(true);
+        try {
+            const results = await searchCard(term);
+            setSearchResults(results);
+
+            console.log('setting search results', results);
+        } catch (error) {
+            console.error("Error searching Pokémon:", error);
+            setSearchResults([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <UserProvider>
             <Router>
-                <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+                <Box>
                     <Navbar onSearch={handleSearch} />
-                    <Box sx={{ flexGrow: 1 }}>
-                        <Container>
-                            <Routes>
-                            <Route path="/login" element={<SignIn />} /> 
-                                <Route path="/signup" element={<SignUp />} /> 
-                                <Route path="*" element={<Navigate to="/login" replace />} /> 
-                                <Route path="/" element={<Home />} />
-                                <Route path="/Decks" element={<Decks />} />
-                                <Route path="/Index" element={<Index searchResults={searchResults} setSearchResults={setSearchResults} />} />
-                                <Route path="/collection" element={<CollectionPage />} />
-                               
-                            </Routes>
-                        </Container>
+                    <Box sx={{ marginTop: 16, width: '100%' }}>
+                        <Routes>
+                            <Route path="/login" element={<SignIn />} />
+                            <Route path="/signup" element={<SignUp />} />
+                            <Route path="*" element={<Navigate to="/login" replace />} />
+                            <Route path="/" element={<Home />} />
+                            <Route path="/Decks" element={<Decks />} />
+                            <Route path="/Index" element={<Index searchResults={searchResults} setSearchResults={setSearchResults} />} />
+                            <Route path="/collection" element={<CollectionPage />} />
+                        </Routes>
                     </Box>
                 </Box>
                 <ToastContainer

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Grid, Typography, Badge, Checkbox, FormControlLabel, IconButton } from '@mui/material';
+import { Grid, Typography, Badge, Checkbox, FormControlLabel, IconButton, Box } from '@mui/material';
 import { toast } from 'react-toastify';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
@@ -9,7 +9,7 @@ import useApi from '../hooks/useApi';
 import { LinearProgress } from '@mui/material';
 import '../styling/cardlist.css';
 
-const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId }) => {
+const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId, sx }) => {
     const { user, authToken } = useUser();
     const [loading, setLoading] = useState(true);
     const [cardCounts, setCardCounts] = useState({});
@@ -335,11 +335,11 @@ const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId 
     const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
 
 return (
-    <div className="card-container">
-        <div className="card-set-name-index" style={{}}>
+    <Box sx={{...sx, width: '100%'}}>
+        <div className="card-set-name-index">
             {showSetTitle && (
                 <>
-                    <Typography variant="h4">
+                    <Typography variant="h3" sx={{width: '100%', paddingLeft: '20%'}}>
                         {`${setTitle}`}
                     </Typography>
                     {isCollectionView && (
@@ -458,7 +458,7 @@ return (
                 
             </Grid>
         
-        </div>
+        </Box>
     );
 };
 

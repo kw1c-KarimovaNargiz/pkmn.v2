@@ -4,24 +4,27 @@ import SetsSidebar from '../components/SetsSideBar';
 import Navbar from '../components/Navbar';
 import { useUser } from '../pages/UserContext';
 import { fetchSeries, fetchCardsForSet, searchCard, fetchSubTypes, addCardToCollection, removeCardFromCollection } from '../services/api';
-import '../styling/Index.css'; 
+import '../styling/Index.css';
+import { Button, Box } from '@mui/material';
 
-const Index = ({searchResults, setSearchResults}) => {
+const Index = ({ searchResults, setSearchResults }) => {
     const [set, setSets] = useState([]);
     const [series, setSeries] = useState([]);
     const [selectedSetId, setSelectedSetId] = useState([]);
     const [cards, setCards] = useState([]);
     const [filteredCards, setFilteredCards] = useState([]);
-    const [originalCards, setOriginalCards] = useState([]); 
+    const [originalCards, setOriginalCards] = useState([]);
     const [allTypes, setAllTypes] = useState([]);
     const [subTypes, setSubTypes] = useState([]);
-    const [loading, setLoading] = useState(false); 
-    const { user, userLoading } = useUser(); 
+    const [loading, setLoading] = useState(false);
+    const { user, userLoading } = useUser();
+
+    const [sidebarVisible, setSidebarVisible] = useState(false);
 
     const handleAddCard = async (card_id, count, variant) => {
         if (!user) {
             console.warn('User must be logged in to handle their collection');
-            return; 
+            return;
         }
         try {
             const response = await addCardToCollection(user.email, card_id, count, variant);
@@ -34,7 +37,7 @@ const Index = ({searchResults, setSearchResults}) => {
     const handleRemoveCard = async (card_id, count) => {
         if (!user) {
             console.warn('User must be logged in to handle their collection');
-            return; 
+            return;
         }
 
         try {
@@ -48,13 +51,13 @@ const Index = ({searchResults, setSearchResults}) => {
         const loadSeries = async () => {
             setLoading(true);
             try {
-                const seriesData = await fetchSeries(); 
+                const seriesData = await fetchSeries();
                 setSeries(seriesData);
-    
+
                 if (seriesData.length > 0) {
                     const firstSeries = seriesData[0];
                     setSets(firstSeries.sets || []);
-    
+
                     if (firstSeries.sets && firstSeries.sets.length > 0) {
                         const firstSet = firstSeries.sets[0];
                         setSelectedSetId(firstSet.id);
@@ -64,10 +67,10 @@ const Index = ({searchResults, setSearchResults}) => {
             } catch (error) {
                 console.error("Cannot fetch series/sets", error);
             } finally {
-                setLoading(false); 
+                setLoading(false);
             }
         };
-        loadSeries(); 
+        loadSeries();
     }, []);
 
     const handleSetSelect = async (setId) => {
@@ -76,32 +79,32 @@ const Index = ({searchResults, setSearchResults}) => {
         setSearchResults([]);
 
         try {
-            const cardData = await fetchCardsForSet(setId); 
+            const cardData = await fetchCardsForSet(setId);
             setCards(cardData);
-            setOriginalCards(cardData); 
+            setOriginalCards(cardData);
             setFilteredCards(cardData);
 
-            const subTypeData = await fetchSubTypes(setId); 
+            const subTypeData = await fetchSubTypes(setId);
             setSubTypes(subTypeData);
         } catch (error) {
             console.error("Error loading cards:", error);
-            setCards([]); 
-            setFilteredCards([]); 
+            setCards([]);
+            setFilteredCards([]);
             setSubTypes([]);
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
     };
 
     const handleFilter = (types, subtypes, isSortedByEvo) => {
         let filtered = cards;
-      
+
         if (types.length > 0) {
             filtered = filtered.filter((card) =>
                 types.some((type) => card.types.includes(type))
             );
         }
-      
+
         if (subtypes.length > 0) {
             filtered = filtered.filter((card) =>
                 subtypes.some((subtype) => card.subtypes.includes(subtype))
@@ -114,45 +117,40 @@ const Index = ({searchResults, setSearchResults}) => {
 
         setFilteredCards(filtered);
     };
-    
+
     const handleSeriesSelect = (selectedSeries) => {
-        setSets(selectedSeries.sets || []); 
+        setSets(selectedSeries.sets || []);
     };
 
     useEffect(() => {
         const uniqueTypes = [...new Set(cards.flatMap((card) => card.types))];
         setAllTypes(uniqueTypes);
-      
+
         const uniqueSubTypes = [...new Set(cards.flatMap((card) => card.subtypes || []))];
-        setSubTypes(uniqueSubTypes); 
+        setSubTypes(uniqueSubTypes);
     }, [cards]);
 
-    if( userLoading ) return null;
+    if (userLoading) return null;
 
     return (
-        <div className="index-container">
-       
-            <div className="sidebar">
-                <SetsSidebar
-                    series={series} 
-                    onSetSelect={handleSetSelect} 
-                    onSeriesSelect={handleSeriesSelect} 
-                    availableTypes={allTypes}
-                    availableSubTypes={subTypes}
-                    onFilter={handleFilter}  
-                />
-            </div>
-            <div className='main-content'>
-            <div className="cards-display-area">
-                <CardList 
-                    cards={searchResults.length > 0 ? searchResults : filteredCards} 
-                    onAddCard={handleAddCard} 
-                    onRemoveCard={handleRemoveCard}
-                    selectedSetId={selectedSetId}
-                />
-            </div>
-        </div>
-        </div>
+        <Box sx={{ display: 'flex', }}>
+            <SetsSidebar
+                series={series}
+                onSetSelect={handleSetSelect}
+                onSeriesSelect={handleSeriesSelect}
+                availableTypes={allTypes}
+                availableSubTypes={subTypes}
+                onFilter={handleFilter}
+                onToggleSidebar={(visible) => setSidebarVisible(visible)}
+            />
+            <CardList
+                cards={searchResults.length > 0 ? searchResults : filteredCards}
+                onAddCard={handleAddCard}
+                onRemoveCard={handleRemoveCard}
+                selectedSetId={selectedSetId}
+                sx={sidebarVisible ? { marginLeft: 44, width: '84%' } : {}}
+            />
+        </Box>
     );
 };
 
