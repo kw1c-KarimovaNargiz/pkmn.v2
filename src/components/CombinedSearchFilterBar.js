@@ -1,51 +1,57 @@
 import React, { useState } from 'react';
-import { Box, Chip, FormControlLabel, Checkbox, Autocomplete, TextField, Drawer } from '@mui/material';
+import { useLocation } from 'react-router-dom';
+import { Box, Chip, FormControlLabel, Checkbox, Autocomplete, TextField, Typography, Button } from '@mui/material';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
-const CombinedSearchFilterBar = ({
-  availableTypes,
-  availableSubTypes,
-  onFilter,
+    const CombinedSearchFilterBar = ({
+      availableTypes,
+      availableSubTypes,
+      selectedTypes,
+      setSelectedTypes,
+      selectedSubTypes,
+      setSelectedSubTypes,
+      isSortedByEvo,
+      setIsSortedByEvo,
+      onFilter,
+      selectedSet, 
+        filterOwnedCards,
+      setFilterOwnedCards 
+    }) => {
 
-  selectedTypes = [],
-  setSelectedTypes,
-  selectedSubTypes = [],
-  setSelectedSubTypes,
-  onSortByEvo,
-
-
-  setTitle,
-}) => {
-  const [isSortedByEvo, setIsSortedByEvo] = useState(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  const handleTypeChange = (event, newValue) => {
-    setSelectedTypes(newValue);
-    onFilter(newValue, selectedSubTypes, isSortedByEvo);
+    const location = useLocation();
+    const isCollectionView = location.pathname === '/collection';
+    const handleTypeChange = (event, newValue) => {
+      setSelectedTypes(newValue);
+      onFilter(newValue, selectedSubTypes, isSortedByEvo, selectedSet, filterOwnedCards);
   };
 
   const handleSubTypeChange = (event, newValue) => {
-    setSelectedSubTypes(newValue);
-    onFilter(selectedTypes, newValue, isSortedByEvo);
+      setSelectedSubTypes(newValue);
+      onFilter(selectedTypes, newValue, isSortedByEvo, selectedSet, filterOwnedCards);
   };
 
   const handleSortByEvoChange = (event) => {
+      const checked = event.target.checked;
+      setIsSortedByEvo(checked);
+      onFilter(selectedTypes, selectedSubTypes, checked, selectedSet, filterOwnedCards);
+  };
+
+
+  const handleFilterOwnedCards = (event) => {
     const checked = event.target.checked;
-    setIsSortedByEvo(checked);
-    onFilter(selectedTypes, selectedSubTypes, checked);
+    setFilterOwnedCards(checked); 
+    onFilter(selectedTypes, selectedSubTypes, isSortedByEvo, selectedSet, checked);
   };
 
-  const handleDrawerToggle = () => {
-    setIsDrawerOpen(!isDrawerOpen);
-  };
 
-  const FilterContent = () => (
+  return (
     <Box sx={{ width: 300, padding: 2 }}>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', mb: 2 }}>
+      <Typography variant="h6" sx={{ mb: 2 }}>Filter Options</Typography>
+      <Box sx={{mb: 2 }}>
         {selectedTypes.map((type) => (
           <Chip
             key={type}
@@ -53,7 +59,7 @@ const CombinedSearchFilterBar = ({
             onDelete={() => {
               const updatedTypes = selectedTypes.filter((t) => t !== type);
               setSelectedTypes(updatedTypes);
-              onFilter(updatedTypes, selectedSubTypes, isSortedByEvo);
+              onFilter(updatedTypes, selectedSubTypes, isSortedByEvo, selectedSet);
             }}
             sx={{ margin: '4px' }}
           />
@@ -119,21 +125,37 @@ const CombinedSearchFilterBar = ({
             color="primary"
           />
         }
-        label="Evo-sort"
+        label="Sort by Evolution"
       />
-    </Box>
-  );
+{isCollectionView && 
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={filterOwnedCards}
+              onChange={handleFilterOwnedCards}
+              color="primary"
+            />
+          }
+          label="Show Owned Cards Only"
+        />
+      }
+      
+      
+    
 
-  return (
-    <Box sx={{ width: '100%' }}>
-   
-      <Drawer
-        anchor="right"
-        open={isDrawerOpen}
-        onClose={handleDrawerToggle}
-      >
-        <FilterContent />
-      </Drawer>
+            {/* {isCollectionView && (
+        <Button
+          onClick={() => onSetSelect('all')}
+          sx={{
+            color: 'white',
+            marginBottom: '10px',
+            width: '100%',
+          }}
+        >
+          View All Owned Cards
+        </Button>
+      )} */}
+
     </Box>
   );
 };

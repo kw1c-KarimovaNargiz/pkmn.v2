@@ -1,56 +1,158 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Grid, Typography, Checkbox, FormControlLabel, IconButton } from '@mui/material';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { Grid, Typography, Badge, Checkbox, FormControlLabel, IconButton } from '@mui/material';
 import { toast } from 'react-toastify';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
-import { addCardToCollection,  removeCardFromCollection, fetchUserCollection } from '../services/api';
+import { addCardToCollection, removeCardFromCollection, fetchUserCollection } from '../services/api';
 import { useUser } from '../pages/UserContext';
+import useApi from '../hooks/useApi';
+import { LinearProgress } from '@mui/material';
+import '../styling/cardlist.css';
 
-const CardList = ({ cards }) => {
-    const { user } = useUser(); 
-    const [visibleCards, setVisibleCards] = useState([]);
+const CardList = ({ cards, isCollectionView, isCardInCollection,  selectedSetId }) => {
+    const { user, authToken } = useUser();
+    const [loading, setLoading] = useState(true);
     const [cardCounts, setCardCounts] = useState({});
-    const [userCards, setUserCards] = useState([]);
-    const observerRef = useRef(null);
+    const [userCards, setUserCards] = useState({});
     const [selectedCard, setSelectedCard] = useState(null);
     const [toastId, setToastId] = useState(null);
     const [toastCount, setToastCount] = useState(0);
-    //handle add card
-    const handleCardToCollection = useCallback(async (cardId, count) => {
-        if (count <= 0) {
-            alert('You must select at least one card to update to your collection.');
-            return;
+    const [displayCount, setDisplayCount] = useState(12);
+    const loadingRef = useRef(null);
+    const { data: collectionData, error: collectionError, isLoading: collectionLoading, triggerFetch: refetchCollection } = useApi('collections', {}, true, 'GET');
+    const [loadingImages, setLoadingImages] = useState({});
+    const showSetTitle = !!selectedSetId;
+    const [ownedCards, setOwnedCards] = useState(new Set());
+    const [instantlyAddedCards, setInstantlyAddedCards] = useState(new Set());
+    const [instantlyRemovedCards, setInstantlyRemovedCards] = useState(new Set());
+    const [currentIndex, setCurrentIndex] = useState({});
+    const [totalSetCards, setTotalSetCards] = useState(0);
+    const [allSetCards, setAllSetCards] = useState([]);
+
+    useEffect(() => {
+        if (cards.length > 0 && cards[0].set) {
+            setTotalSetCards(cards[0].set.printed_total);
+            if (allSetCards.length === 0) {
+                setAllSetCards(cards);
+            }
         }
+    }, [selectedSetId]);
+
+
+    // useEffect(() => {
+    //     const observer = new IntersectionObserver((entries) => {
+    //         if (entries[0].isIntersecting) {
+    //             setDisplayCount((prevCount) => prevCount + 12);
+    //         }
+    //     });
+
+    //     if (loadingRef.current) {
+    //         observer.observe(loadingRef.current);
+    //     }
+
+    //     return () => {
+    //         if (loadingRef.current) {
+    //             observer.unobserve(loadingRef.current);
+    //         }
+    //     };
+    // }, [loadingRef]);
+
+        
+    useEffect(() => {
+        if (collectionData && Array.isArray(collectionData[0])) {
+            const ownedCardIds = new Set(collectionData[0].map(card => card.card_id));
+            setOwnedCards(ownedCardIds);
+        }
+    }, [collectionData]);
+
+    const isCardOwned = useCallback((cardId) => {
     
+        const cardCounts = cardCounts[cardId] || {};
+        const hasNonZeroCount = Object.values(cardCounts).some(count => count > 0);
+        
+        return (ownedCards.has(cardId) || instantlyAddedCards.has(cardId)) 
+            && !instantlyRemovedCards.has(cardId)
+            && hasNonZeroCount;
+    }, [ownedCards, instantlyAddedCards, instantlyRemovedCards, cardCounts]);
+
+    useEffect(() => {
+        setLoading(cards.length === 0 && collectionLoading);
+    }, [cards, collectionLoading]);
+
+    useEffect(() => {
+        setLoading(true);
+        if (cards.length > 0) {
+            setLoading(false);
+        }
+    }, [cards]);
+
+    const handleImageLoad = (cardId) => {
+        setLoadingImages((prev) => ({ ...prev, [cardId]: false }));
+    };
+
+     const [cardStatus, setCardStatus] = useState(
+        cards.reduce((acc, card) => {
+            acc[card.id] = true; 
+            return acc;
+        }, {})
+    );
+    useEffect(() => {
+        setUserCards(collectionData);
+    }, [collectionData, collectionError, collectionLoading]);
+    
+    const getVariantColor = (variant) => {
+        switch (variant) {
+            case 'normal':
+                return 'yellow';
+            case 'holofoil':
+                return 'purple';
+            case 'reverseHolofoil':
+                return 'blue';
+            default:
+                return 'white';
+        }
+    };
+    const handleCardToCollection = useCallback(async (cardId, variant, count) => {
+
         const payload = {
-            email: user?.email,
+            authToken: authToken,
             card_id: cardId,
+            variant,
             count: count,
         };
-    
+
         try {
-            console.log('Sending payload:', payload);
-            
+
+            setInstantlyAddedCards(prev => new Set([...prev, cardId]));
+
             const response = await addCardToCollection(payload);
-            console.log('Card updated:', response.data);
             
+            console.log('Card updated:', response.data);
+            setOwnedCards(prev => new Set([...prev, cardId]));
             setCardCounts(prevCounts => ({
                 ...prevCounts,
-                [cardId]: count
+                [cardId]: {
+                    ...prevCounts[cardId],
+                    [variant]: count,
+                }
+             
             }));
-            
-            alert('Collection updated');
-    
-            //refresh collection
-            const collectionData = await fetchUserCollection(user?.email);
-            setUserCards(collectionData);
-            
-            console.log('toast is active:', toast.isActive(toastId));
+
+            setCardStatus(prevStatus => ({
+                ...prevStatus,
+                [cardId]: false 
+
+            }));
+
+            setOwnedCards(prev => new Set([...prev, cardId]));
+         
+            refetchCollection();
+
             if (toast.isActive(toastId)) {
                 let newToastCount = toastCount + 1;
                 setToastCount(newToastCount);
                 toast.update(toastId, {
-                    render: `Card added successfully! (${++newToastCount})`,
+                    render: `Card added successfully! (${newToastCount})`,
                     type: 'success',
                     autoClose: 3000,
                 });
@@ -67,7 +169,7 @@ const CardList = ({ cards }) => {
                 data: error.response?.data,
                 message: error.message
             });
-            
+
             if (error.response?.status === 422) {
                 const validationErrors = error.response.data.errors;
                 const errorMessage = Object.values(validationErrors).flat().join('\n');
@@ -80,185 +182,282 @@ const CardList = ({ cards }) => {
                 alert('An error occurred while adding the card.');
             }
         }
-    }, [user?.email]);
+    }, [authToken, toastId, toastCount, refetchCollection]);
 
-    //handle remove card
-    const handleRemoveCardFromCollection = useCallback(async (cardId, count) => {
-        if (!user?.email) {
-            alert('You must be logged in to do this');
+    const handleRemoveCardFromCollection = useCallback(async (cardId, variant, count) => {
+        if (!authToken) {
+            alert('You must be logged in to remove cards from your collection');
             return;
         }
-        // if (count <= 0) {
-        //     alert('Please specify a valid number of cards to remove');
-        //     return;
-        // }
+    
+        const payload = {
+            token: authToken,
+            authToken: authToken,
+            card_id: cardId,
+            variant: variant,
+            count: count
+        };
     
         try {
-            const response = await removeCardFromCollection(user.email, cardId, count);
+            const response = await removeCardFromCollection(payload);
             console.log('Card removed:', response);
             
-            //local state update
-            setCardCounts(prevCounts => ({
-                ...prevCounts,
-                [cardId]: response.count
-            }));
-            
-            alert(response.message);
-            
-            //update/refresh collection
-            const collectionData = await fetchUserCollection(user.email);
-            setUserCards(collectionData);
-            
+            refetchCollection();
+
+            if (toast.isActive(toastId)) {
+                let newToastCount = toastCount - 1;
+                setToastCount(newToastCount);
+                toast.update(toastId, {
+                    render: `Card removed successfully! (${newToastCount})`,
+                    type: 'success',
+                    autoClose: 3000,
+                });
+            } else {
+                setToastId(toast.success(toastCount ? `Card removed successfully! (${toastCount})` : 'Card removed successfully!'), {
+                    onClose: () => {
+                        setToastId(null);
+                    }
+                });
+            }
         } catch (error) {
-            console.error('Error removing card:', error);
-            const errorMessage = error.response?.data?.message || 'An error occurred while removing the card';
-            alert(errorMessage);
-            
-            //refresh collection to ensure proper state
-            const collectionData = await fetchUserCollection(user.email);
-            setUserCards(collectionData);
+            console.error('Error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                message: error.message
+            });
+
+            if (error.response?.status === 422) {
+                const validationErrors = error.response.data.errors;
+                const errorMessage = Object.values(validationErrors).flat().join('\n');
+                alert(`Validation failed: ${errorMessage}`);
+            } else if (error.response?.status === 401) {
+                alert('You must be logged in to update cards to your collection.');
+            } else if (error.response?.status === 404) {
+                alert('The card was not found.');
+            } else {
+                alert('An error occurred while adding the card.');
+            }
         }
-    }, [user?.email]);
+    }, [authToken, toastId, toastCount, refetchCollection]);
+
+    
+    const handleIncrement = useCallback(async (cardId, variant) => {
+        const currentCount = cardCounts[cardId]?.[variant] || 0;
+        const newCount = currentCount + 1;
+
+        setCardCounts(prevCounts => ({
+            ...prevCounts,
+            [cardId]: {
+                ...prevCounts[cardId],
+                [variant]: newCount
+            }
+        }));
+
+       
+
+        await handleCardToCollection(cardId, variant, newCount);
+    }, [cardCounts, handleCardToCollection]);
+
+    
+    const handleDecrement = useCallback(async (cardId, variant) => {
+        const currentCount = cardCounts[cardId]?.[variant] || 0;
+        const newCount = currentCount;
+
+        setCardCounts(prevCounts => ({
+            ...prevCounts,
+            [cardId]: {
+                ...prevCounts[cardId],
+                [variant]: newCount
+            }
+        }));
+
+        const updatedCounts = {
+            ...cardCounts[cardId],
+            [variant]: newCount
+        };
+        
+        const allCountsZero = Object.values(updatedCounts).every(count => count === 0);
+        
+         //if all counts are 0, mark the card as instantly removed
+        if (allCountsZero) {
+            setInstantlyRemovedCards(prev => new Set([...prev, cardId]));
+        }
+
+        await handleRemoveCardFromCollection(cardId, variant, newCount);
+    }, [cardCounts, handleRemoveCardFromCollection]);
 
  
-    //increment for addcard function
-    const handleIncrement = useCallback(async (index) => {
-        const cardId = cards[index].id;
-        const newCount = (cardCounts[cardId] || 0) + 1;
-    
-        setCardCounts((prev) => ({
-            ...prev,
-            [cardId]: newCount,
-        }));
-    
-        await handleCardToCollection(cardId, newCount);
-    }, [cards, cardCounts, handleCardToCollection]);
-    
-    //decrement for remove card function
-    const handleDecrement = useCallback(async (index) => {
-        const cardId = cards[index].id;
-        const currentCount = cardCounts[cardId] || 0; 
-      
-        setCardCounts((prev) => ({
-          ...prev,
-          [cardId]: currentCount - 1, 
-        }));
-      
-        await handleRemoveCardFromCollection(cardId, 1); 
-        //check if last card 1 to 0 succeeded
-        if (currentCount === 1) {
-          alert("Last card removed from your collection.");
-        }
-      }, [cards, cardCounts, handleRemoveCardFromCollection]);
-
-      
-    useEffect(() => {
-        const fetchCollection = async () => {
-            if (!user || !user.email) {
-                console.error('User is not logged in, cannot fetch their collection');
-                return; 
-            }
-
-            try {
-                const data = await fetchUserCollection(user.email);
-                setUserCards(data); 
-            } catch (error) {
-                console.error('Error fetching user collection:', error);
-            }
-        };
-
-        fetchCollection();
-    }, [user]); 
 
     useEffect(() => {
+        console.log('Collection Data:', collectionData);
         const initialCounts = {};
     
-        if (Array.isArray(userCards)) {
-            userCards.forEach(card => {
-                initialCounts[card.card_id] = card.count;
+        //if collectionData is not null and has the expected structure
+        if (collectionData && typeof collectionData === 'object' && Array.isArray(collectionData[0])) {
+            const cardsArray = collectionData[0]; 
+    
+            cardsArray.forEach(card => {
+                initialCounts[card.card_id] = {
+                    normal: card.normal_count,
+                    holofoil: card.holo_count,
+                    reverseHolofoil: card.reverse_holo_count,
+                };
             });
+        } else {
+            console.warn('Null collection');
         }
     
-        setCardCounts(prevCounts => {
-            const hasDifferentCounts = Object.keys(initialCounts).some(id => initialCounts[id] !== prevCounts[id]);
-            return hasDifferentCounts ? initialCounts : prevCounts;
-        });
-    }, [userCards]);
+        console.log('Initial Counts:', initialCounts);
+        setCardCounts(initialCounts);
+    }, [collectionData]);
 
- 
-    // const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
     const handleCardClick = (card) => {
         setSelectedCard(card);
+        setCurrentIndex(cards.indexOf(card));
     };
 
-    const handleCloseCardDisplay = () => {
-        setSelectedCard(null);
-    };
-    return (
-        <div>
-            {/* <Typography variant="h4" gutterBottom className="card-list-title">
-  {setTitle}
-</Typography> */}
 
-            <Grid container spacing={2}>
-                {cards.map((card, index) => (
-                    <Grid 
-                        item 
-                        key={card.id} 
-                        xs={12} 
-                        sm={6} 
-                        md={4} 
-                        className="card-item" 
-                        data-index={index} 
-                    >
+    const uniqueOwnedCardsCount = useCallback(() => {
+        if (!allSetCards || !cardCounts) return 0;
+        
+        return allSetCards.reduce((count, card) => {
+            const cardCount = cardCounts[card.card_id];
+            if (cardCount) {
+                const hasAnyCount = Object.values(cardCount).some(count => count > 0);
+                return hasAnyCount ? count + 1 : count;
+            }
+            return count;
+        }, 0);
+    }, [allSetCards, cardCounts]);
+
+    const progressPercentage = (uniqueOwnedCardsCount() / totalSetCards) * 100;
+
+    const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
+
+return (
+    <div className="card-container">
+        <div className="card-set-name-index" style={{}}>
+            {showSetTitle && (
+                <>
+                    <Typography variant="h4">
+                        {`${setTitle}`}
+                    </Typography>
+                    {isCollectionView && (
                         <div style={{ 
-                            display: 'flex', 
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '4px'
+                            marginTop: '10px', 
+                            marginBottom: '20px',
+                            width: '100%',
+                            maxWidth: '300px' 
                         }}>
-                            <CardDisplay card={card} onClick={() => handleCardClick(card)} />
-                            
                             <div style={{ 
                                 display: 'flex', 
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '100%',
-                                marginTop: '-30px'
+                                justifyContent: 'space-between', 
+                                marginBottom: '5px' 
                             }}>
-                                <IconButton 
-                                    onClick={() => handleDecrement(index)} 
-                                    size="small" 
-                                    disabled={cardCounts[card.id] === 0}
-                                >
-                                    <Remove />
-                                </IconButton>
-
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox 
-                                            checked={!!cardCounts[card.id]} 
-                                            color="primary" 
-                                        />
+                                  </div>
+                                
+                            <div className="collection-progress">
+                             
+                                {/* <Typography variant="body1" sx={{ color: '#999' }}>
+                                    Collection Progress
+                                </Typography> */}
+                                <Typography variant="body1" sx={{ color: '#999' }}>
+                                    {uniqueOwnedCardsCount()} / {totalSetCards}
+                                </Typography>
+                          
+                                <div className ="linear-progress">
+                            <LinearProgress 
+                                variant="determinate" 
+                                value={progressPercentage}
+                                sx={{
+                                    height: 10,
+                                    borderRadius: 5,
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    '& .MuiLinearProgress-bar': {
+                                        backgroundColor: '#4CAF50',
+                                        borderRadius: 5
                                     }
-                                    label={cardCounts[card.id] || 0} 
-                                />
+                                }}
 
-                                <IconButton 
-                                    onClick={() => handleIncrement(index)} 
-                                    size="small"
-                                >
-                                    <Add />
-                                </IconButton>
+                            />
+                                </div>
+                            </div>
+                            
+                        </div>
+                    )}
+                </>
+            )}
+        </div>
+
+        <Grid container spacing={8}>
+            {cards.slice(0).map((card) => (
+                <Grid item key={card.id} xs={12} sm={6} md={4} lg={4} className="card-item">
+                    <div>
+                        <CardDisplay
+                            card={card}
+                            isNotInCollection={isCollectionView && !isCardInCollection(card.id)}
+                            isCollectionView={isCollectionView}
+                            onClick={() => handleCardClick(card)}
+                            cards={cards} 
+                            currentIndex={currentIndex}
+                            setCurrentIndex={setCurrentIndex} 
+                            onCardAdded={handleCardToCollection}
+                            instantlyAddedCards={instantlyAddedCards}
+                            instantlyRemovedCards={instantlyRemovedCards}
+                            cardCounts={cardCounts}
+                            selectedSetId={selectedSetId}
+
+                        />
+                
+                    <div className="variant-container">
+                        {['normal', 'holofoil', 'reverseHolofoil'].map((variant) => (
+                            card.price_data?.tcgplayer?.[variant] && (
+                                <div key={variant} className="variant-boxes">
+                                    <div
+                                        style={{
+                                            width: '24px',
+                                            height: '24px',
+                                            border: '2px solid',
+                                            borderColor: getVariantColor(variant),
+                                            borderRadius: '4px',
+                                            backgroundColor: getVariantColor(variant),
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            color: '#1f1f1f',  
+                                            fontSize: '14px',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        {cardCounts[card.card_id]?.[variant] || 0}
+                                   
+                                    <div className="variant-buttons">
+                                        
+                                        <IconButton sx={{ color: '#999', '& .MuiSvgIcon-root': { fontSize: 18 } }}
+                                            onClick={() => handleIncrement(card.card_id, variant)}
+                                            size="small"
+                                        >
+                                            <Add />
+                                        </IconButton>
+                                        <IconButton sx={{color: '#999', '& .MuiSvgIcon-root': { fontSize: 18 } }}
+                                            onClick={() => handleDecrement(card.card_id, variant)}
+                                            size="small"
+                                            disabled={(cardCounts[card.card_id]?.[variant] || 0) === 0}
+                                        >
+                                            <Remove />
+                                        </IconButton>
+                                     </div>
+                                     </div>
+                                     </div>
+                                )
+                                ))}
                             </div>
                         </div>
                     </Grid>
                 ))}
+                
             </Grid>
-
-            {selectedCard && (
-                <CardDisplay card={selectedCard} onClose={handleCloseCardDisplay} />
-            )}
+        
         </div>
     );
 };

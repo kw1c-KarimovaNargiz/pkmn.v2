@@ -16,6 +16,15 @@ export const loginUser = async (formData) => {
   }
 };
 
+// export const fetchCardPrices = async (cardId) => {
+//     try {
+//         const response = await axios.get(`http://127.0.0.1:8000/api/card-prices/${cardId}`);
+//         return response.data; 
+//     } catch (error) {
+//         console.error("Er is een fout opgetreden bij het ophalen van de kaartprijzen:", error);
+//         throw error;
+//     }
+// };
 //fetch all series and their according sets
 export const fetchSeries = async () => {
     try {
@@ -33,10 +42,14 @@ export const fetchSeries = async () => {
       const response = await axios.get(`http://127.0.0.1:8000/api/sets/${setId}/cards`);
       return response.data;
     } catch (error) {
-      console.error("Error fetching cards for set:", error);
-      throw error;
-    }
-  };
+        console.error("Error fetching cards for set:", error);  
+        if (error.response) {
+          console.error("Response data:", error.response.data); 
+          console.error("Response status:", error.response.status);
+        }
+        throw error;
+      }
+    };
 
   //search for a card
   export const searchCard = async (searchTerm) => {
@@ -50,26 +63,26 @@ export const fetchSeries = async () => {
         };
 
         //loading cards per page ??? nog niet in gebruik
-        export const loadMoreCards = async (page) => {
-            try {
-                const response = await axios.get(`http://127.0.0.1:8000/api/cards?page=${page}`);
-                return response.data;
-            } catch (error) {
-                console.error("Error loading more cards:", error);
-                throw error;
-            }
-        };
+        // export const loadMoreCards = async (page) => {
+        //     try {
+        //         const response = await axios.get(`http://127.0.0.1:8000/api/cards?page=${page}`);
+        //         return response.data;
+        //     } catch (error) {
+        //         console.error("Error loading more cards:", error);
+        //         throw error;
+        //     }
+        // };
 
         //filtering
-    export const handleFilter = async (type) => {
-        try {
-            const response = await axios.get(`http://127.0.0.1:8000/api/cards/filter?type=${type}`);
-            return response.data;
-            } catch (error) {
-                console.error("Error searching card with type", error);
-                throw error;
+        export const handleFilter = async (type) => {
+            try {
+                const response = await axios.get(`http://127.0.0.1:8000/api/cards/filter?type=${type}`);
+                return response.data;
+                } catch (error) {
+                    console.error("Error searching card with type", error);
+                    throw error;
+            }
         }
-    }
 
       //evo's per set for now
       export const fetchSortedEvolutionCards = async (setId) => {
@@ -97,13 +110,15 @@ export const fetchSeries = async () => {
     export const addCardToCollection = async (payload) => {
       try {
           const response = await axios.post('http://127.0.0.1:8000/api/collections/add', {
-              email: payload.email,
+              token: payload.token,
               card_id: payload.card_id.toString(),
+              variant: payload.variant,
               count: parseInt(payload.count), 
           }, {
               headers: {
                   'Content-Type': 'application/json',
                   'Accept': 'application/json',
+                  'Authorization': `Bearer ${payload.authToken}`,
               }
           });
           return response;
@@ -113,26 +128,22 @@ export const fetchSeries = async () => {
   };
   
 
-//user's collection of cards
-export const fetchUserCollection = async (email) => {
-  try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/collections`, {
-          params: { email: email }
-      });
-      return response.data;
-  } catch (error) {
-      console.error('Error fetching user collection:', error);
-      throw error; 
-  }
-};
 
-export const removeCardFromCollection = async (email, cardId, count) => {
+
+
+export const removeCardFromCollection = async (payload) => {
     try {
         const response = await axios.delete('http://127.0.0.1:8000/api/collections/remove', {
             data: {
-                email,
-                card_id: cardId,
-                count
+                token: payload.token,
+                card_id: payload.card_id.toString(),
+                variant: payload.variant,
+                count: parseInt(payload.count),
+            },
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${payload.authToken}`
             }
         });
         return response.data;
@@ -142,7 +153,18 @@ export const removeCardFromCollection = async (email, cardId, count) => {
 };
 
 
-// export const removeCardFromCollection = async (email, cardId) => {
+export const fetchUserCollection = async (token) => {
+    try {
+        const response = await axios.get(`http://127.0.0.1:8000/api/collections`, {
+            params: { token: token }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching user collection:', error);
+        throw error; 
+    }
+  };
+// export const removeCardFromCollection = async (token, cardId) => {
 //   try {
 //       const response = await fetch('http://127.0.0.1:8000/api/collections/remove', {
 //           method: 'DELETE',
@@ -150,7 +172,7 @@ export const removeCardFromCollection = async (email, cardId, count) => {
 //               'Content-Type': 'application/json',
 //           },
 //           body: JSON.stringify({
-//               email: email,
+//               token: token,
 //               card_id: cardId,
 //               count: count,
 //           }),
