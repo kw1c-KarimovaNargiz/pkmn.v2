@@ -3,8 +3,7 @@ import React, { useEffect, useState } from 'react';
 
 import { Accordion, AccordionSummary, AccordionDetails, Typography, Drawer, Button, Box } from '@mui/material';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import SortIcon from '@mui/icons-material/Sort';
-import CombinedSearchFilterBar from './CombinedSearchFilterBar';
+import SortIcon from '@mui/icons-material/Sort';import CombinedSearchFilterBar from './CombinedSearchFilterBar';
 
 
 const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect, availableTypes, availableSubTypes, onFilter, filterOwnedCards,
@@ -38,14 +37,14 @@ const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect, availableTypes,
         <>
             <Button sx={{
                 position: 'fixed',
-                bottom: 0,
+                top: 70,
                 left: 0,
                 zIndex: 100,
-                width: '100%',
-                backgroundColor: '#8a3f3f',
-                color: 'white',
+                backgroundColor: '#212121',
+                color: 'white', 
+                width: 420
             }} onClick={() => setSidebarVisible(!sidebarVisible)}>{sidebarVisible ? 'Hide' : 'Show'} Sidebar</Button>
-            {sidebarVisible && <Box sx={{ position: 'fixed', top: 60, left: 0, zIndex: 100, maxHeight: '85%', overflowX: 'auto' }}>
+            {sidebarVisible && <Box sx={{ position: 'fixed', top: 110, left: 0, zIndex: 100, maxHeight: '85%', overflowX: 'auto', width: 420, backgroundColor: '#212121' }}>
                 <Button
                     onClick={handleDrawerToggle}
                     startIcon={<SortIcon />}
@@ -96,7 +95,7 @@ const SetsSidebar = ({ series = [], onSetSelect, onSeriesSelect, availableTypes,
                                 {s.sets.map((setInfo) => (
                                     <li key={setInfo.id} style={{ marginBottom: 10 }}>
                                         <button
-                                            onClick={() => onSetSelect(setInfo.id)}
+                                            onClick={() => onSetSelect(setInfo.id, true)}
                                             style={{
                                                 padding: 12,
                                                 justifyContent: 'center',
