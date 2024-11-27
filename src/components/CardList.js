@@ -488,7 +488,12 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
         instantlyRemovedCards,
         selectedSetId,
     }) => (
-    <Grid item xs={12} sm={6} md={4} lg={4} className="card-item">
+        <Grid 
+        item 
+        xs={12}
+        sm={6}
+        md={sidebarVisible ? 6 : 4}  // Show 2 cards per row when sidebar is visible (6), 3 when hidden (4)
+        lg={sidebarVisible ? 6 : 4} className="card-item">
         <div>
             <CardDisplay
                 card={card}
@@ -553,7 +558,14 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
 
 
 return (
-    <Box sx={{ flex: 1, width: '100%' }}>
+    <Box sx={{ 
+        flex: 1, 
+        width: '100%',
+        display: 'flex',
+        transition: 'margin-left 0.3s ease', 
+        marginLeft: sidebarVisible ? '420px' : '0'
+    }}>
+
         <Box sx={{ ...sx, width: '100%' }}>
             <div className="card-set-name-index">
                 {showCollectionTitle && (

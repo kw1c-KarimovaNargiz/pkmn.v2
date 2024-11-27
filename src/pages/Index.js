@@ -4,7 +4,7 @@ import { useUser } from '../pages/UserContext';
 import '../styling/Index.css';
 import { Box } from '@mui/material';
 
-const Index = ({ searchResults, setSearchResults }) => {
+const Index = ({ searchResults, setSearchResults, setSearchTerm }) => {
     const { userLoading } = useUser();
 
     if (userLoading) return null;
@@ -12,7 +12,7 @@ const Index = ({ searchResults, setSearchResults }) => {
     return (
      
           
-            <CardList type='index' searchResults={searchResults} setSearchResults={setSearchResults} />
+            <CardList type='index' searchResults={searchResults} setSearchResults={setSearchResults} setSearchTerm={setSearchTerm} />
         
      
 

@@ -63,7 +63,8 @@ const CardDisplay = React.memo(({ card,   isCollectionView, isNotInCollection, c
     return (
         <>
             <Card 
-                sx={{ backgroundColor: 'transparent', boxShadow: 'none' }}
+                sx={{ backgroundColor: 'transparent', boxShadow: 'none', maxWidth: '300px', 
+                    margin: '0 auto', gap: '0' }}
                 onClick={handleCardClick}
             >
                 <div className="card-content-list">
@@ -104,7 +105,7 @@ const CardDisplay = React.memo(({ card,   isCollectionView, isNotInCollection, c
                             </div>
                         </div>
                     </CardContent>
-                </div>
+                    </div>
             </Card>
 
             <Dialog 
