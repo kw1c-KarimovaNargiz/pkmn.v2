@@ -24,11 +24,11 @@ function Navbar({ searchTerm, setSearchTerm, onSearch }) {
       navigate(path);
     }
   };
-  console.log('navbar onsearch', onSearch)
+
   return (
     <AppBar sx={{ backgroundColor: '#8a3f3f', position: 'fixed', zIndex: '1100' }}>
-      <Toolbar sx={{ justifyContent: 'space-between' }}>
-        <div>
+      <Toolbar sx={{ display:'flex', justifyContent: 'space-between' }}>
+        <Box sx={{display:'flex'}}>
           {pages.map((page) => (
             <Button
               key={page.name}
@@ -38,11 +38,11 @@ function Navbar({ searchTerm, setSearchTerm, onSearch }) {
               {page.name}
             </Button>
           ))}
-        </div>
-        <Box sx={{ marginLeft: 130 }}>
+        </Box>
+        <Box>
           <SearchBar onSearch={onSearch} />
         </Box>
-        <Box sx={{ marginLeft: 0 }} />
+        <Box/>
         
         <AccountMenu isLoggedIn={isLoggedIn} logout={logout} />
       </Toolbar>

@@ -46,6 +46,7 @@ const AccountMenu = ({ isLoggedIn, logout }) => {
             className: 'menu-listbox'
           }
         }}
+        style={{zIndex: 9999}}
       >
         <MenuItem onClick={handleCollection}>My Collection</MenuItem>
         <MenuItem onClick={handleDecks}>My Decks</MenuItem>
@@ -80,10 +81,10 @@ const Listbox = styled('ul')`
   border-radius: 8px;
   overflow: auto;
   outline: 0;
-  background: :  #303740;
+  background: #303740;
   color: #999;
   box-shadow: 0px 4px 6px rgba(0,0,0, 0.50);
-  z-index: 1;
+  z-index: 9999;
 `;
 //items
 const MenuItem = styled(BaseMenuItem)`
