@@ -12,11 +12,8 @@ const Index = ({ searchResults, setSearchResults }) => {
     return (
      
           
-                <div className="main-content">
-              <div className="cards-display-area">
             <CardList type='index' searchResults={searchResults} setSearchResults={setSearchResults} />
-            </div>
-            </div>
+        
      
 
     );

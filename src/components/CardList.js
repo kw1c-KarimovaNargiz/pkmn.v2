@@ -21,7 +21,7 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
     const [toastId, setToastId] = useState(null);
     const [toastCount, setToastCount] = useState(0);
     const [displayCount, setDisplayCount] = useState(12);
-    const [loadingImages, setLoadingImages] = useState({});
+
     const [ownedCards, setOwnedCards] = useState(new Set());
     const [instantlyAddedCards, setInstantlyAddedCards] = useState(new Set());
     const [instantlyRemovedCards, setInstantlyRemovedCards] = useState(new Set());
@@ -37,21 +37,18 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
     const [sidebarVisible, setSidebarVisible] = useState(false);
     const [selectedSetId, setSelectedSetId] = useState(null);
     const [filteredCards, setFilteredCards] = useState([]);
-    const [originalCards, setOriginalCards] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
     const [userCollection, setUserCollection] = useState([]);
 
     const [error, setError] = useState(null);
-    const [filterOwnedCards, setFilterOwnedCards] = useState(false);
     const [totalCollectionValue, setTotalCollectionValue] = useState(0);
     const [totalCardCount, setTotalCardCount] = useState(0);
 
-    const [cardStatus, setCardStatus] = useState(
-        cards.reduce((acc, card) => {
-            acc[card.id] = true;
-            return acc;
-        }, {})
-    );
+    // const [cardStatus, setCardStatus] = useState(
+    //     cards.reduce((acc, card) => {
+    //         acc[card.id] = true;
+    //         return acc;
+    //     }, {})
+    // );
 
     const { data: collectionData, error: collectionError, isLoading: collectionLoading, triggerFetch: refetchCollection } = useApi('collections', {}, true, 'GET');
 
@@ -122,10 +119,6 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
         }
     }, [collectionData]);
 
-    const handleImageLoad = (cardId) => {
-        setLoadingImages((prev) => ({ ...prev, [cardId]: false }));
-    };
-
 
     const getVariantColor = (variant) => {
         switch (variant) {
@@ -165,12 +158,7 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
 
             }));
 
-            setCardStatus(prevStatus => ({
-                ...prevStatus,
-                [cardId]: false
-
-            }));
-
+     
             setOwnedCards(prev => new Set([...prev, cardId]));
 
             refetchCollection();
@@ -315,24 +303,14 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
     };
 
     const uniqueOwnedCardsCount = useCallback(() => {
-        if (!allSetCards || !cardCounts) return 0;
-
+        if (!allSetCards?.length || !cardCounts) return 0;
         return allSetCards.reduce((count, card) => {
             const cardCount = cardCounts[card.card_id];
-            if (cardCount) {
-                const hasAnyCount = Object.values(cardCount).some(count => count > 0);
-                return hasAnyCount ? count + 1 : count;
-            }
-            return count;
+            return cardCount && Object.values(cardCount).some(count => count > 0) 
+                ? count + 1 
+                : count;
         }, 0);
     }, [allSetCards, cardCounts]);
-
-
-
-
-
-
-
 
     const handleSeriesSelect = useCallback((selectedSeries) => {
         setSets(selectedSeries.sets || []);
@@ -394,253 +372,281 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
         }
     };
 
-    useEffect(() => {
-        const uniqueTypes = [...new Set(cards.flatMap((card) => card.types))];
-        setAllTypes(uniqueTypes);
 
-        const uniqueSubTypes = [...new Set(cards.flatMap((card) => card.subtypes || []))];
-        setSubTypes(uniqueSubTypes);
+    useEffect(() => {
+        if (cards.length > 0) {
+            const uniqueTypes = [...new Set(cards.flatMap((card) => card.types || []))];
+            const uniqueSubTypes = [...new Set(cards.flatMap((card) => card.subtypes || []))];
+            setAllTypes(uniqueTypes);
+            setSubTypes(uniqueSubTypes);
+        }
     }, [cards]);
 
     useEffect(() => {
         if (cards.length > 0 && cards[0].set) {
-            setTotalSetCards(cards[0].set.printed_total);
-            if (allSetCards.length === 0) {
-                setAllSetCards(cards);
-            }
+
+            const updates = {
+                totalSetCards: cards[0].set.printed_total,
+                allSetCards: allSetCards.length === 0 ? cards : allSetCards
+            };
+            setTotalSetCards(updates.totalSetCards);
+            setAllSetCards(updates.allSetCards);
         }
     }, [selectedSetId]);
 
+    useEffect(() => {
+        const currentRef = loadingRef.current;
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && displayCount < cards.length) {
+                    setDisplayCount(prevCount => Math.min(prevCount + 12, cards.length));
+                }
+            },
+            { threshold: 0.1 }
+        );
+    
+        if (currentRef) {
+            observer.observe(currentRef);
+        }
+    
+        return () => {
+            if (currentRef) {
+                observer.unobserve(currentRef);
+            }
+        };
+    }, [displayCount, cards.length]);
 
-    // useEffect(() => {
-    //     const observer = new IntersectionObserver((entries) => {
-    //         if (entries[0].isIntersecting) {
-    //             setDisplayCount((prevCount) => prevCount + 12);
-    //         }
-    //     });
-
-    //     if (loadingRef.current) {
-    //         observer.observe(loadingRef.current);
-    //     }
-
-    //     return () => {
-    //         if (loadingRef.current) {
-    //             observer.unobserve(loadingRef.current);
-    //         }
-    //     };
-    // }, [loadingRef]);
 
     useEffect(() => {
-        // Always load series data for the sidebar
+        //always load series data for the sidebar
         loadSeries();
     }, []);
 
     useEffect(() => {
         if (collectionData && Array.isArray(collectionData[0])) {
-            console.log('Collection Data useeffect :', collectionData);
-            const initialCounts = {};
-        
-            if (collectionData && typeof collectionData === 'object' && Array.isArray(collectionData[0])) {
-                const cardsArray = collectionData[0];
-        
-                cardsArray.forEach(card => {
-                    initialCounts[card.card_id] = {
-                        normal: card.normal_count,
-                        holofoil: card.holo_count,
-                        reverseHolofoil: card.reverse_holo_count,
-                    };
-                });
-                
-                const collectionItems = Object.values(collectionData).find(Array.isArray);
-                const totalValue = collectionData.total_collection_value || 0;
-                
-                setUserCollection(collectionItems || []);
-                setTotalCollectionValue(totalValue);
-        
-                const totalCount = collectionItems.reduce((sum, item) => {
-                    return sum + (item.normal_count || 0) + (item.holo_count || 0) + (item.reverse_holo_count || 0);
-                }, 0);
-                setTotalCardCount(totalCount);
-                
-                // Only set cards to collection data if we're in collection view
-                if (type === 'collection') {
-                    setCards(collectionData[0].map(item => item.card));
-                }
-                
-                setLoading(false);
-            } else {
-                console.warn('Null collection');
-            }
-        
-            setCardCounts(initialCounts);
-            const ownedCardIds = new Set(collectionData[0].map(card => card.card_id));
-            setOwnedCards(ownedCardIds);
-        }
-        setUserCards(collectionData);
+            const cardsArray = collectionData[0];
+            const updates = {
+                initialCounts: {},
+                ownedCardIds: new Set(),
+                collectionItems: [],
+                totalValue: 0,
+                totalCount: 0,
+                cards: []
+            };
     
-        if (collectionError) {
-            setError('Failed to fetch user collection');
+            //calculations in one pass / loop 
+            updates.collectionItems = Object.values(collectionData).find(Array.isArray) || [];
+            updates.totalValue = collectionData.total_collection_value || 0;
+            updates.ownedCardIds = new Set(cardsArray.map(card => card.card_id));
+            
+          
+            cardsArray.forEach(card => {
+                updates.initialCounts[card.card_id] = {
+                    normal: card.normal_count,
+                    holofoil: card.holo_count,
+                    reverseHolofoil: card.reverse_holo_count,
+                };
+                updates.totalCount += (card.normal_count || 0) + 
+                                    (card.holo_count || 0) + 
+                                    (card.reverse_holo_count || 0);
+            });
+    
+            setCardCounts(updates.initialCounts);
+            setOwnedCards(updates.ownedCardIds);
+            setUserCollection(updates.collectionItems);
+            setTotalCollectionValue(updates.totalValue);
+            setTotalCardCount(updates.totalCount);
+            setUserCards(collectionData);
+    
+            if (type === 'collection') {
+                setCards(cardsArray.map(item => item.card));
+            }
+            
             setLoading(false);
         }
-    }, [collectionData, collectionError, collectionLoading, type]);
+    }, [collectionData, type]);
+
+
     const showCollectionTitle = type === 'collection';
     const showSetTitle = !showCollectionTitle;
     const progressPercentage = (uniqueOwnedCardsCount() / totalSetCards) * 100;
     const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
 
     console.log('before cardlist return', cards)
-    return (
-        <Box sx={{ flex: 1, width: '100%' }}>
-            <Box sx={{ ...sx, width: '100%' }}>
-                <div className="card-set-name-index">
-                    {showCollectionTitle && (
-                        <Box sx={{ width: '100%', paddingLeft: '20%' }}>
-                            <Typography variant="h4">YOUR COLLECTION</Typography>
-                            <div className="collection-value">
-                                <Typography variant="h6">Total Value: ${totalCollectionValue.toFixed(2)}</Typography>
-                            </div>
-                            <div className="total-card-count">
-                                <Typography variant="h6">Total Cards: {totalCardCount}</Typography>
-                            </div>
-                        </Box>
-                    )}
-                    {showSetTitle && (
-                        <>
-                            <Typography variant="h3" sx={{ width: '100%', paddingLeft: '20%' }}>
-                                {`${setTitle}`}
-                            </Typography>
-                            {isCollectionView && (
-                                <div style={{
-                                    marginTop: '10px',
-                                    marginBottom: '20px',
-                                    width: '100%',
-                                    maxWidth: '300px'
-                                }}>
-                                    <div style={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        marginBottom: '5px'
-                                    }}>
-                                    </div>
 
-                                    <div className="collection-progress">
-
-                                        {/* <Typography variant="body1" sx={{ color: '#999' }}>
-                                    Collection Progress
-                                </Typography> */}
-                                        <Typography variant="body1" sx={{ color: '#999' }}>
-                                            {uniqueOwnedCardsCount()} / {totalSetCards}
-                                        </Typography>
-
-                                        <div className="linear-progress">
-                                            <LinearProgress
-                                                variant="determinate"
-                                                value={progressPercentage}
-                                                sx={{
-                                                    height: 10,
-                                                    borderRadius: 5,
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                                    '& .MuiLinearProgress-bar': {
-                                                        backgroundColor: '#4CAF50',
-                                                        borderRadius: 5
-                                                    }
-                                                }}
-
-                                            />
-                                        </div>
-                                    </div>
-
-                                </div>
-                            )}
-                        </>
-                    )}
-                </div>
-
-
-                <Grid container spacing={8}>
-                    {cards.slice(0).map((card) => (
-                        <Grid item key={card.id} xs={12} sm={6} md={4} lg={4} className="card-item">
-                            <div>
-                                <CardDisplay
-                                    card={card}
-                                    isNotInCollection={isCollectionView && !isCardInCollection(card.id)}
-                                    isCollectionView={isCollectionView}
-                                    onClick={() => handleCardClick(card)}
-                                    cards={cards}
-                                    currentIndex={currentIndex}
-                                    setCurrentIndex={setCurrentIndex}
-                                    onCardAdded={handleCardToCollection}
-                                    instantlyAddedCards={instantlyAddedCards}
-                                    instantlyRemovedCards={instantlyRemovedCards}
-                                    cardCounts={cardCounts}
-                                    selectedSetId={selectedSetId}
-
-                                />
-
-                                <div className="variant-container">
-                                    {['normal', 'holofoil', 'reverseHolofoil'].map((variant) => (
-                                        card.price_data?.tcgplayer?.[variant] && (
-                                            <div key={variant} className="variant-boxes">
-                                                <div
-                                                    style={{
-                                                        width: '24px',
-                                                        height: '24px',
-                                                        border: '2px solid',
-                                                        borderColor: getVariantColor(variant),
-                                                        borderRadius: '4px',
-                                                        backgroundColor: getVariantColor(variant),
-                                                        display: 'flex',
-                                                        justifyContent: 'center',
-                                                        alignItems: 'center',
-                                                        color: '#1f1f1f',
-                                                        fontSize: '14px',
-                                                        fontWeight: 'bold'
-                                                    }}
-                                                >
-                                                    {cardCounts[card.card_id]?.[variant] || 0}
-
-                                                    <div className="variant-buttons">
-
-                                                        <IconButton sx={{ color: '#999', '& .MuiSvgIcon-root': { fontSize: 18 } }}
-                                                            onClick={() => handleIncrement(card.card_id, variant)}
-                                                            size="small"
-                                                        >
-                                                            <Add />
-                                                        </IconButton>
-                                                        <IconButton sx={{ color: '#999', '& .MuiSvgIcon-root': { fontSize: 18 } }}
-                                                            onClick={() => handleDecrement(card.card_id, variant)}
-                                                            size="small"
-                                                            disabled={(cardCounts[card.card_id]?.[variant] || 0) === 0}
-                                                        >
-                                                            <Remove />
-                                                        </IconButton>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )
-                                    ))}
-                                </div>
-                            </div>
-                        </Grid>
-                    ))}
-
-                </Grid>
-
-            </Box>
-
-            <SetsSidebar
-                series={series}
-                onSetSelect={handleSetSelect}
-                onSeriesSelect={handleSeriesSelect}
-                availableTypes={allTypes}
-                availableSubTypes={subTypes}
-                onFilter={handleFilter}
-                onToggleSidebar={(visible) => setSidebarVisible(visible)}
+    const RenderCard = React.memo(({ 
+        card, 
+        isCollectionView, 
+        isCardInCollection, 
+        handleCardClick,
+        cardCounts,
+        handleIncrement,
+        handleDecrement,
+        currentIndex,
+        setCurrentIndex,
+        instantlyAddedCards,
+        instantlyRemovedCards,
+        selectedSetId,
+    }) => (
+    <Grid item xs={12} sm={6} md={4} lg={4} className="card-item">
+        <div>
+            <CardDisplay
+                card={card}
+                isNotInCollection={isCollectionView && !isCardInCollection(card.id)}
+                isCollectionView={isCollectionView}
+                onClick={() => handleCardClick(card)}
+                cards={cards}
+                currentIndex={currentIndex}
+                setCurrentIndex={setCurrentIndex}
+                onCardAdded={handleCardToCollection}
+                instantlyAddedCards={instantlyAddedCards}
+                instantlyRemovedCards={instantlyRemovedCards}
+                cardCounts={cardCounts}
+                selectedSetId={selectedSetId}
             />
+            <div className="variant-container">
+                {['normal', 'holofoil', 'reverseHolofoil'].map((variant) => (
+                    card.price_data?.tcgplayer?.[variant] && (
+                        <div key={variant} className="variant-boxes">
+                            <div
+                                style={{
+                                    width: '24px',
+                                    height: '24px',
+                                    border: '2px solid',
+                                    borderColor: getVariantColor(variant),
+                                    borderRadius: '4px',
+                                    backgroundColor: getVariantColor(variant),
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    color: '#1f1f1f',
+                                    fontSize: '14px',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                {cardCounts[card.card_id]?.[variant] || 0}
+                                <div className="variant-buttons">
+                                    <IconButton 
+                                        sx={{ color: '#999', '& .MuiSvgIcon-root': { fontSize: 18 } }}
+                                        onClick={() => handleIncrement(card.card_id, variant)}
+                                        size="small"
+                                    >
+                                        <Add />
+                                    </IconButton>
+                                    <IconButton 
+                                        sx={{ color: '#999', '& .MuiSvgIcon-root': { fontSize: 18 } }}
+                                        onClick={() => handleDecrement(card.card_id, variant)}
+                                        size="small"
+                                        disabled={(cardCounts[card.card_id]?.[variant] || 0) === 0}
+                                    >
+                                        <Remove />
+                                    </IconButton>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                ))}
+            </div>
+        </div>
+    </Grid>
+));
 
+
+return (
+    <Box sx={{ flex: 1, width: '100%' }}>
+        <Box sx={{ ...sx, width: '100%' }}>
+            <div className="card-set-name-index">
+                {showCollectionTitle && (
+                    <Box sx={{ width: '100%', paddingLeft: '20%' }}>
+                        <Typography variant="h4">YOUR COLLECTION</Typography>
+                        <div className="collection-value">
+                            <Typography variant="h6">Total Value: ${totalCollectionValue.toFixed(2)}</Typography>
+                        </div>
+                        <div className="total-card-count">
+                            <Typography variant="h6">Total Cards: {totalCardCount}</Typography>
+                        </div>
+                    </Box>
+                )}
+                {showSetTitle && (
+                    <>
+                        <Typography variant="h3" sx={{ width: '100%', paddingLeft: '20%' }}>
+                            {`${setTitle}`}
+                        </Typography>
+                        {isCollectionView && (
+                            <div style={{
+                                marginTop: '10px',
+                                marginBottom: '20px',
+                                width: '100%',
+                                maxWidth: '300px'
+                            }}>
+                                <div className="collection-progress">
+                                    <Typography variant="body1" sx={{ color: '#999' }}>
+                                        {uniqueOwnedCardsCount()} / {totalSetCards}
+                                    </Typography>
+                                    <div className="linear-progress">
+                                        <LinearProgress
+                                            variant="determinate"
+                                            value={progressPercentage}
+                                            sx={{
+                                                height: 10,
+                                                borderRadius: 5,
+                                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                '& .MuiLinearProgress-bar': {
+                                                    backgroundColor: '#4CAF50',
+                                                    borderRadius: 5
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+
+            <Grid container spacing={8}>
+                {cards.slice(0, displayCount).map((card) => (
+                    <RenderCard
+                        key={card.id}
+                        card={card}
+                        isCollectionView={isCollectionView}
+                        isCardInCollection={isCardInCollection}
+                        handleCardClick={handleCardClick}
+                        cardCounts={cardCounts}
+                        handleIncrement={handleIncrement}
+                        handleDecrement={handleDecrement}
+                        currentIndex={currentIndex}
+                        setCurrentIndex={setCurrentIndex}
+                        instantlyAddedCards={instantlyAddedCards}
+                        instantlyRemovedCards={instantlyRemovedCards}
+                        selectedSetId={selectedSetId}
+                    />
+                ))}
+
+                {displayCount < cards.length && (
+                <Grid container justifyContent="center">
+                    <div ref={loadingRef} style={{ height: '50px', margin: '20px 0', width: '100%' }}>
+                        <LinearProgress />
+                    </div>
+                </Grid>
+            )}
+            </Grid>
+
+        
         </Box>
 
-    );
+        <SetsSidebar
+            series={series}
+            onSetSelect={handleSetSelect}
+            onSeriesSelect={handleSeriesSelect}
+            availableTypes={allTypes}
+            availableSubTypes={subTypes}
+            onFilter={handleFilter}
+            onToggleSidebar={(visible) => setSidebarVisible(visible)}
+        />
+    </Box>
+);
 };
 
 export default CardList;
