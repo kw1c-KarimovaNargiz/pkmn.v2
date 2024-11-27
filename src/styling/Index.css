@@ -26,21 +26,6 @@ body {
   align-items: 'center';
 }
 
-.sidebar {
-  position: fixed;
-  width: 280px;
-  left: 0;
-
-  background-color: #3c3c3c;
-  height: 100vh;
-  margin: 0;
-  top: 50px;
-  overflow-y: auto;
-  background-color: inherit;
-  z-index: 1;
-  box-shadow: 5px 0 5px rgba(0, 0, 0, 0.1);
-}
-
 .filter-sidebar {
 
   margin: 0;

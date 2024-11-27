@@ -10,9 +10,15 @@ const Index = ({ searchResults, setSearchResults }) => {
     if (userLoading) return null;
 
     return (
-        <Box sx={{ display: 'flex', }}>
+     
+          
+                <div className="main-content">
+              <div className="cards-display-area">
             <CardList type='index' searchResults={searchResults} setSearchResults={setSearchResults} />
-        </Box>
+            </div>
+            </div>
+     
+
     );
 };
 

@@ -46,6 +46,13 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
     const [totalCollectionValue, setTotalCollectionValue] = useState(0);
     const [totalCardCount, setTotalCardCount] = useState(0);
 
+    const [cardStatus, setCardStatus] = useState(
+        cards.reduce((acc, card) => {
+            acc[card.id] = true;
+            return acc;
+        }, {})
+    );
+
     const { data: collectionData, error: collectionError, isLoading: collectionLoading, triggerFetch: refetchCollection } = useApi('collections', {}, true, 'GET');
 
     const isCardOwned = useCallback((cardId) => {
@@ -65,7 +72,7 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
         if (type === 'collection' && !setAnyway) {
 
             if (collectionData) {
-                console.log('Collection data:', collectionData);
+                console.log('Collection data handlesetselect:', collectionData);
 
                 //array items in collection - cards - value
                 const collectionItems = Object.values(collectionData).find(Array.isArray);
@@ -89,7 +96,6 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
 
 
         } else {
-
             //keep false to prevent rerendering index container 
             setSelectedSetId(setId);
 
@@ -120,12 +126,7 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
         setLoadingImages((prev) => ({ ...prev, [cardId]: false }));
     };
 
-    const [cardStatus, setCardStatus] = useState(
-        cards.reduce((acc, card) => {
-            acc[card.id] = true;
-            return acc;
-        }, {})
-    );
+
     const getVariantColor = (variant) => {
         switch (variant) {
             case 'normal':
@@ -368,33 +369,30 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
     }, [cards, isCardInCollection]);
 
 
+    const loadSeries = async () => {
+        console.log('load series')
+        setLoading(true);
+        try {
+            const seriesData = await fetchSeries();
+            setSeries(seriesData);
 
+            if (seriesData.length > 0) {
+                const firstSeries = seriesData[0];
+                setSets(firstSeries.sets || []);
 
-    useEffect(() => {
-        const loadSeries = async () => {
-            setLoading(true);
-            try {
-                const seriesData = await fetchSeries();
-                setSeries(seriesData);
-
-                if (seriesData.length > 0) {
-                    const firstSeries = seriesData[0];
-                    setSets(firstSeries.sets || []);
-
-                    if (firstSeries.sets && firstSeries.sets.length > 0) {
-                        const firstSet = firstSeries.sets[0];
-                        setSelectedSetId(firstSet.id);
-                        await handleSetSelect(firstSet.id);
-                    }
+                if (firstSeries.sets && firstSeries.sets.length > 0) {
+                    const firstSet = firstSeries.sets[0];
+                    setSelectedSetId(firstSet.id);
+                    console.log('setselect')
+                    await handleSetSelect(firstSet.id);
                 }
-            } catch (error) {
-                console.error("Cannot fetch series/sets", error);
-            } finally {
-                setLoading(false);
             }
-        };
-        loadSeries();
-    }, []);
+        } catch (error) {
+            console.error("Cannot fetch series/sets", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         const uniqueTypes = [...new Set(cards.flatMap((card) => card.types))];
@@ -432,87 +430,65 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
     //     };
     // }, [loadingRef]);
 
+    useEffect(() => {
+        // on load, were going to always load the collectiondata, if we are not in type=collection, try loading the series
+        if(type!=='collection')loadSeries(); 
+    }, []);
 
     useEffect(() => {
         if (collectionData && Array.isArray(collectionData[0])) {
+            console.log('Collection Data useeffect :', collectionData);
+            const initialCounts = {};
+        
+            if (collectionData && typeof collectionData === 'object' && Array.isArray(collectionData[0])) {
+                const cardsArray = collectionData[0];
+        
+                cardsArray.forEach(card => {
+                    initialCounts[card.card_id] = {
+                        normal: card.normal_count,
+                        holofoil: card.holo_count,
+                        reverseHolofoil: card.reverse_holo_count,
+                    };
+                });
+                
+                const collectionItems = Object.values(collectionData).find(Array.isArray);
+                const totalValue = collectionData.total_collection_value || 0;
+                
+                setUserCollection(collectionItems || []);
+                setTotalCollectionValue(totalValue);
+        
+                const totalCount = collectionItems.reduce((sum, item) => {
+                    return sum + (item.normal_count || 0) + (item.holo_count || 0) + (item.reverse_holo_count || 0);
+                }, 0);
+                setTotalCardCount(totalCount);
+                
+                // Only set cards to collection data if we're in collection view
+                if (type === 'collection') {
+                    setCards(collectionData[0].map(item => item.card));
+                }
+                
+                setLoading(false);
+            } else {
+                console.warn('Null collection');
+            }
+        
+            setCardCounts(initialCounts);
             const ownedCardIds = new Set(collectionData[0].map(card => card.card_id));
             setOwnedCards(ownedCardIds);
         }
-    }, [collectionData]);
-
-    useEffect(() => {
-        setLoading(cards.length === 0 && collectionLoading);
-    }, [cards, collectionLoading]);
-
-    useEffect(() => {
-        setLoading(true);
-        if (cards.length > 0) {
-            setLoading(false);
-        }
-    }, [cards]);
-
-
-    useEffect(() => {
         setUserCards(collectionData);
-    }, [collectionData, collectionError, collectionLoading]);
-
-
-
-    useEffect(() => {
-        console.log('Collection Data:', collectionData);
-        const initialCounts = {};
-
-        //if collectionData is not null and has the expected structure
-        if (collectionData && typeof collectionData === 'object' && Array.isArray(collectionData[0])) {
-            const cardsArray = collectionData[0];
-
-            cardsArray.forEach(card => {
-                initialCounts[card.card_id] = {
-                    normal: card.normal_count,
-                    holofoil: card.holo_count,
-                    reverseHolofoil: card.reverse_holo_count,
-                };
-            });
-        } else {
-            console.warn('Null collection');
-        }
-
-        console.log('Initial Counts:', initialCounts);
-        setCardCounts(initialCounts);
-    }, [collectionData]);
-
-
-    useEffect(() => {
-        if (collectionData) {
-            console.log('Collection data:', collectionData);
-
-            //array items in collection - cards - value
-            const collectionItems = Object.values(collectionData).find(Array.isArray);
-
-            const totalValue = collectionData.total_collection_value || 0;
-
-            setUserCollection(collectionItems || []);
-            setTotalCollectionValue(totalValue);
-
-            //total card count
-            const totalCount = collectionItems.reduce((sum, item) => {
-                return sum + (item.normal_count || 0) + (item.holo_count || 0) + (item.reverse_holo_count || 0);
-            }, 0);
-            setTotalCardCount(totalCount);
-            setLoading(false);
-        }
+    
         if (collectionError) {
             setError('Failed to fetch user collection');
             setLoading(false);
         }
-    }, [collectionData, collectionError, collectionLoading]);
-
+    }, [collectionData, collectionError, collectionLoading, type]);
     const showCollectionTitle = type === 'collection';
     const showSetTitle = !showCollectionTitle;
     const progressPercentage = (uniqueOwnedCardsCount() / totalSetCards) * 100;
     const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
 
-
+    console.log('before cardlist return', cards)
     return (
         <Box sx={{ flex: 1, width: '100%' }}>
             <Box sx={{ ...sx, width: '100%' }}>
