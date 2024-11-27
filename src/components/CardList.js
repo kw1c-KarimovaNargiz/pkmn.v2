@@ -431,8 +431,8 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
     // }, [loadingRef]);
 
     useEffect(() => {
-        // on load, were going to always load the collectiondata, if we are not in type=collection, try loading the series
-        if(type!=='collection')loadSeries(); 
+        // Always load series data for the sidebar
+        loadSeries();
     }, []);
 
     useEffect(() => {
