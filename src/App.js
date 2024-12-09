@@ -1,75 +1,68 @@
-import React from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+// App.js
+import React, {useState, useEffect} from 'react';
 import { UserProvider } from './pages/UserContext';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import 'react-toastify/dist/ReactToastify.css';
-
-import { Box, Container } from '@mui/material';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Sidebar from './components/SideBar';
+import {fetchSeries} from './services/api'
+// import Home from './pages/Home';
+import Pokedex from './pages/Pokedex';
+// import Account from './pages/Account';
 import setBodyColor from './setBodyColor';
-import Navbar from './components/Navbar';
-import Home from './pages/Home';
-import Decks from './pages/Decks';
-import Index from './pages/Index';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
-import CollectionPage from './pages/CollectionPage';
-
-import { fetchSeries, fetchCardsForSet, searchCard, fetchSubTypes, addCardToCollection, removeCardFromCollection } from './services/api';
-
 
 function App() {
-    const [searchResults, setSearchResults] = React.useState([])
-    const [loading, setLoading] = React.useState(false)
 
-    const handleSearch = async (term) => {
-        console.log('handling search', term)
-        setLoading(true);
+  setBodyColor({ color: "#1f1f1f" });
+  const [series, setSeries] = useState([]);
+
+  useEffect(() => {
+    const loadSeries = async () => {
         try {
-            const results = await searchCard(term);
-            setSearchResults(results);
-
-            console.log('setting search results', results);
+            const data = await fetchSeries();
+            setSeries(data);
         } catch (error) {
-            console.error("Error searching Pokémon:", error);
-            setSearchResults([]);
-        } finally {
-            setLoading(false);
+            console.error("Error loading series:", error);
         }
     };
+    loadSeries();
+}, []);
 
-    return (
-        <UserProvider>
-            <Router>
-                <Box>
-                    <Navbar onSearch={handleSearch} />
-                    <Box sx={{ marginTop: 16, width: '100%' }}>
-                        <Routes>
-                            <Route path="/login" element={<SignIn />} />
-                            <Route path="/signup" element={<SignUp />} />
-                            <Route path="*" element={<Navigate to="/login" replace />} />
-                            <Route path="/" element={<Home />} />
-                            <Route path="/Decks" element={<Decks />} />
-                            <Route path="/Index" element={<Index searchResults={searchResults} setSearchResults={setSearchResults} />} />
-                            <Route path="/collection" element={<CollectionPage />} />
-                        </Routes>
-                    </Box>
-                </Box>
-                <ToastContainer
-                    position="bottom-right"
-                    autoClose={1000}
-                    hideProgressBar={false}
-                    newestOnTop={false}
-                    closeOnClick
-                    rtl={false}
-                    pauseOnFocusLoss
-                    draggable
-                    pauseOnHover
-                    closeButton={false}
+const handleSeriesSelect = (series) => {
+  console.log('Selected series:', series);
+};
+
+
+
+  return (
+    <UserProvider>
+    <Router>
+      <div className="App flex">
+       
+
+        {/* Main Content Area */}
+        <main className="flex-1 min-h-screen text-gray-100">
+        <div className="sidebar">
+                <Sidebar
+                    series={series} 
+                     onSeriesSelect={handleSeriesSelect}
                 />
-            </Router>
-        </UserProvider>
-    );
+            </div>
+          <Routes>
+            <Route path="/"  />
+            <Route path="/pokedex/:setId" element={<Pokedex />} />
+
+            <Route path="/login" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
+    </UserProvider>
+  );
 }
 
+// Apply dark theme color
 setBodyColor({ color: "#1f1f1f" });
+
 export default App;

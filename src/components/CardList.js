@@ -1,16 +1,22 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Grid, Typography, Badge, Checkbox, FormControlLabel, IconButton, Box } from '@mui/material';
+import { Typography, IconButton, Box } from '@mui/material';
+import {Grid, AutoSizer } from 'react-virtualized';
 import { toast } from 'react-toastify';
 import { Add, Remove } from '@mui/icons-material';
 import CardDisplay from './CardDisplay';
-import SetsSidebar from './SetsSideBar';
 import { addCardToCollection, removeCardFromCollection, fetchUserCollection, fetchSeries, fetchCardsForSet, searchCard, fetchSubTypes } from '../services/api';
 import { useUser } from '../pages/UserContext';
 import useApi from '../hooks/useApi';
 import { LinearProgress } from '@mui/material';
 import '../styling/cardlist.css';
 
-const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults }) => {
+const CardList = ({ 
+    type,
+    isCollectionView,
+    sx,
+    searchResults,
+    setSearchResults 
+}) => {
     const { authToken } = useUser();
     const loadingRef = useRef(null);
 
@@ -122,16 +128,13 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
 
     const getVariantColor = (variant) => {
         switch (variant) {
-            case 'normal':
-                return 'yellow';
-            case 'holofoil':
-                return 'purple';
-            case 'reverseHolofoil':
-                return 'blue';
-            default:
-                return 'white';
+            case 'normal': return 'yellow';
+            case 'holofoil': return 'purple';
+            case 'reverseHolofoil': return 'blue';
+            default: return 'white';
         }
     };
+
 
     const handleCardToCollection = useCallback(async (cardId, variant, count) => {
         const payload = {
@@ -466,6 +469,10 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
         }
     }, [collectionData, type]);
 
+    const columnCount = 3;
+    const rowHeight = 500;
+    const cardMargin = 8;
+    
 
     const showCollectionTitle = type === 'collection';
     const showSetTitle = !showCollectionTitle;
@@ -474,191 +481,150 @@ const CardList = ({ type, isCollectionView, sx, searchResults, setSearchResults 
 
     console.log('before cardlist return', cards)
 
-    const RenderCard = React.memo(({ 
-        card, 
-        isCollectionView, 
-        isCardInCollection, 
-        handleCardClick,
-        cardCounts,
-        handleIncrement,
-        handleDecrement,
-        currentIndex,
-        setCurrentIndex,
-        instantlyAddedCards,
-        instantlyRemovedCards,
-        selectedSetId,
-    }) => (
-        <Grid 
-        item 
-        xs={12}
-        sm={6}
-        md={sidebarVisible ? 6 : 4}  // Show 2 cards per row when sidebar is visible (6), 3 when hidden (4)
-        lg={sidebarVisible ? 6 : 4} className="card-item">
-        <div>
-            <CardDisplay
-                card={card}
-                isNotInCollection={isCollectionView && !isCardInCollection(card.id)}
-                isCollectionView={isCollectionView}
-                onClick={() => handleCardClick(card)}
-                cards={cards}
-                currentIndex={currentIndex}
-                setCurrentIndex={setCurrentIndex}
-                onCardAdded={handleCardToCollection}
-                instantlyAddedCards={instantlyAddedCards}
-                instantlyRemovedCards={instantlyRemovedCards}
-                cardCounts={cardCounts}
-                selectedSetId={selectedSetId}
-            />
-            <div className="variant-container">
-                {['normal', 'holofoil', 'reverseHolofoil'].map((variant) => (
-                    card.price_data?.tcgplayer?.[variant] && (
-                        <div key={variant} className="variant-boxes">
-                            <div
-                                style={{
-                                    width: '24px',
-                                    height: '24px',
-                                    border: '2px solid',
-                                    borderColor: getVariantColor(variant),
-                                    borderRadius: '4px',
-                                    backgroundColor: getVariantColor(variant),
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    color: '#1f1f1f',
-                                    fontSize: '14px',
-                                    fontWeight: 'bold'
-                                }}
-                            >
-                                {cardCounts[card.card_id]?.[variant] || 0}
-                                <div className="variant-buttons">
-                                    <IconButton 
-                                        sx={{ color: '#999', '& .MuiSvgIcon-root': { fontSize: 18 } }}
-                                        onClick={() => handleIncrement(card.card_id, variant)}
-                                        size="small"
-                                    >
-                                        <Add />
-                                    </IconButton>
-                                    <IconButton 
-                                        sx={{ color: '#999', '& .MuiSvgIcon-root': { fontSize: 18 } }}
-                                        onClick={() => handleDecrement(card.card_id, variant)}
-                                        size="small"
-                                        disabled={(cardCounts[card.card_id]?.[variant] || 0) === 0}
-                                    >
-                                        <Remove />
-                                    </IconButton>
-                                </div>
-                            </div>
-                        </div>
-                    )
-                ))}
-            </div>
-        </div>
-    </Grid>
-));
+    const cellRenderer = ({ columnIndex, key, rowIndex, style }) => {
+        const index = rowIndex * columnCount + columnIndex;
+        const card = cards[index];
 
+        if (!card) return null;
 
-return (
-    <Box sx={{ 
-        flex: 1, 
-        width: '100%',
-        display: 'flex',
-        transition: 'margin-left 0.3s ease', 
-        marginLeft: sidebarVisible ? '420px' : '0'
-    }}>
+        const cardStyle = {
+            ...style,
+            padding: cardMargin,
+        };
 
-        <Box sx={{ ...sx, width: '100%' }}>
-            <div className="card-set-name-index">
-                {showCollectionTitle && (
-                    <Box sx={{ width: '100%', paddingLeft: '20%' }}>
-                        <Typography variant="h4">YOUR COLLECTION</Typography>
-                        <div className="collection-value">
-                            <Typography variant="h6">Total Value: ${totalCollectionValue.toFixed(2)}</Typography>
-                        </div>
-                        <div className="total-card-count">
-                            <Typography variant="h6">Total Cards: {totalCardCount}</Typography>
-                        </div>
-                    </Box>
-                )}
-                {showSetTitle && (
-                    <>
-                        <Typography variant="h3" sx={{ width: '100%', paddingLeft: '20%' }}>
-                            {`${setTitle}`}
-                        </Typography>
-                        {isCollectionView && (
-                            <div style={{
-                                marginTop: '10px',
-                                marginBottom: '20px',
-                                width: '100%',
-                                maxWidth: '300px'
-                            }}>
-                                <div className="collection-progress">
-                                    <Typography variant="body1" sx={{ color: '#999' }}>
-                                        {uniqueOwnedCardsCount()} / {totalSetCards}
-                                    </Typography>
-                                    <div className="linear-progress">
-                                        <LinearProgress
-                                            variant="determinate"
-                                            value={progressPercentage}
-                                            sx={{
-                                                height: 10,
-                                                borderRadius: 5,
-                                                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                                '& .MuiLinearProgress-bar': {
-                                                    backgroundColor: '#4CAF50',
-                                                    borderRadius: 5
-                                                }
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </>
-                )}
-            </div>
-
-            <Grid container spacing={8}>
-                {cards.slice(0, displayCount).map((card) => (
-                    <RenderCard
-                        key={card.id}
+        return (
+            <div key={key} style={cardStyle}>
+                <div className="border rounded-lg hover:shadow-lg transition-shadow h-full">
+                    <CardDisplay
                         card={card}
-                        isCollectionView={isCollectionView}
-                        isCardInCollection={isCardInCollection}
-                        handleCardClick={handleCardClick}
-                        cardCounts={cardCounts}
-                        handleIncrement={handleIncrement}
-                        handleDecrement={handleDecrement}
+                        isNotInCollection={isCollectionView && !isCardInCollection(card.id)}
+                        onClick={() => handleCardClick(card)}
+                        cards={cards}
                         currentIndex={currentIndex}
                         setCurrentIndex={setCurrentIndex}
+                        onCardAdded={handleCardToCollection}
                         instantlyAddedCards={instantlyAddedCards}
                         instantlyRemovedCards={instantlyRemovedCards}
+                        cardCounts={cardCounts}
                         selectedSetId={selectedSetId}
                     />
-                ))}
-
-                {displayCount < cards.length && (
-                <Grid container justifyContent="center">
-                    <div ref={loadingRef} style={{ height: '50px', margin: '20px 0', width: '100%' }}>
-                        <LinearProgress />
+                    <div className="variant-container">
+                        {['normal', 'holofoil', 'reverseHolofoil'].map((variant) => (
+                            card.price_data?.tcgplayer?.[variant] && (
+                                <div key={variant} className="variant-boxes">
+                                    <div style={{
+                                        width: '24px',
+                                        height: '24px',
+                                        border: '2px solid',
+                                        borderColor: getVariantColor(variant),
+                                        borderRadius: '4px',
+                                        backgroundColor: getVariantColor(variant),
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        color: '#1f1f1f',
+                                        fontSize: '14px',
+                                        fontWeight: 'bold'
+                                    }}>
+                                        {cardCounts[card.card_id]?.[variant] || 0}
+                                        <div className="variant-buttons">
+                                            <IconButton 
+                                                onClick={() => handleIncrement(card.card_id, variant)}
+                                                size="small"
+                                                sx={{ color: '#999', '& .MuiSvgIcon-root': { fontSize: 18 } }}
+                                            >
+                                                <Add />
+                                            </IconButton>
+                                            <IconButton 
+                                                onClick={() => handleDecrement(card.card_id, variant)}
+                                                size="small"
+                                                disabled={(cardCounts[card.card_id]?.[variant] || 0) === 0}
+                                                sx={{ color: '#999', '& .MuiSvgIcon-root': { fontSize: 18 } }}
+                                            >
+                                                <Remove />
+                                            </IconButton>
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        ))}
                     </div>
-                </Grid>
-            )}
-            </Grid>
+                </div>
+            </div>
+        );
+    };
 
-        
+    return (
+        <Box sx={{ flex: 1 }}>
+            <div className="header">
+                      
+                    
+                    {showSetTitle && (
+                        <>
+                        <div className="card-set-name-index">
+                            <Typography variant="h3" sx={{ width: '100%', paddingLeft: '20%' }}>
+                                {setTitle}
+                            </Typography>
+                         </div>
+                            <Typography variant="h6">Total Value: ${totalCollectionValue.toFixed(2)}</Typography>
+                            {isCollectionView && (
+                                <div style={{
+                                 
+                                }}>
+                                    <div className="collection-progress">
+                                        <Typography variant="body1" sx={{ color: '#999' }}>
+                                            {uniqueOwnedCardsCount()} / {totalSetCards}
+                                        </Typography>
+                                        <div className="linear-progress">
+                                            <LinearProgress
+                                                variant="determinate"
+                                                value={progressPercentage}
+                                                sx={{
+                                                    height: 10,
+                                                    borderRadius: 5,
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                    '& .MuiLinearProgress-bar': {
+                                                        backgroundColor: '#4CAF50',
+                                                        borderRadius: 5
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+               
+
+                <div style={{ 
+                height: '100vh', 
+                width: '90%',
+                paddingLeft: '14%',
+            }}>
+                <AutoSizer>
+                    {({ height, width }) => {
+                        const calculatedColumnWidth = width / columnCount;
+                        const rowCount = Math.ceil(cards.length / columnCount);
+                        
+                        return (
+                            <Grid
+                                height={height}
+                                width={width}
+                                columnCount={columnCount}
+                                columnWidth={calculatedColumnWidth}
+                                rowCount={rowCount}
+                                rowHeight={rowHeight}
+                                cellRenderer={cellRenderer}
+                                style={{ overflowX: 'hidden' }}
+                            />
+                        );
+                    }}
+                </AutoSizer>
+            </div>
         </Box>
-
-        <SetsSidebar
-            series={series}
-            onSetSelect={handleSetSelect}
-            onSeriesSelect={handleSeriesSelect}
-            availableTypes={allTypes}
-            availableSubTypes={subTypes}
-            onFilter={handleFilter}
-            onToggleSidebar={(visible) => setSidebarVisible(visible)}
-        />
-    </Box>
-);
+    );
 };
 
 export default CardList;

@@ -9,14 +9,7 @@ const Index = ({ searchResults, setSearchResults, setSearchTerm }) => {
 
     if (userLoading) return null;
 
-    return (
-     
-          
-            <CardList type='index' searchResults={searchResults} setSearchResults={setSearchResults} setSearchTerm={setSearchTerm} />
-        
-     
-
-    );
+ 
 };
 
 export default Index;

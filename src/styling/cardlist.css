@@ -1,23 +1,96 @@
-.collection-progress {
- 
-   
-   margin-top: -20px;
+.cards-display-area {
+  width: 80%;
+}
+
+
+.main-content {
+  flex-direction: column;
+  display: flex;
+
+  margin-top: calc(100px + 200px);
+  margin-left: 280px;
+
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.variant-container {
+  display: flex;
+  gap: 30px;
+  width: 100%;
+  margin-top: -18px;
+  justify-content: center;
+}
+
+.variant-boxes {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.variant-buttons {
+  color: #999 !important;
+  position: absolute;
+  /* Position buttons over the box */
+  top: 50%;
+  /* Center vertically */
+  left: 50%;
+  /* Center horizontally */
+  transform: translate(-50%, -50%);
+  /* Adjust for centering */
+  display: none;
+  /* Hide by default */
+  gap: 20px;
+  padding: 0;
 
 }
 
-.sidebar {
-   position: fixed;
-   width: 280px;
-   left: 0;
- 
-   background-color: #3c3c3c;
-   height: 100vh;
-   margin: 0;
-   top: 50px;
-   overflow-y: auto;
-   background-color: inherit;
-   z-index: 1;
-   box-shadow: 5px 0 5px rgba(0, 0, 0, 0.1);
- }
- 
- 
+.variant-boxes:hover .variant-buttons {
+  display: flex;
+  /* Show buttons on hover */
+
+
+}
+
+.card-set-name-index {
+  width: 100%;
+  overflow: hidden;
+  font-size: 120px;
+  text-transform: uppercase;
+  position: absolute;
+  text-align: center;
+  opacity: 0.5;
+  line-height: 1.5em;
+  color: #818078;
+  left: -35%;
+  perspective: 1000px;
+  position: relative;
+  bottom: -20px;
+}
+
+.card-set-name-index::before,
+.card-set-name-index::after {
+  position: absolute;
+  content: '';
+  background: linear-gradient(to right, transparent, #818078, transparent);
+  top: 50%;
+  height: 1px;
+
+}
+
+.card-set-name-index::before {
+  width: 100%;
+  left: -45%;
+}
+
+.card-set-name-index::after {
+  width: 100%;
+  right: -81%;
+}
+
+.card-title-list {
+  text-align: end;
+  margin-right: 20px;
+
+}

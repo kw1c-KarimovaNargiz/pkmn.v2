@@ -194,7 +194,7 @@ const CardDisplay = React.memo(({ card,   isCollectionView, isNotInCollection, c
                                 </Typography>
                             </div>
                         </div>
-
+                        
                         <div className="parent-container">
                             <div className="img-container shine">
                                 <img 
