@@ -11,32 +11,17 @@ const Pokedex = ({
     uniqueOwnedCardsCount = () => 0 
 }) => {
     const { setId } = useParams();
-    const [cardData, setCardData] = useState([]);
-    const [totalSetCards, setTotalSetCards] = useState(0);
-
-    useEffect(() => {
-        const loadCardData = async () => {
-            try {
-                const data = await fetchCardsForSet(setId);
-                setCardData(data);
-                setTotalSetCards(data.length);
-            } catch (error) {
-                console.error("Error loading card data:", error);
-            }
-        };
-
-        loadCardData();
-    }, [setId]);
+    const [loading, setLoading] = useState(true);
 
     return (
         <div>
             <CardList 
-                data={cardData}
-                showCollectionTitle={showCollectionTitle}
+                type="pokedex"
                 isCollectionView={isCollectionView}
+                initialSetId={setId}
+                showCollectionTitle={showCollectionTitle}
                 totalCollectionValue={totalCollectionValue}
                 totalCardCount={totalCardCount}
-                totalSetCards={totalSetCards}
                 uniqueOwnedCardsCount={uniqueOwnedCardsCount}
             />
         </div>

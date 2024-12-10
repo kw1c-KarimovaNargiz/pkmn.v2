@@ -13,6 +13,7 @@ import '../styling/cardlist.css';
 const CardList = ({ 
     type,
     isCollectionView,
+    initialSetId,
     sx,
     searchResults,
     setSearchResults 
@@ -27,6 +28,9 @@ const CardList = ({
     const [toastId, setToastId] = useState(null);
     const [toastCount, setToastCount] = useState(0);
     const [displayCount, setDisplayCount] = useState(12);
+    const [originalCards, setOriginalCards] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterOwnedCards, setFilterOwnedCards] = useState(false);
 
     const [ownedCards, setOwnedCards] = useState(new Set());
     const [instantlyAddedCards, setInstantlyAddedCards] = useState(new Set());
@@ -70,60 +74,51 @@ const CardList = ({
 
     const handleSetSelect = useCallback(async (setId, setAnyway) => {
         console.log('Load Selected set:', setId);
+        if (!setId) return;
+        
         setLoading(true);
+        setSelectedSetId(setId);
 
-        if (type === 'collection' && !setAnyway) {
+        try {
+            const [cardData, subTypeData] = await Promise.all([
+                fetchCardsForSet(setId),
+                fetchSubTypes(setId)
+            ]);
 
-            if (collectionData) {
-                console.log('Collection data handlesetselect:', collectionData);
+            console.log('Received card data:', cardData);
 
-                //array items in collection - cards - value
-                const collectionItems = Object.values(collectionData).find(Array.isArray);
+            // Update all card-related states at once
+            setCards(cardData);
+            setFilteredCards(cardData);
+            setOriginalCards(cardData);
+            setSubTypes(subTypeData);
+            setAllTypes([...new Set(cardData.flatMap(card => card.types || []))]);
 
-                const totalValue = collectionData.total_collection_value || 0;
-
-                setUserCollection(collectionItems || []);
-                setTotalCollectionValue(totalValue);
-
-                //total card count
-                const totalCount = collectionItems.reduce((sum, item) => {
-                    return sum + (item.normal_count || 0) + (item.holo_count || 0) + (item.reverse_holo_count || 0);
-                }, 0);
-                setTotalCardCount(totalCount);
-                setLoading(false);
-            }
-            if (collectionError) {
-                setError('Failed to fetch user collection');
-                setLoading(false);
+            if (cardData.length > 0 && cardData[0].set) {
+                setTotalSetCards(cardData[0].set.printed_total);
+                setAllSetCards(cardData);
             }
 
-
-        } else {
-            //keep false to prevent rerendering index container 
-            setSelectedSetId(setId);
-
-            try {
-                const [cardData, subTypeData] = await Promise.all([
-                    fetchCardsForSet(setId),
-                    fetchSubTypes(setId)
-                ]);
-                setCards(cardData);
-                setFilteredCards(cardData);
-                setSubTypes(subTypeData);
-
-                const uniqueTypes = [...new Set(cardData.flatMap(card => card.types || []))];
-                setAllTypes(uniqueTypes);
-            } catch (error) {
-                console.error("Error loading set data:", error);
-                setCards([]);
-                setFilteredCards([]);
-                setSubTypes([]);
-                setAllTypes([]);
-            } finally {
-                setLoading(false);
-            }
+            // Reset filters
+            setSearchTerm('');
+            setFilterOwnedCards(false);
+        } catch (error) {
+            console.error("Error loading set data:", error);
+            setError('Failed to load set data');
+            setCards([]);
+            setFilteredCards([]);
+            setSubTypes([]);
+            setAllTypes([]);
+        } finally {
+            setLoading(false);
         }
-    }, [collectionData]);
+    }, []);
+
+    useEffect(() => {
+        if (initialSetId && initialSetId !== selectedSetId) {
+            handleSetSelect(initialSetId);
+        }
+    }, [initialSetId, handleSetSelect]);
 
 
     const getVariantColor = (variant) => {
@@ -357,19 +352,24 @@ const CardList = ({
             const seriesData = await fetchSeries();
             setSeries(seriesData);
 
-            if (seriesData.length > 0) {
+            if (initialSetId) {
+                // If we have an initial set ID from the route, use that
+                await handleSetSelect(initialSetId);
+                setSelectedSetId(initialSetId);
+            } else if (seriesData.length > 0) {
+                // Otherwise use the first set from the first series
                 const firstSeries = seriesData[0];
                 setSets(firstSeries.sets || []);
 
                 if (firstSeries.sets && firstSeries.sets.length > 0) {
                     const firstSet = firstSeries.sets[0];
                     setSelectedSetId(firstSet.id);
-                    console.log('setselect')
                     await handleSetSelect(firstSet.id);
                 }
             }
         } catch (error) {
             console.error("Cannot fetch series/sets", error);
+            setError('Failed to load series data');
         } finally {
             setLoading(false);
         }
