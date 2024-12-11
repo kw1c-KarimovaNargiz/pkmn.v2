@@ -16,35 +16,20 @@ import {
 import CheckBoxOutlineBlank from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBox from '@mui/icons-material/CheckBox';
 import CloseIcon from '@mui/icons-material/Close';
-import TuneIcon from '@mui/icons-material/Tune';
 
 const icon = <CheckBoxOutlineBlank fontSize="small" />;
 const checkedIcon = <CheckBox fontSize="small" />;
 
 const DrawerPeek = styled(Box)(({ theme, isactive }) => ({
     position: 'fixed',
+    left: '2%',
     top: 0,
     bottom: 0,
-    width: '20%',
+    width: '18%',
     backgroundColor: '#8A3F3F',
-    cursor: isactive ? 'pointer' : 'default',
     zIndex: 0,
-    opacity: isactive ? 100 : 50,
-    transition: 'opacity 0.3s ease',
-    '&:hover': {
-        opacity: isactive ? 100 : 50, 
-    }
-}));
-
-const FilterIconWrapper = styled(Box)(({ theme }) => ({
-     color: '#fff',
-    position: 'fixed',
-    left: '22%', 
-    top: '1rem',
-    zIndex: 1200,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem'
+    opacity: isactive ? 1 : 0.5,
+    
 }));
 
 const FilterDrawer = ({
@@ -53,9 +38,11 @@ const FilterDrawer = ({
     onFilter,
     selectedSet,
     filterOwnedCards: initialFilterOwnedCards = false,
-    setFilterOwnedCards: parentSetFilterOwnedCards
+    setFilterOwnedCards: parentSetFilterOwnedCards,
+    isOpen,
+    onClose,
+    onOpen
 }) => {
-    const [isOpen, setIsOpen] = useState(false);
     const [selectedTypes, setSelectedTypes] = useState([]);
     const [selectedSubTypes, setSelectedSubTypes] = useState([]);
     const [isSortedByEvo, setIsSortedByEvo] = useState(false);
@@ -64,15 +51,6 @@ const FilterDrawer = ({
     const location = useLocation();
     const isCollectionView = location.pathname === '/collection';
     const isPokedexSetRoute = /^\/pokedex\/[^/]+$/.test(location.pathname);
-
-    const toggleDrawer = (e) => {
-        e.stopPropagation();
-        if (isPokedexSetRoute) {
-            setIsOpen(true);
-        } else {
-            console.log('Not in pokedex set route:', location.pathname);
-        }
-    };
 
     const handleTypeChange = (event, newValue) => {
         setSelectedTypes(newValue || []);
@@ -101,25 +79,23 @@ const FilterDrawer = ({
 
     return (
         <>
-            <FilterIconWrapper>
-                <IconButton 
-                    onClick={toggleDrawer}
+            {isPokedexSetRoute && (
+                <DrawerPeek 
                     isactive={isPokedexSetRoute ? 1 : 0}
-                    sx={{ 
-                        color: '#999999',
+                    onClick={onOpen}
+                    sx={{
+                        cursor: 'pointer',
+                        '&:hover': {
+                            width: '6px',
+                        }
                     }}
-                >
-                    <TuneIcon />
-                </IconButton>
-            </FilterIconWrapper>
-
-            <DrawerPeek 
-            />
+                />
+            )}
 
             <Drawer
                 anchor="left"
                 open={isOpen}
-                onClose={() => setIsOpen(false)}
+                onClose={onClose}
                 PaperProps={{
                     sx: {
                         width: '18%',
@@ -159,7 +135,7 @@ const FilterDrawer = ({
                         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                             Filters
                         </Typography>
-                        <IconButton onClick={() => setIsOpen(false)} sx={{ color: '#999' }}>
+                        <IconButton onClick={onClose} sx={{ color: '#999' }}>
                             <CloseIcon />
                         </IconButton>
                     </Box>

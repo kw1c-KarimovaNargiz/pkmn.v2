@@ -70,25 +70,6 @@
   padding-left: 20%
 }
 
-.card-set-name-index::before,
-.card-set-name-index::after {
-  position: absolute;
-  content: '';
-  background: linear-gradient(to right, transparent, #818078, transparent);
-  top: 50%;
-  height: 1px;
-
-}
-
-.card-set-name-index::before {
-  width: 100%;
-  left: -45%;
-}
-
-.card-set-name-index::after {
-  width: 100%;
-  right: -81%;
-}
 
 .card-title-list {
   text-align: end;
@@ -98,6 +79,12 @@
 
 .header-content {
   margin-left: 100px;
+}
+
+.filter-button {
+  margin-left: 15%;
+  color: #999;
+  top: 10;
 }
 
 /* .linear-progress {

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Typography, IconButton, Box } from '@mui/material';
 import {Grid, AutoSizer } from 'react-virtualized';
 import { toast } from 'react-toastify';
@@ -8,6 +9,10 @@ import { addCardToCollection, removeCardFromCollection, fetchUserCollection, fet
 import { useUser } from '../pages/UserContext';
 import useApi from '../hooks/useApi';
 import { LinearProgress } from '@mui/material';
+import TuneIcon from '@mui/icons-material/Tune';
+import FilterDrawer from './FilterDrawer';
+
+
 import '../styling/cardlist.css';
 
 const CardList = ({ 
@@ -31,7 +36,7 @@ const CardList = ({
     const [originalCards, setOriginalCards] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterOwnedCards, setFilterOwnedCards] = useState(false);
-
+    const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
     const [ownedCards, setOwnedCards] = useState(new Set());
     const [instantlyAddedCards, setInstantlyAddedCards] = useState(new Set());
     const [instantlyRemovedCards, setInstantlyRemovedCards] = useState(new Set());
@@ -44,15 +49,20 @@ const CardList = ({
     const [cards, setCards] = useState([]);
     const [allTypes, setAllTypes] = useState([]);
     const [subTypes, setSubTypes] = useState([]);
-    const [sidebarVisible, setSidebarVisible] = useState(false);
+    const [sidebarVisible, SidebarVisible] = useState(false);
     const [selectedSetId, setSelectedSetId] = useState(null);
     const [filteredCards, setFilteredCards] = useState([]);
     const [userCollection, setUserCollection] = useState([]);
-
+    const [availableTypes, setAvailableTypes] = useState([]);
+    const [availableSubTypes, setAvailableSubTypes] = useState([]);
+    const [currentSet, setCurrentSet] = useState(null);
+    
     const [error, setError] = useState(null);
     const [totalCollectionValue, setTotalCollectionValue] = useState(0);
     const [totalCardCount, setTotalCardCount] = useState(0);
-
+    
+    const location = useLocation();
+    const isPokedexSetRoute = /^\/pokedex\/[^/]+$/.test(location.pathname);
     // const [cardStatus, setCardStatus] = useState(
     //     cards.reduce((acc, card) => {
     //         acc[card.id] = true;
@@ -469,6 +479,8 @@ const CardList = ({
         }
     }, [collectionData, type]);
 
+
+
     const columnCount = 3;
     const rowHeight = 500;
     const cardMargin = 8;
@@ -480,6 +492,24 @@ const CardList = ({
     const setTitle = cards.length > 0 && cards[0].set ? cards[0].set.set_name : "";
 
     console.log('before cardlist return', cards)
+
+
+    const renderFilterButton = () => (
+        <IconButton 
+            onClick={() => setIsFilterDrawerOpen(true)}
+            sx={{ 
+                color: '#999',
+                bgcolor: 'rgba(33, 33, 33, 0.8)',
+                '&:hover': {
+                    bgcolor: 'rgba(33, 33, 33, 0.95)',
+                },
+                ml: 2
+            }}
+        >
+            <TuneIcon />
+        </IconButton>
+    );
+    
 
     const cellRenderer = ({ columnIndex, key, rowIndex, style }) => {
         const index = rowIndex * columnCount + columnIndex;
@@ -558,13 +588,17 @@ const CardList = ({
         <Box sx={{ flex: 1 }}>
             <div className="header">
             <div className="header-content">
-            
+                <div className="filter-button">
+            {isPokedexSetRoute && renderFilterButton()}
+            </div>
                     {showSetTitle && (
                         <>
                         <div className="card-set-name-index">
-                            <Typography variant="h3" sx={{ width: '100%', paddingLeft: '20%' }}>
-                                {setTitle}
-                            </Typography>
+                        <Typography variant="h3" sx={{ width: '100%',}}>
+                       
+                        {setTitle}
+                        
+                        </Typography>
                          </div>
                             <Typography variant="h6">Total Value: ${totalCollectionValue.toFixed(2)}</Typography>
                             {isCollectionView && (
@@ -626,6 +660,17 @@ const CardList = ({
                     }}
                 </AutoSizer>
             </div>
+            <FilterDrawer
+    availableTypes={allTypes}
+    availableSubTypes={subTypes}
+    onFilter={handleFilter}
+    selectedSet={selectedSetId}
+    filterOwnedCards={filterOwnedCards}
+    setFilterOwnedCards={setFilterOwnedCards}
+    isOpen={isFilterDrawerOpen}
+    onClose={() => setIsFilterDrawerOpen(false)}
+    onOpen={() => setIsFilterDrawerOpen(true)}
+/>
         </Box>
     );
 };
