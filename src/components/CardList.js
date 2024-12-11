@@ -557,8 +557,8 @@ const CardList = ({
     return (
         <Box sx={{ flex: 1 }}>
             <div className="header">
-                      
-                    
+            <div className="header-content">
+            
                     {showSetTitle && (
                         <>
                         <div className="card-set-name-index">
@@ -572,7 +572,7 @@ const CardList = ({
                                  
                                 }}>
                                     <div className="collection-progress">
-                                        <Typography variant="body1" sx={{ color: '#999' }}>
+                                        <Typography variant="body1" sx={{ color:'#999', }}>
                                             {uniqueOwnedCardsCount()} / {totalSetCards}
                                         </Typography>
                                         <div className="linear-progress">
@@ -580,8 +580,11 @@ const CardList = ({
                                                 variant="determinate"
                                                 value={progressPercentage}
                                                 sx={{
+                                                    width: '30%',
+                                                    bottom: 10,
                                                     height: 10,
                                                     borderRadius: 5,
+                                                    marginLeft: '20%',
                                                     backgroundColor: 'rgba(255, 255, 255, 0.1)',
                                                     '& .MuiLinearProgress-bar': {
                                                         backgroundColor: '#4CAF50',
@@ -595,7 +598,7 @@ const CardList = ({
                             )}
                         </>
                     )}
-                </div>
+                </div></div>
                
 
                 <div style={{ 

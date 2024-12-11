@@ -1,5 +1,6 @@
 // App.js
 import React, {useState, useEffect} from 'react';
+
 import { UserProvider } from './pages/UserContext';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Sidebar from './components/SideBar';
@@ -11,6 +12,7 @@ import setBodyColor from './setBodyColor';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 
+import PersistentFilterDrawer from './components/PersistentFilterDrawer';
 function App() {
 
   setBodyColor({ color: "#1f1f1f" });
@@ -48,6 +50,7 @@ const handleSeriesSelect = (series) => {
                      onSeriesSelect={handleSeriesSelect}
                 />
             </div>
+            <PersistentFilterDrawer />
           <Routes>
             <Route path="/"  />
             <Route path="/pokedex/:setId" element={<Pokedex />} />
@@ -58,6 +61,7 @@ const handleSeriesSelect = (series) => {
         </main>
       </div>
     </Router>
+    
     </UserProvider>
   );
 }

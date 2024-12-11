@@ -67,6 +67,7 @@
   perspective: 1000px;
   position: relative;
   bottom: -20px;
+  padding-left: 20%
 }
 
 .card-set-name-index::before,
@@ -93,4 +94,27 @@
   text-align: end;
   margin-right: 20px;
 
+}
+
+.header-content {
+  margin-left: 100px;
+}
+
+/* .linear-progress {
+  width: 30%;
+  height: 10; 
+  border-radius: 5;
+  margin-left: 60%;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+
+.linear-progress .MuiLinearProgress-bar {
+  background-color: #4CAF50;
+  border-radius: 5;
+ 
+} */
+
+.collection-progress {
+  color: #999;
 }
