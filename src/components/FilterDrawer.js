@@ -50,8 +50,7 @@ const FilterDrawer = ({
 
     const location = useLocation();
     const isCollectionView = location.pathname === '/collection';
-    const isPokedexSetRoute = /^\/pokedex\/[^/]+$/.test(location.pathname);
-
+ 
     const handleTypeChange = (event, newValue) => {
         setSelectedTypes(newValue || []);
         onFilter(newValue || [], selectedSubTypes, isSortedByEvo, selectedSet, filterOwnedCards);
@@ -79,18 +78,10 @@ const FilterDrawer = ({
 
     return (
         <>
-            {isPokedexSetRoute && (
+       
                 <DrawerPeek 
-                    isactive={isPokedexSetRoute ? 1 : 0}
-                    onClick={onOpen}
-                    sx={{
-                        cursor: 'pointer',
-                        '&:hover': {
-                            width: '6px',
-                        }
-                    }}
                 />
-            )}
+            
 
             <Drawer
                 anchor="left"
