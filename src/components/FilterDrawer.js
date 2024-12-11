@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { 
     Box, 
@@ -13,54 +13,75 @@ import {
     IconButton,
     styled
 } from '@mui/material';
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import CheckBoxOutlineBlank from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBox from '@mui/icons-material/CheckBox';
 import CloseIcon from '@mui/icons-material/Close';
+import TuneIcon from '@mui/icons-material/Tune';
 
-const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
-const checkedIcon = <CheckBoxIcon fontSize="small" />;
+const icon = <CheckBoxOutlineBlank fontSize="small" />;
+const checkedIcon = <CheckBox fontSize="small" />;
 
-const DrawerPeek = styled(Box)(({ theme, open }) => ({
-    // position: 'fixed',
-    // left: '73px',
-    // top: 0,
-    // bottom: 0,
-    // width: '4px',
-    // backgroundColor: '#8B0000',
-    // cursor: 'pointer',
-    // zIndex: 0,
-    // opacity: open ? 0 : 1,
-    // transition: 'opacity 0.3s ease',
+const DrawerPeek = styled(Box)(({ theme, isactive }) => ({
+    position: 'fixed',
+    top: 0,
+    bottom: 0,
+    width: '20%',
+    backgroundColor: '#8A3F3F',
+    cursor: isactive ? 'pointer' : 'default',
+    zIndex: 0,
+    opacity: isactive ? 100 : 50,
+    transition: 'opacity 0.3s ease',
+    '&:hover': {
+        opacity: isactive ? 100 : 50, 
+    }
+}));
+
+const FilterIconWrapper = styled(Box)(({ theme }) => ({
+     color: '#fff',
+    position: 'fixed',
+    left: '22%', 
+    top: '1rem',
+    zIndex: 1200,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem'
 }));
 
 const FilterDrawer = ({
-    open,
-    onClose,
-    onOpen,
-    availableTypes,
-    availableSubTypes,
-    selectedTypes,
-    setSelectedTypes,
-    selectedSubTypes,
-    setSelectedSubTypes,
-    isSortedByEvo,
-    setIsSortedByEvo,
+    availableTypes = [],
+    availableSubTypes = [],
     onFilter,
     selectedSet,
-    filterOwnedCards,
-    setFilterOwnedCards
+    filterOwnedCards: initialFilterOwnedCards = false,
+    setFilterOwnedCards: parentSetFilterOwnedCards
 }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [selectedTypes, setSelectedTypes] = useState([]);
+    const [selectedSubTypes, setSelectedSubTypes] = useState([]);
+    const [isSortedByEvo, setIsSortedByEvo] = useState(false);
+    const [filterOwnedCards, setFilterOwnedCards] = useState(initialFilterOwnedCards);
+
     const location = useLocation();
     const isCollectionView = location.pathname === '/collection';
+    const isPokedexSetRoute = /^\/pokedex\/[^/]+$/.test(location.pathname);
+
+    const toggleDrawer = (e) => {
+        e.stopPropagation();
+        if (isPokedexSetRoute) {
+            setIsOpen(true);
+        } else {
+            console.log('Not in pokedex set route:', location.pathname);
+        }
+    };
 
     const handleTypeChange = (event, newValue) => {
-        setSelectedTypes(newValue);
-        onFilter(newValue, selectedSubTypes, isSortedByEvo, selectedSet, filterOwnedCards);
+        setSelectedTypes(newValue || []);
+        onFilter(newValue || [], selectedSubTypes, isSortedByEvo, selectedSet, filterOwnedCards);
     };
 
     const handleSubTypeChange = (event, newValue) => {
-        setSelectedSubTypes(newValue);
-        onFilter(selectedTypes, newValue, isSortedByEvo, selectedSet, filterOwnedCards);
+        setSelectedSubTypes(newValue || []);
+        onFilter(selectedTypes, newValue || [], isSortedByEvo, selectedSet, filterOwnedCards);
     };
 
     const handleSortByEvoChange = (event) => {
@@ -72,32 +93,38 @@ const FilterDrawer = ({
     const handleFilterOwnedCards = (event) => {
         const checked = event.target.checked;
         setFilterOwnedCards(checked);
+        if (parentSetFilterOwnedCards) {
+            parentSetFilterOwnedCards(checked);
+        }
         onFilter(selectedTypes, selectedSubTypes, isSortedByEvo, selectedSet, checked);
     };
 
     return (
         <>
+            <FilterIconWrapper>
+                <IconButton 
+                    onClick={toggleDrawer}
+                    isactive={isPokedexSetRoute ? 1 : 0}
+                    sx={{ 
+                        color: '#999999',
+                    }}
+                >
+                    <TuneIcon />
+                </IconButton>
+            </FilterIconWrapper>
+
             <DrawerPeek 
-                open={open}
-                onClick={onOpen}
-                sx={{
-                    '&:hover': {
-                        width: '6px',
-                        transition: 'width 0.2s ease'
-                    }
-                }}
             />
 
             <Drawer
                 anchor="left"
-                open={open}
-                onClose={onClose}
+                open={isOpen}
+                onClose={() => setIsOpen(false)}
                 PaperProps={{
                     sx: {
                         width: '18%',
                         bgcolor: '#212121',
                         color: '#999',
-                        // borderLeft: '4px solid #8A3F3F',
                         left: '0',
                         right: 'auto',
                         height: '100%',
@@ -132,7 +159,7 @@ const FilterDrawer = ({
                         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                             Filters
                         </Typography>
-                        <IconButton onClick={onClose} sx={{ color: '#999' }}>
+                        <IconButton onClick={() => setIsOpen(false)} sx={{ color: '#999' }}>
                             <CloseIcon />
                         </IconButton>
                     </Box>
@@ -144,7 +171,7 @@ const FilterDrawer = ({
                             Types
                         </Typography>
                         <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                            {selectedTypes.map((type) => (
+                            {(selectedTypes || []).map((type) => (
                                 <Chip
                                     key={type}
                                     label={type}
@@ -165,7 +192,7 @@ const FilterDrawer = ({
                             multiple
                             options={availableTypes}
                             disableCloseOnSelect
-                            value={selectedTypes}
+                            value={selectedTypes || []}
                             onChange={handleTypeChange}
                             getOptionLabel={(option) => option}
                             renderOption={(props, option, { selected }) => (
@@ -204,36 +231,17 @@ const FilterDrawer = ({
                         />
                     </Box>
 
+                    <Divider sx={{ mb: 3, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
 
-                <Divider sx={{ mb: 3, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
-
-                {/* Additional Options */}
-                <Box>
-                    <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
-                        Sort & Filter
-                    </Typography>
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={isSortedByEvo}
-                                onChange={handleSortByEvoChange}
-                                sx={{
-                                    color: '#999',
-                                    '&.Mui-checked': {
-                                        color: '#fff',
-                                    },
-                                }}
-                            />
-                        }
-                        label="Sort by Evolution"
-                        sx={{ color: '#999', mb: 1 }}
-                    />
-                    {isCollectionView && (
+                    <Box>
+                        <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 'bold' }}>
+                            Sort & Filter
+                        </Typography>
                         <FormControlLabel
                             control={
                                 <Checkbox
-                                    checked={filterOwnedCards}
-                                    onChange={handleFilterOwnedCards}
+                                    checked={isSortedByEvo}
+                                    onChange={handleSortByEvoChange}
                                     sx={{
                                         color: '#999',
                                         '&.Mui-checked': {
@@ -242,12 +250,29 @@ const FilterDrawer = ({
                                     }}
                                 />
                             }
-                            label="Show Owned Cards Only"
-                            sx={{ color: '#999' }}
+                            label="Sort by Evolution"
+                            sx={{ color: '#999', mb: 1 }}
                         />
-                    )}
-
- </Box>   </Box>
+                        {isCollectionView && (
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={filterOwnedCards}
+                                        onChange={handleFilterOwnedCards}
+                                        sx={{
+                                            color: '#999',
+                                            '&.Mui-checked': {
+                                                color: '#fff',
+                                            },
+                                        }}
+                                    />
+                                }
+                                label="Show Owned Cards Only"
+                                sx={{ color: '#999' }}
+                            />
+                        )}
+                    </Box>
+                </Box>
             </Drawer>
         </>
     );

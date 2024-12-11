@@ -12,7 +12,7 @@ import setBodyColor from './setBodyColor';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 
-import PersistentFilterDrawer from './components/PersistentFilterDrawer';
+import FilterDrawer from './components/FilterDrawer';
 function App() {
 
   setBodyColor({ color: "#1f1f1f" });
@@ -50,7 +50,7 @@ const handleSeriesSelect = (series) => {
                      onSeriesSelect={handleSeriesSelect}
                 />
             </div>
-            <PersistentFilterDrawer />
+            <FilterDrawer />
           <Routes>
             <Route path="/"  />
             <Route path="/pokedex/:setId" element={<Pokedex />} />
