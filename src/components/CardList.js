@@ -130,6 +130,7 @@ const CardList = ({
         }
     }, [initialSetId, handleSetSelect]);
 
+    
 
     const getVariantColor = (variant) => {
         switch (variant) {
@@ -355,26 +356,42 @@ const CardList = ({
     }, [cards, isCardInCollection]);
 
 
+    useEffect(() => {
+        if (searchResults) {
+            // If we have search results, only set those
+            setLoading(true);
+            setCards(searchResults);
+            setFilteredCards(searchResults);
+            setOriginalCards(searchResults);
+            setLoading(false);
+        } else if (initialSetId && initialSetId !== selectedSetId) {
+            // Only load the set if we're not showing search results
+            handleSetSelect(initialSetId);
+        }
+    }, [searchResults, initialSetId, selectedSetId, handleSetSelect]);
+    
+    // Modify the loadSeries function to not load initial set when we have search results
     const loadSeries = async () => {
         console.log('load series')
         setLoading(true);
         try {
             const seriesData = await fetchSeries();
             setSeries(seriesData);
-
-            if (initialSetId) {
-                // If we have an initial set ID from the route, use that
-                await handleSetSelect(initialSetId);
-                setSelectedSetId(initialSetId);
-            } else if (seriesData.length > 0) {
-                // Otherwise use the first set from the first series
-                const firstSeries = seriesData[0];
-                setSets(firstSeries.sets || []);
-
-                if (firstSeries.sets && firstSeries.sets.length > 0) {
-                    const firstSet = firstSeries.sets[0];
-                    setSelectedSetId(firstSet.id);
-                    await handleSetSelect(firstSet.id);
+    
+            // Only load initial set if we're not showing search results
+            if (!searchResults) {
+                if (initialSetId) {
+                    await handleSetSelect(initialSetId);
+                    setSelectedSetId(initialSetId);
+                } else if (seriesData.length > 0) {
+                    const firstSeries = seriesData[0];
+                    setSets(firstSeries.sets || []);
+    
+                    if (firstSeries.sets && firstSeries.sets.length > 0) {
+                        const firstSet = firstSeries.sets[0];
+                        setSelectedSetId(firstSet.id);
+                        await handleSetSelect(firstSet.id);
+                    }
                 }
             }
         } catch (error) {
@@ -384,6 +401,15 @@ const CardList = ({
             setLoading(false);
         }
     };
+    
+    // Also modify the series loading useEffect
+    useEffect(() => {
+        // Only load series if we're not showing search results
+        if (!searchResults) {
+            loadSeries();
+        }
+    }, [searchResults]);
+
 
     const extractSetId = (cards) => {
         if (cards.length > 0 && cards[0].card_id) {
@@ -437,11 +463,7 @@ const CardList = ({
     }, [displayCount, cards.length]);
 
 
-    useEffect(() => {
-        //always load series data for the sidebar
-        loadSeries();
-    }, []);
-
+    
     useEffect(() => {
         if (collectionData && Array.isArray(collectionData[0])) {
             const cardsArray = collectionData[0];
@@ -592,31 +614,36 @@ const CardList = ({
     }; 
 
     return (
-        // header
         <Box sx={{ flex: 1 }}>
         <div className="header" style={{ 
             borderBottom: '1px solid rgba(128, 128, 128, 0.2)',
-            padding: '2% 0',
-            position: 'relative',
+            padding: '0% 0',
+            position: 'fixed',
+            top: 0,
+            left: '20%',
+            right: 0,
             zIndex: 1200, 
-            backgroundColor: 'inherit',
-            overflow: 'visible'
+            backgroundColor: '#1f1f1f',
+            overflow: 'visible',
+            minHeight: '120px',
+            width: '80%'
         }}>
             <div className="header-content" style={{ 
                 display: 'flex',
                 padding: '0 1%',
-                marginLeft: '20%',
                 position: 'relative',
-                overflow: 'visible'
+                overflow: 'visible',
+                height: '100%'
             }}>
-                {showSetTitle && (
+                {/* Only show content if not search results */}
+                {!searchResults && showSetTitle && (
                     <>
                         <div className="card-set-name-index" style={{ 
                             width: '20%',
                             marginLeft: '15%',
                             position: 'relative',
-                            paddingTop: '2%',  // Add space at top
-                            overflow: 'visible'  // Allow content to overflow
+                            paddingTop: '2%',
+                            overflow: 'visible'
                         }}>
                             {cards.length > 0 && (
                                 <img 
@@ -626,7 +653,7 @@ const CardList = ({
                                         width: '100%',
                                         height: 'auto',
                                         display: 'block',
-                                        transform: 'translateY(-20%)',  // This will move just the image up
+                                        transform: 'translateY(-20%)',
                                         position: 'relative'
                                     }}
                                     onError={(e) => {
@@ -686,18 +713,18 @@ const CardList = ({
                 )}
             </div>
         </div>
-
-               {/*cardlist */}
-
-                <div style={{ 
-                height: '100vh', 
-                marginTop: '5%',
-                paddingLeft: '20%',
-            }}>
-                    
-            <div className="filter-button">
-                        {isPokedexSetRoute && renderFilterButton()}
-                    </div>
+    
+      
+    
+            {/* Card list section */}
+            <div style={{ 
+            height: '100vh', 
+            marginTop: '10%', 
+            paddingLeft: '20%',
+        }}>
+                <div className="filter-button">
+                    {isPokedexSetRoute && !searchResults && renderFilterButton()}
+                </div>
                 <AutoSizer>
                     {({ height, width }) => {
                         const calculatedColumnWidth = width / columnCount;
@@ -718,17 +745,20 @@ const CardList = ({
                     }}
                 </AutoSizer>
             </div>
-            <FilterDrawer
-    availableTypes={allTypes}
-    availableSubTypes={subTypes}
-    onFilter={handleFilter}
-    selectedSet={selectedSetId}
-    filterOwnedCards={filterOwnedCards}
-    setFilterOwnedCards={setFilterOwnedCards}
-    isOpen={isFilterDrawerOpen}
-    onClose={() => setIsFilterDrawerOpen(false)}
-    onOpen={() => setIsFilterDrawerOpen(true)}
-/>
+            
+            {!searchResults && (
+                <FilterDrawer
+                    availableTypes={allTypes}
+                    availableSubTypes={subTypes}
+                    onFilter={handleFilter}
+                    selectedSet={selectedSetId}
+                    filterOwnedCards={filterOwnedCards}
+                    setFilterOwnedCards={setFilterOwnedCards}
+                    isOpen={isFilterDrawerOpen}
+                    onClose={() => setIsFilterDrawerOpen(false)}
+                    onOpen={() => setIsFilterDrawerOpen(true)}
+                />
+            )}
         </Box>
     );
 };

@@ -12,11 +12,13 @@ const Search = styled('div')(({ theme }) => ({
     backgroundColor: alpha(theme.palette.common.white, 0.25),
   },
   width: '100%',
+  backdropFilter: 'blur(8px)',
+  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
   [theme.breakpoints.up('sm')]: {
-    marginLeft: theme.spacing(1),
-    width: 'auto',
+    width: '100%',
   },
 }));
+
 
 const SearchIconWrapper = styled('div')(({ theme }) => ({
   padding: theme.spacing(0, 2),
@@ -36,10 +38,11 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     padding: theme.spacing(1, 1, 1, 0),
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
     transition: theme.transitions.create('width'),
+    width: '100%',
     [theme.breakpoints.up('sm')]: {
-      width: '12ch',
+      width: '100%',
       '&:focus': {
-        width: '20ch',
+        width: '100%',
       },
     },
   },
