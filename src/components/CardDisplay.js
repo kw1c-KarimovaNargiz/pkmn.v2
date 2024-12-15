@@ -63,20 +63,39 @@ const CardDisplay = React.memo(({ card,   isCollectionView, isNotInCollection, c
     return (
         <>
             <Card 
-                sx={{ backgroundColor: 'transparent', boxShadow: 'none', maxWidth: '300px', 
-                    margin: '0 auto', gap: '0' }}
+                sx=  {{backgroundColor: 'transparent', 
+                boxShadow: 'none', 
+                gap: '10%',
+                margin: '0', // Changed from '0 auto' to '0'
+                width: '80%' // Added width: 100%
+            }}
                 onClick={handleCardClick}
             >
                 <div className="card-content-list">
                     <div className="card-title-list">
-                        <Typography
+                    <Typography
                             variant="h5"
-                            sx={{ color: '#999', textTransform: 'uppercase', fontSize: '16px', opacity: '0.6' }}
+                            sx={{ 
+                                color: '#999', 
+                                textTransform: 'uppercase', 
+                                fontSize: '16px', 
+                                opacity: '0.6',
+                                marginBottom: '4px' 
+                            }}
                         >
                             {card.name}
                         </Typography>
                     </div>
-                    <CardContent sx={{ background: 'none', backgroundColor: 'transparent' }}>
+                    <CardContent 
+                        sx={{ 
+                            background: 'none', 
+                            backgroundColor: 'transparent',
+                            padding: '8px', // Reduced padding
+                            '&:last-child': { 
+                                paddingBottom: '8px' // Ensure consistent padding
+                            }
+                        }}
+                    >
                         <div className="collection-view" style={{
                             filter: isCollectionView ? 
                                 ((isNotInCollection && !isCardInstantlyAdded) || isCardInstantlyRemoved || hasNoCounts() ? 'grayscale(100%)' : 'none')

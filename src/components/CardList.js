@@ -385,6 +385,13 @@ const CardList = ({
         }
     };
 
+    const extractSetId = (cards) => {
+        if (cards.length > 0 && cards[0].card_id) {
+            // Split by hyphen and take the first part (e.g., 'swsh12-36' -> 'swsh12')
+            return cards[0].card_id.split('-')[0];
+        }
+        return null;
+    };
 
     useEffect(() => {
         if (cards.length > 0) {
@@ -582,64 +589,115 @@ const CardList = ({
                 </div>
             </div>
         );
-    };
+    }; 
 
     return (
+        // header
         <Box sx={{ flex: 1 }}>
-            <div className="header">
-            <div className="header-content">
-                <div className="filter-button">
-            {isPokedexSetRoute && renderFilterButton()}
-            </div>
-                    {showSetTitle && (
-                        <>
-                        <div className="card-set-name-index">
-                        <Typography variant="h3" sx={{ width: '100%',}}>
-                       
-                        {setTitle}
-                        
-                        </Typography>
-                         </div>
-                            <Typography variant="h6">Total Value: ${totalCollectionValue.toFixed(2)}</Typography>
-                            {isCollectionView && (
-                                <div style={{
-                                 
-                                }}>
-                                    <div className="collection-progress">
-                                        <Typography variant="body1" sx={{ color:'#999', }}>
-                                            {uniqueOwnedCardsCount()} / {totalSetCards}
-                                        </Typography>
-                                        <div className="linear-progress">
-                                            <LinearProgress
-                                                variant="determinate"
-                                                value={progressPercentage}
-                                                sx={{
-                                                    width: '30%',
-                                                    bottom: 10,
-                                                    height: 10,
-                                                    borderRadius: 5,
-                                                    marginLeft: '20%',
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                                    '& .MuiLinearProgress-bar': {
-                                                        backgroundColor: '#4CAF50',
-                                                        borderRadius: 5
-                                                    }
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+        <div className="header" style={{ 
+            borderBottom: '1px solid rgba(128, 128, 128, 0.2)',
+            padding: '2% 0',
+            position: 'relative',
+            zIndex: 1200, 
+            backgroundColor: 'inherit',
+            overflow: 'visible'
+        }}>
+            <div className="header-content" style={{ 
+                display: 'flex',
+                padding: '0 1%',
+                marginLeft: '20%',
+                position: 'relative',
+                overflow: 'visible'
+            }}>
+                {showSetTitle && (
+                    <>
+                        <div className="card-set-name-index" style={{ 
+                            width: '20%',
+                            marginLeft: '15%',
+                            position: 'relative',
+                            paddingTop: '2%',  // Add space at top
+                            overflow: 'visible'  // Allow content to overflow
+                        }}>
+                            {cards.length > 0 && (
+                                <img 
+                                    src={`/set-images/logos/${extractSetId(cards)}-logo.png`}
+                                    alt={setTitle}
+                                    style={{
+                                        width: '100%',
+                                        height: 'auto',
+                                        display: 'block',
+                                        transform: 'translateY(-20%)',  // This will move just the image up
+                                        position: 'relative'
+                                    }}
+                                    onError={(e) => {
+                                        console.log('Failed to load set image:', e.target.src);
+                                        e.target.style.display = 'none';
+                                        const titleEl = document.createElement('h3');
+                                        titleEl.textContent = setTitle;
+                                        titleEl.style.fontSize = '1.5em';
+                                        e.target.parentNode.appendChild(titleEl);
+                                    }}
+                                />
                             )}
-                        </>
-                    )}
-                </div></div>
-               
+                        </div>
+                        {isCollectionView && (
+                            <div className="collection-progress" style={{ 
+                                position: 'absolute',
+                                left: '25%',
+                                top: '65%',
+                                transform: 'translateY(-40%)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '8px'
+                            }}>
+                                <Typography variant="body1" sx={{ 
+                                    color: '#999', 
+                                    textAlign: 'center',
+                                    marginBottom: '4px'
+                                }}>
+                                    {uniqueOwnedCardsCount()} / {totalSetCards}
+                                </Typography>
+                                
+                                <LinearProgress
+                                    variant="determinate"
+                                    value={progressPercentage}
+                                    sx={{
+                                        width: '200px',
+                                        height: '6px',
+                                        borderRadius: '3px',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                        '& .MuiLinearProgress-bar': {
+                                            backgroundColor: '#4CAF50',
+                                            borderRadius: '3px'
+                                        }
+                                    }}
+                                />
+                                
+                                <Typography variant="h6" sx={{ 
+                                    textAlign: 'center',
+                                    marginTop: '4px'
+                                }}>
+                                    ${totalCollectionValue.toFixed(2)}
+                                </Typography>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+        </div>
+
+               {/*cardlist */}
 
                 <div style={{ 
                 height: '100vh', 
-                width: '90%',
-                paddingLeft: '14%',
+                marginTop: '5%',
+                paddingLeft: '20%',
             }}>
+                    
+            <div className="filter-button">
+                        {isPokedexSetRoute && renderFilterButton()}
+                    </div>
                 <AutoSizer>
                     {({ height, width }) => {
                         const calculatedColumnWidth = width / columnCount;
